@@ -1,0 +1,45 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\geometry{margin=1in}
+
+\title{\textbf{Software Requirements Specification (SRS)\\FraudLens Gateway: Explainable Fraud Scoring and Mitigation Engine}}
+\author{FraudLens Engineering \& Data Science Group}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+\subsection{Purpose}
+This document details the functional and non-functional requirements for FraudLens Gateway, a low-latency financial transaction risk assessment engine combining heuristic rules with XGBoost machine learning inference and SHAP local attribution explainability.
+
+\subsection{Scope}
+The system intercepts transactional payloads, assesses risk in under 100 milliseconds, produces actionable SHAP attributions, manages an audit log for dispute handling, and exposes operational metric endpoints.
+
+\section{System Architecture}
+\begin{itemize}
+    \item \textbf{Ingestion Layer:} FastAPI application serving \texttt{/predict}, \texttt{/transactions}, and \texttt{/metrics}.
+    \item \textbf{Decision Pipeline:} Hybrid rule engine evaluates velocity and geographic rules, alongside calibrated XGBoost probability estimation.
+    \item \textbf{Explainability Layer:} Real-time local TreeSHAP computation with stability verification metric.
+    \item \textbf{Persistence Layer:} Relational store (SQLite / PostgreSQL) tracking transactions and full audit trail.
+\end{itemize}
+
+\section{Functional Requirements}
+\begin{enumerate}
+    \item \textbf{FR-1 (Real-time Scoring):} The system shall accept JSON payloads containing transaction ID, user ID, amount, and location, returning an explicit APPROVE, REVIEW, or DECLINE decision.
+    \item \textbf{FR-2 (Local Attribution):} Every prediction must provide the top feature contributions derived via SHAP values.
+    \item \textbf{FR-3 (Heuristic Overrides):} Critical safety rules (e.g. extreme value thresholds, sanctioned origin IPs) shall supersede ML probabilities.
+    \item \textbf{FR-4 (Audit Trail):} Every scored event must be logged immutably with timestamp and risk score for compliance.
+\end{enumerate}
+
+\section{Non-Functional Requirements}
+\begin{itemize}
+    \item \textbf{Latency:} P95 transaction scoring latency must not exceed 100ms.
+    \item \textbf{Availability:} Gateway design supports horizontal scaling behind an API load balancer.
+    \item \textbf{Explainability Reliability:} Model explanation stability shall be evaluated using top-$k$ Jaccard overlap and Spearman rank correlation.
+\end{itemize}
+
+\end{document}

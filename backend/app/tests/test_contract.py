@@ -5,7 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
-from app.core.auth import VALID_DEV_TOKEN
+from app.core.auth import create_test_token
 from app.main import app
 from app.models.schemas import (
     AnalystReviewRecord,
@@ -24,7 +24,7 @@ from app.models.schemas import (
 )
 
 client = TestClient(app)
-AUTH_HEADERS = {"Authorization": f"Bearer {VALID_DEV_TOKEN}"}
+AUTH_HEADERS = {"Authorization": f"Bearer {create_test_token()}"}
 
 
 # -------------------------------------------------------------------------
@@ -186,7 +186,7 @@ def test_public_endpoints_accessible_without_token():
     # /api/v1/auth/login
     res_login = client.post(
         "/api/v1/auth/login",
-        json={"username": "analyst", "password": "secure_password"},
+        json={"username": "analyst_1", "password": "analyst_secure_password"},
     )
     assert res_login.status_code == 200
     data = res_login.json()

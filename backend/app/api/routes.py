@@ -3,7 +3,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
-from app.core.auth import VALID_DEV_TOKEN, get_current_analyst
+from app.core.auth import create_access_token, get_current_analyst, verify_password
+from app.core.config import settings
 from app.db.repository import TransactionRepository, get_repository
 from app.models.schemas import (
     AnalystReviewIn,
@@ -37,10 +38,18 @@ def login(credentials: LoginRequest) -> TokenResponse:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username and password are required",
         )
+    if credentials.username != settings.ANALYST_USERNAME or not verify_password(credentials.password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password",
+        )
+    token = create_access_token(
+        data={"sub": credentials.username, "username": credentials.username, "role": "analyst"}
+    )
     return TokenResponse(
-        access_token=VALID_DEV_TOKEN,
+        access_token=token,
         token_type="bearer",
-        expires_in=3600,
+        expires_in=settings.JWT_EXPIRES_IN_SECONDS,
         username=credentials.username,
         role="analyst",
     )

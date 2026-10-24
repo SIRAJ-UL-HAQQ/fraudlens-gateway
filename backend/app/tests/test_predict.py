@@ -1,10 +1,10 @@
 from fastapi.testclient import TestClient
 
-from app.core.auth import VALID_DEV_TOKEN
+from app.core.auth import create_test_token
 from app.main import app
 
 client = TestClient(app)
-AUTH_HEADERS = {"Authorization": f"Bearer {VALID_DEV_TOKEN}"}
+AUTH_HEADERS = {"Authorization": f"Bearer {create_test_token()}"}
 
 
 def test_health_check():

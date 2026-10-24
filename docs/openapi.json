@@ -6,6 +6,28 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Service health check",
+        "description": "Return health status including live database connectivity and ML model metadata.",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/login": {
       "post": {
         "tags": [
@@ -54,7 +76,7 @@
           "Prediction"
         ],
         "summary": "Score a transaction",
-        "description": "Score incoming transaction with ML model, heuristic rules, and SHAP stability.",
+        "description": "Score incoming transaction, compute SHAP attribution, and persist audit record before responding.\n\nIf database write fails, returns HTTP 503 without exposing an unpersisted decision.",
         "operationId": "predict_api_v1_predict_post",
         "requestBody": {
           "content": {
@@ -385,7 +407,7 @@
           "Metrics"
         ],
         "summary": "Operational and ML performance metrics",
-        "description": "Retrieve current system latency, decision breakdown, and ML benchmark metrics.",
+        "description": "Retrieve system latency, decision breakdown, and ML benchmark metrics.",
         "operationId": "get_metrics_api_v1_metrics_get",
         "responses": {
           "200": {
@@ -559,28 +581,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/health": {
-      "get": {
-        "tags": [
-          "Health"
-        ],
-        "summary": "Service health check",
-        "description": "Return health status of the FraudLens Gateway.",
-        "operationId": "health_check_health_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HealthResponse"
                 }
               }
             }

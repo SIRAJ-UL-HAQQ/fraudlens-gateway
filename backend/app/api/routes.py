@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
 from app.core.auth import create_access_token, get_current_analyst, verify_password
 from app.core.config import settings
-from app.db.repository import TransactionRepository, get_repository
+from app.db.repository import DatabaseUnavailableError, TransactionRepository, get_repository
 from app.models.schemas import (
     AnalystReviewIn,
     AnalystReviewRecord,
@@ -66,9 +66,18 @@ def predict(
     repo: Annotated[TransactionRepository, Depends(get_repository)],
     user: Annotated[dict, Depends(get_current_analyst)],
 ) -> PredictionOut:
-    """Score incoming transaction with ML model, heuristic rules, and SHAP stability."""
+    """Score incoming transaction, compute SHAP attribution, and persist audit record before responding.
+
+    If database write fails, returns HTTP 503 without exposing an unpersisted decision.
+    """
     prediction = scoring_service.predict(payload)
-    repo.save_transaction(payload, prediction)
+    try:
+        repo.save_transaction(payload, prediction)
+    except DatabaseUnavailableError as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database persistence failed. Transaction scoring aborted to preserve audit integrity.",
+        ) from e
     return prediction
 
 
@@ -91,16 +100,22 @@ def list_transactions(
     page_size: Annotated[int, Query(ge=1, le=200, description="Items per page")] = 50,
 ) -> PaginatedTransactionsResponse:
     """Query transactions using dataset time (step) and system scoring time (created_at)."""
-    return repo.list_transactions(
-        step_min=step_min,
-        step_max=step_max,
-        created_from=created_from,
-        created_to=created_to,
-        decision=decision,
-        explanation_status=explanation_status,
-        page=page,
-        page_size=page_size,
-    )
+    try:
+        return repo.list_transactions(
+            step_min=step_min,
+            step_max=step_max,
+            created_from=created_from,
+            created_to=created_to,
+            decision=decision,
+            explanation_status=explanation_status,
+            page=page,
+            page_size=page_size,
+        )
+    except DatabaseUnavailableError as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database service unavailable",
+        ) from e
 
 
 @router.get(
@@ -115,13 +130,21 @@ def get_transaction(
     user: Annotated[dict, Depends(get_current_analyst)],
 ) -> TransactionDetail:
     """Retrieve full transaction record including SHAP attribution and audit reviews."""
-    tx = repo.get_transaction(transaction_id)
-    if not tx:
+    try:
+        tx = repo.get_transaction(transaction_id)
+        if not tx:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Transaction '{transaction_id}' not found",
+            )
+        return tx
+    except HTTPException:
+        raise
+    except DatabaseUnavailableError as e:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Transaction '{transaction_id}' not found",
-        )
-    return tx
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database service unavailable",
+        ) from e
 
 
 @router.post(
@@ -138,17 +161,21 @@ def submit_review(
 ) -> AnalystReviewRecord:
     """Append a human review to the transaction's immutable audit log."""
     try:
-        record = repo.add_review(
+        return repo.add_review(
             transaction_id=transaction_id,
             review_in=review_in,
-            reviewed_by=user.get("username", "analyst"),
+            reviewed_by=user.get("username", settings.ANALYST_USERNAME),
         )
-        return record
     except KeyError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Transaction '{transaction_id}' not found",
         )
+    except DatabaseUnavailableError as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database service unavailable",
+        ) from e
 
 
 @router.get(
@@ -161,8 +188,14 @@ def get_metrics(
     repo: Annotated[TransactionRepository, Depends(get_repository)],
     user: Annotated[dict, Depends(get_current_analyst)],
 ) -> MetricsSummary:
-    """Retrieve current system latency, decision breakdown, and ML benchmark metrics."""
-    return repo.get_metrics()
+    """Retrieve system latency, decision breakdown, and ML benchmark metrics."""
+    try:
+        return repo.get_metrics()
+    except DatabaseUnavailableError as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database service unavailable",
+        ) from e
 
 
 @router.get(
@@ -182,17 +215,28 @@ def export_transactions(
     explanation_status: Annotated[ExplanationStatus | None, Query(description="Explanation stability filter")] = None,
 ) -> Response:
     """Export filtered transaction records."""
-    content, media_type, filename = repo.export_transactions(
-        format=format,
-        step_min=step_min,
-        step_max=step_max,
-        created_from=created_from,
-        created_to=created_to,
-        decision=decision,
-        explanation_status=explanation_status,
-    )
-    return Response(
-        content=content,
-        media_type=media_type,
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
-    )
+    try:
+        content, media_type, filename = repo.export_transactions(
+            format=format,
+            step_min=step_min,
+            step_max=step_max,
+            created_from=created_from,
+            created_to=created_to,
+            decision=decision,
+            explanation_status=explanation_status,
+        )
+        return Response(
+            content=content,
+            media_type=media_type,
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    except DatabaseUnavailableError as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database service unavailable",
+        ) from e

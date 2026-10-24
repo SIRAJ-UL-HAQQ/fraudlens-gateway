@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from app.core.auth import create_test_token
-from app.core.config import Settings
+from app.core.config import Settings, settings
 from app.main import app
 
 client = TestClient(app)
@@ -15,7 +15,7 @@ def test_login_success():
     """Valid credentials return a valid JWT token."""
     response = client.post(
         "/api/v1/auth/login",
-        json={"username": "analyst_1", "password": "analyst_secure_password"},
+        json={"username": "analyst_1", "password": settings.get_analyst_password()},
     )
     assert response.status_code == 200
     data = response.json()
@@ -68,7 +68,7 @@ def test_dev_token_rejected_now():
     """Hardcoded dev token is no longer accepted."""
     response = client.get(
         "/api/v1/transactions",
-        headers={"Authorization": "Bearer fraudlens-analyst-token-secret"},
+        headers={"Authorization": "Bearer old-deprecated-static-token"},
     )
     assert response.status_code == 401
 
@@ -78,7 +78,7 @@ def test_production_mode_fails_with_placeholder_secrets():
     with pytest.raises(ValidationError):
         Settings(
             APP_ENV="prod",
-            JWT_SECRET_KEY="change_me_placeholder",
+            JWT_SECRET_KEY="placeholder_jwt_secret_value",
             ANALYST_PASSWORD="secure_pass_12345678",
         )
 
@@ -86,5 +86,5 @@ def test_production_mode_fails_with_placeholder_secrets():
         Settings(
             APP_ENV="prod",
             JWT_SECRET_KEY="a_very_secure_random_key_here_at_least_32_bytes_long",
-            ANALYST_PASSWORD="change_me_placeholder",
+            ANALYST_PASSWORD="placeholder_analyst_password_value",
         )

@@ -151,8 +151,8 @@ class MetricsSummary(BaseModel):
     average_risk_score: float = Field(..., ge=0.0, le=1.0, description="Average risk score across transactions")
     latency_p50_ms: float = Field(..., ge=0.0, description="Median latency in milliseconds")
     latency_p95_ms: float = Field(..., ge=0.0, description="95th percentile latency in milliseconds")
-    strategy_comparison: dict[str, Any] | None = Field(default=None, description="Metrics breakdown across imbalance strategies")
-    evaluation_metrics: dict[str, float] | None = Field(default=None, description="Core ML metrics (Precision, Recall, F1, PR-AUC, MCC)")
+    strategy_comparison: dict[str, Any] | None = Field(default=None, description="Metrics breakdown across imbalance strategies, or null if benchmark report is unavailable")
+    evaluation_metrics: dict[str, float] | None = Field(default=None, description="Core ML metrics (Precision, Recall, F1, PR-AUC, MCC), or null if benchmark report is unavailable")
 
 
 class LoginRequest(BaseModel):

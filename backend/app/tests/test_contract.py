@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from app.core.auth import create_test_token
+from app.core.config import settings
 from app.main import app
 from app.models.schemas import (
     AnalystReviewRecord,
@@ -186,7 +187,7 @@ def test_public_endpoints_accessible_without_token():
     # /api/v1/auth/login
     res_login = client.post(
         "/api/v1/auth/login",
-        json={"username": "analyst_1", "password": "analyst_secure_password"},
+        json={"username": "analyst_1", "password": settings.get_analyst_password()},
     )
     assert res_login.status_code == 200
     data = res_login.json()

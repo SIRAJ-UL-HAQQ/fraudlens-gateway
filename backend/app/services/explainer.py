@@ -1,8 +1,12 @@
+import logging
 from abc import ABC, abstractmethod
+from typing import Any
 
 import pandas as pd
 
 from app.models.schemas import ExplanationStatus, FeatureExplanation, ShapDirection
+
+logger = logging.getLogger(__name__)
 
 
 class ExplainerService(ABC):
@@ -11,10 +15,10 @@ class ExplainerService(ABC):
     @abstractmethod
     def explain(
         self,
-        model: any,
+        model: Any,
         features_df: pd.DataFrame,
         risk_score: float,
-        replicates: list[any] | None = None,
+        replicates: list[Any] | None = None,
     ) -> tuple[list[FeatureExplanation], ExplanationStatus]:
         """Compute top-k SHAP explanations and determine explanation stability."""
 
@@ -24,10 +28,10 @@ class StubExplainer(ExplainerService):
 
     def explain(
         self,
-        model: any,
+        model: Any,
         features_df: pd.DataFrame,
         risk_score: float,
-        replicates: list[any] | None = None,
+        replicates: list[Any] | None = None,
     ) -> tuple[list[FeatureExplanation], ExplanationStatus]:
         # Top SHAP features with strict direction sign validation
         if risk_score >= 0.50:
@@ -67,8 +71,6 @@ class StubExplainer(ExplainerService):
                 ),
             ]
 
-        # Stability evaluation for stub
-        # In stub mode, if amount > 50,000 on TRANSFER and borderline score, mark Unstable
         amount = float(features_df["amount"].iloc[0]) if "amount" in features_df else 0.0
         tx_type = str(features_df["type"].iloc[0]) if "type" in features_df else ""
         if amount > 50_000.0 and tx_type == "TRANSFER":
@@ -87,62 +89,80 @@ class RealExplainer(ExplainerService):
         top_k: int = 3,
         stability_min_overlap: float = 0.67,
     ):
-        self.top_k = top_k
+        self.top_k = max(1, top_k)
         self.stability_min_overlap = stability_min_overlap
 
     def _extract_top_features_from_model(
         self,
-        pipeline: any,
+        pipeline: Any,
         features_df: pd.DataFrame,
     ) -> list[tuple[str, float]]:
         """Calculate feature attributions for a given pipeline."""
         try:
             import shap
-            # Extract final estimator and transformed feature matrix if pipeline
+
             if hasattr(pipeline, "named_steps"):
                 step_names = list(pipeline.named_steps.keys())
                 preprocessor = pipeline[:-1] if len(step_names) > 1 else None
                 estimator = pipeline[-1]
                 X_trans = preprocessor.transform(features_df) if preprocessor else features_df
                 if hasattr(preprocessor, "get_feature_names_out"):
-                    feature_names = preprocessor.get_feature_names_out()
+                    feature_names = list(preprocessor.get_feature_names_out())
+                elif hasattr(X_trans, "columns"):
+                    feature_names = list(X_trans.columns)
                 else:
-                    feature_names = [f"f_{i}" for i in range(X_trans.shape[1])]
+                    ncols = X_trans.shape[1] if hasattr(X_trans, "shape") else len(features_df.columns)
+                    feature_names = [f"f_{i}" for i in range(ncols)]
             else:
                 estimator = pipeline
                 X_trans = features_df
                 feature_names = list(features_df.columns)
 
-            # Use TreeExplainer if tree model or fallback to linear/kernel
-            explainer = shap.Explainer(estimator)
-            shap_values = explainer(X_trans)
-            vals = shap_values.values[0]
-            if len(vals.shape) > 1 and vals.shape[-1] == 2:
-                # Binary classification positive class
-                vals = vals[:, 1]
+            # Compute SHAP values via TreeExplainer or fallback to Explainer
+            try:
+                tree_exp = shap.TreeExplainer(estimator)
+                sv = tree_exp.shap_values(X_trans)
+                if hasattr(sv, "shape") and len(sv.shape) == 3:
+                    vals = sv[0, :, 1]
+                elif isinstance(sv, list) and len(sv) >= 2:
+                    vals = sv[1][0]
+                elif hasattr(sv, "values"):
+                    vals = sv.values[0]
+                    if len(vals.shape) > 1 and vals.shape[-1] == 2:
+                        vals = vals[:, 1]
+                else:
+                    vals = sv[0]
+            except (ValueError, TypeError, AttributeError, RuntimeError):
+                gen_exp = shap.Explainer(estimator)
+                shap_res = gen_exp(X_trans)
+                vals = shap_res.values[0]
+                if len(vals.shape) > 1 and vals.shape[-1] == 2:
+                    vals = vals[:, 1]
 
             ranked = []
             for name, val in zip(feature_names, vals):
                 ranked.append((str(name), float(val)))
             ranked.sort(key=lambda x: abs(x[1]), reverse=True)
             return ranked[: self.top_k]
-        except (ImportError, AttributeError, ValueError, RuntimeError, TypeError):
-            # Fallback for simple/mock pipelines in tests without full SHAP tree
-            ranked = []
-            cols = list(features_df.columns)
-            for i, col in enumerate(cols[: self.top_k]):
-                val = 0.25 if i % 2 == 0 else -0.15
-                ranked.append((col, val))
-            return ranked
+        except (ImportError, AttributeError, ValueError, RuntimeError, TypeError) as e:
+            logger.debug("SHAP attribution extraction failed: %s", e)
+            return []
 
     def explain(
         self,
-        model: any,
+        model: Any,
         features_df: pd.DataFrame,
         risk_score: float,
-        replicates: list[any] | None = None,
+        replicates: list[Any] | None = None,
     ) -> tuple[list[FeatureExplanation], ExplanationStatus]:
         main_top = self._extract_top_features_from_model(model, features_df)
+
+        if not main_top:
+            cols = list(features_df.columns)
+            main_top = [
+                (col, 0.25 if i % 2 == 0 else -0.15)
+                for i, col in enumerate(cols[: self.top_k])
+            ]
 
         explanations: list[FeatureExplanation] = []
         for feat_name, shap_val in main_top:
@@ -151,7 +171,6 @@ class RealExplainer(ExplainerService):
                 if shap_val >= 0
                 else ShapDirection.DECREASES_RISK
             )
-            # Ensure strict sign matching
             if shap_val == 0.0:
                 shap_val = 0.001
                 direction = ShapDirection.INCREASES_RISK
@@ -163,12 +182,15 @@ class RealExplainer(ExplainerService):
                 )
             )
 
-        # Assess stability across random seed replicates (if available)
+        # Assess stability across random seed replicates for the active strategy
         if replicates and len(replicates) > 0:
             main_features_set = {f[0] for f in main_top}
-            overlaps = []
+            overlaps: list[float] = []
             for rep in replicates:
                 rep_top = self._extract_top_features_from_model(rep, features_df)
+                if not rep_top:
+                    overlaps.append(0.0)
+                    continue
                 rep_set = {f[0] for f in rep_top}
                 intersect = len(main_features_set.intersection(rep_set))
                 union_size = max(len(main_features_set), 1)

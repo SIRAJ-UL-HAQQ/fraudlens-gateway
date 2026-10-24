@@ -847,7 +847,7 @@
               }
             ],
             "title": "Strategy Comparison",
-            "description": "Metrics breakdown across imbalance strategies"
+            "description": "Metrics breakdown across imbalance strategies, or null if benchmark report is unavailable"
           },
           "evaluation_metrics": {
             "anyOf": [
@@ -862,7 +862,7 @@
               }
             ],
             "title": "Evaluation Metrics",
-            "description": "Core ML metrics (Precision, Recall, F1, PR-AUC, MCC)"
+            "description": "Core ML metrics (Precision, Recall, F1, PR-AUC, MCC), or null if benchmark report is unavailable"
           }
         },
         "type": "object",

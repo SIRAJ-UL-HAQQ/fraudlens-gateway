@@ -249,7 +249,7 @@
     }
   },
   "auth_response": {
-    "access_token": "fraudlens-analyst-token-secret",
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbmFseXN0XzEifQ.sample_signature",
     "token_type": "bearer",
     "expires_in": 3600,
     "username": "analyst_1",

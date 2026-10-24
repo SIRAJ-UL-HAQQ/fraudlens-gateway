@@ -50,7 +50,7 @@ def sanitize_csv_cell(value: Any) -> str:
 
 
 def load_ml_reports_metrics() -> tuple[dict | None, dict | None]:
-    """Read ML benchmark metrics from ml/reports/metrics.json if present, else fallback to defaults."""
+    """Read ML benchmark metrics from ml/reports/metrics.json if present, else return None (unavailable)."""
     metrics_path = Path(settings.METRICS_PATH)
     if metrics_path.exists():
         try:
@@ -60,20 +60,7 @@ def load_ml_reports_metrics() -> tuple[dict | None, dict | None]:
         except (OSError, json.JSONDecodeError):
             pass
 
-    # Default fallback benchmarks conforming to docs/api-contract.md
-    strategy_comparison = {
-        "none": {"precision": 0.88, "recall": 0.62, "f1": 0.73, "pr_auc": 0.74, "stability": 0.71},
-        "class_weight": {"precision": 0.91, "recall": 0.84, "f1": 0.87, "pr_auc": 0.89, "stability": 0.88},
-        "smote_enn": {"precision": 0.85, "recall": 0.87, "f1": 0.86, "pr_auc": 0.87, "stability": 0.80},
-    }
-    evaluation_metrics = {
-        "precision": 0.91,
-        "recall": 0.84,
-        "f1": 0.87,
-        "pr_auc": 0.89,
-        "mcc": 0.86,
-    }
-    return strategy_comparison, evaluation_metrics
+    return None, None
 
 
 def generate_pdf_export(items: list[TransactionSummary]) -> bytes:

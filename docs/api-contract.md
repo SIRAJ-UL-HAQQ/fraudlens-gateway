@@ -63,14 +63,14 @@ Analyst reviews (`POST /api/v1/transactions/{id}/review`) append new review reco
 ```json
 {
   "username": "analyst_1",
-  "password": "analyst_secure_password"
+  "password": "<analyst_password>"
 }
 ```
 
 #### Response (`200 OK`)
 ```json
 {
-  "access_token": "fraudlens-analyst-token-secret",
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbmFseXN0XzEifQ.sample_signature",
   "token_type": "bearer",
   "expires_in": 3600,
   "username": "analyst_1",
@@ -315,7 +315,7 @@ Analyst reviews (`POST /api/v1/transactions/{id}/review`) append new review reco
 ### 3.7. Operational & ML Metrics
 - **Endpoint**: `GET /api/v1/metrics`
 - **Access**: Protected (Bearer token required)
-- **Description**: Returns live system telemetry (decision breakdown, p50/p95 latency) alongside ML research benchmark metrics comparing imbalance strategies.
+- **Description**: Returns live system telemetry (decision breakdown, p50/p95 latency) alongside ML research benchmark metrics comparing imbalance strategies. When benchmark reports (`ml/reports/metrics.json`) are missing or ungenerated, `strategy_comparison` and `evaluation_metrics` return `null` ('unavailable') so the frontend dashboard displays an appropriate unavailable notice rather than invented values.
 
 #### Response (`200 OK` - `MetricsSummary`)
 ```json

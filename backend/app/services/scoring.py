@@ -22,6 +22,76 @@ from app.services.rules import evaluate_rules
 logger = logging.getLogger(__name__)
 
 
+def validate_manifest(
+    manifest: dict[str, Any],
+    model: Any,
+    replicate_files: list[Path],
+) -> None:
+    """Validate manifest.json against ML artifact contract specifications.
+
+    Raises RuntimeError if any contract condition is violated:
+    - feature_names must match model's expected features
+    - thresholds must satisfy 0 < review < high < 1
+    - n_replicates must match the count of replicate files found
+    - shap_top_k >= 1 and 0 <= stability_min_overlap <= 1
+    """
+    # 1. Feature names validation
+    feat_names = manifest.get("feature_names")
+    if not isinstance(feat_names, list) or len(feat_names) == 0:
+        raise RuntimeError("Manifest must define a non-empty 'feature_names' list.")
+
+    # If pipeline/model declares expected input features, verify matching
+    expected_model_features = None
+    if hasattr(model, "feature_names_in_"):
+        expected_model_features = list(model.feature_names_in_)
+    elif hasattr(model, "named_steps"):
+        for step in model.named_steps.values():
+            if hasattr(step, "feature_names_in_"):
+                expected_model_features = list(step.feature_names_in_)
+                break
+
+    if expected_model_features is not None and list(expected_model_features) != list(feat_names):
+            raise RuntimeError(
+                f"Manifest feature_names {feat_names} do not match pipeline expected features "
+                f"{expected_model_features}."
+            )
+
+    # 2. Thresholds validation: strictly 0 < review < high < 1
+    thresholds = manifest.get("thresholds")
+    if not isinstance(thresholds, dict) or "high" not in thresholds or "review" not in thresholds:
+        raise RuntimeError("Manifest must contain 'thresholds' with both 'high' and 'review' keys.")
+
+    high = float(thresholds["high"])
+    review = float(thresholds["review"])
+    if not (0.0 < review < high < 1.0):
+        raise RuntimeError(
+            f"Invalid thresholds in manifest: must satisfy 0 < review < high < 1. Got review={review}, high={high}."
+        )
+
+    # 3. n_replicates validation
+    n_replicates = manifest.get("n_replicates")
+    if n_replicates is None or not isinstance(n_replicates, int) or n_replicates < 0:
+        raise RuntimeError(f"Manifest must define an integer 'n_replicates' >= 0, got {n_replicates}.")
+
+    actual_file_count = len(replicate_files)
+    if n_replicates != actual_file_count:
+        raise RuntimeError(
+            f"Manifest n_replicates ({n_replicates}) does not match number of replicate files found "
+            f"({actual_file_count})."
+        )
+
+    # 4. SHAP parameters validation
+    shap_top_k = manifest.get("shap_top_k", 3)
+    if not isinstance(shap_top_k, int) or shap_top_k < 1:
+        raise RuntimeError(f"Manifest shap_top_k must be an integer >= 1, got {shap_top_k}.")
+
+    stability_min_overlap = manifest.get("stability_min_overlap", 0.67)
+    if not isinstance(stability_min_overlap, (int, float)) or not (0.0 <= stability_min_overlap <= 1.0):
+        raise RuntimeError(
+            f"Manifest stability_min_overlap must be in range [0.0, 1.0], got {stability_min_overlap}."
+        )
+
+
 class ScoringService:
     """Production scoring service managing ML inference, explainability, and gateway routing."""
 
@@ -69,23 +139,31 @@ class ScoringService:
                 self.manifest = json.load(f)
 
             self.model = joblib.load(model_file)
+
+            # Discover replicate files
+            replicate_files: list[Path] = []
+            replicates_dir = bundle_dir / "replicates"
+            if replicates_dir.exists() and replicates_dir.is_dir():
+                replicate_files = sorted(replicates_dir.glob("seed_*.joblib"))
+
+            # Strict manifest validation against contract
+            validate_manifest(self.manifest, self.model, replicate_files)
+
             self.model_version = self.manifest.get("model_version", "v1.0.0")
             self.imbalance_strategy = self.manifest.get("imbalance_strategy", "class_weight")
 
             # Extract calibrated thresholds from manifest
-            thresholds = self.manifest.get("thresholds", {})
-            self.threshold_high = float(thresholds.get("high", settings.FRAUD_THRESHOLD_HIGH))
-            self.threshold_review = float(thresholds.get("review", settings.FRAUD_THRESHOLD_REVIEW))
+            thresholds = self.manifest["thresholds"]
+            self.threshold_high = float(thresholds["high"])
+            self.threshold_review = float(thresholds["review"])
 
-            # Load replicates if present
+            # Load replicate pipelines
             self.replicates = []
-            replicates_dir = bundle_dir / "replicates"
-            if replicates_dir.exists() and replicates_dir.is_dir():
-                for rep_path in replicates_dir.glob("seed_*.joblib"):
-                    try:
-                        self.replicates.append(joblib.load(rep_path))
-                    except (OSError, KeyError, ValueError, TypeError) as ex:
-                        logger.warning(f"Failed to load replicate at {rep_path}: {ex}")
+            for rep_path in replicate_files:
+                try:
+                    self.replicates.append(joblib.load(rep_path))
+                except (OSError, KeyError, ValueError, TypeError) as ex:
+                    logger.warning("Failed to load replicate at %s: %s", rep_path, ex)
 
             shap_top_k = int(self.manifest.get("shap_top_k", 3))
             stability_min_overlap = float(self.manifest.get("stability_min_overlap", 0.67))
@@ -94,7 +172,9 @@ class ScoringService:
                 stability_min_overlap=stability_min_overlap,
             )
             self.mode = "trained"
-            logger.info(f"Successfully loaded trained model '{self.model_version}' from {bundle_dir}")
+            logger.info("Successfully loaded trained model '%s' from %s", self.model_version, bundle_dir)
+        except RuntimeError:
+            raise
         except Exception as e:
             raise RuntimeError(f"Failed to load ML artifact from {bundle_dir}: {e}") from e
 
@@ -168,6 +248,7 @@ class ScoringService:
                 risk_score = float(proba[0][0])
             else:
                 risk_score = float(proba[0]) if hasattr(proba, "__getitem__") else float(proba)
+
             top_features, explanation_status = self.explainer.explain(
                 self.model,
                 features_df,

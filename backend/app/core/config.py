@@ -90,7 +90,7 @@ class Settings(BaseSettings):
         if self.ANALYST_PASSWORD:
             return self.ANALYST_PASSWORD
         if self.APP_ENV.lower() in ["dev", "development", "test"]:
-            return "analyst_secure_password"
+            return os.getenv("ANALYST_PASSWORD", "dev_local_analyst_password_2026")
         raise ValueError("ANALYST_PASSWORD is not configured for non-dev environment.")
 
 

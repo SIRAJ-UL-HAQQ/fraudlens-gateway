@@ -326,9 +326,8 @@ def test_postgres_deterministic_ordering():
 def test_postgres_alembic_migrations():
     """Verify Alembic migration lifecycle: upgrade head -> downgrade base -> upgrade head -> check."""
     engine = get_postgres_engine_or_skip()
-    from alembic.config import Config
-
     from alembic import command
+    from alembic.config import Config
 
     # Drop existing tables and alembic version tracking to test full migration lifecycle cleanly
     with engine.connect() as conn:

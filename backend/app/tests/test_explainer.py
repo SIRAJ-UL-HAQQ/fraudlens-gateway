@@ -326,3 +326,182 @@ def test_stub_explainer_behavior():
     df_large_transfer = pd.DataFrame([{"amount": 75000.0, "type": "TRANSFER"}])
     _, status_unstable = stub.explain(None, df_large_transfer, risk_score=0.85)
     assert status_unstable == ExplanationStatus.UNSTABLE
+
+
+def test_real_explainer_xgboost_pipeline_stable_and_unstable():
+    """Verify RealExplainer with xgboost.XGBClassifier in an sklearn Pipeline with preprocessing."""
+    import xgboost as xgb
+    from sklearn.compose import ColumnTransformer
+    from sklearn.preprocessing import OneHotEncoder, RobustScaler
+
+    n = 30
+    y = np.array([1] * (n // 2) + [0] * (n // 2))
+
+    # Main dataset: amount is the strong deterministic signal for fraud
+    X_main = pd.DataFrame(
+        {
+            "step": [1] * n,
+            "type": ["TRANSFER"] * (n // 2) + ["PAYMENT"] * (n // 2),
+            "amount": np.concatenate(
+                [np.full(n // 2, 500000.0), np.full(n // 2, 10.0)]
+            ),
+            "old_balance_orig": [100.0] * n,
+            "new_balance_orig": [0.0] * n,
+            "old_balance_dest": [0.0] * n,
+            "new_balance_dest": [0.0] * n,
+        }
+    )
+
+    # Unstable dataset: step is the strong signal, amount is constant
+    X_unstable = pd.DataFrame(
+        {
+            "step": np.concatenate([np.full(n // 2, 100), np.full(n // 2, 1)]),
+            "type": ["TRANSFER"] * (n // 2) + ["PAYMENT"] * (n // 2),
+            "amount": [100.0] * n,
+            "old_balance_orig": [100.0] * n,
+            "new_balance_orig": [0.0] * n,
+            "old_balance_dest": [0.0] * n,
+            "new_balance_dest": [0.0] * n,
+        }
+    )
+
+    numeric_cols = [
+        "step",
+        "amount",
+        "old_balance_orig",
+        "new_balance_orig",
+        "old_balance_dest",
+        "new_balance_dest",
+    ]
+    categorical_cols = ["type"]
+
+    def build_xgb_pipeline(seed: int):
+        ct = ColumnTransformer(
+            transformers=[
+                ("num", RobustScaler(), numeric_cols),
+                (
+                    "cat",
+                    OneHotEncoder(handle_unknown="ignore", sparse_output=False),
+                    categorical_cols,
+                ),
+            ]
+        )
+        clf = xgb.XGBClassifier(
+            n_estimators=10,
+            max_depth=2,
+            random_state=seed,
+            eval_metric="logloss",
+        )
+        return Pipeline([("prep", ct), ("clf", clf)])
+
+    main_model = build_xgb_pipeline(seed=42).fit(X_main, y)
+    rep_stable1 = build_xgb_pipeline(seed=43).fit(X_main, y)
+    rep_stable2 = build_xgb_pipeline(seed=44).fit(X_main, y)
+
+    rep_unstable1 = build_xgb_pipeline(seed=45).fit(X_unstable, y)
+    rep_unstable2 = build_xgb_pipeline(seed=46).fit(X_unstable, y)
+
+    query_row = X_main.iloc[[0]]
+    explainer = RealExplainer(top_k=1, stability_min_overlap=0.67)
+
+    # 1. Stable test
+    explanations_stable, status_stable = explainer.explain(
+        model=main_model,
+        features_df=query_row,
+        risk_score=0.95,
+        replicates=[rep_stable1, rep_stable2],
+    )
+    assert status_stable == ExplanationStatus.STABLE
+    assert len(explanations_stable) == 1
+    assert explanations_stable[0].feature == "num__amount"
+    assert explanations_stable[0].direction == ShapDirection.INCREASES_RISK
+
+    # 2. Unstable test
+    explanations_unstable, status_unstable = explainer.explain(
+        model=main_model,
+        features_df=query_row,
+        risk_score=0.95,
+        replicates=[rep_unstable1, rep_unstable2],
+    )
+    assert status_unstable == ExplanationStatus.UNSTABLE
+    assert len(explanations_unstable) == 1
+
+
+def test_real_explainer_logistic_regression_pipeline():
+    """Verify RealExplainer with LogisticRegression in an sklearn Pipeline with preprocessing."""
+    from sklearn.compose import ColumnTransformer
+    from sklearn.preprocessing import OneHotEncoder, RobustScaler
+
+    X = pd.DataFrame(
+        {
+            "step": [1, 2, 3, 4, 5, 6],
+            "type": [
+                "TRANSFER",
+                "CASH_OUT",
+                "PAYMENT",
+                "TRANSFER",
+                "PAYMENT",
+                "CASH_OUT",
+            ],
+            "amount": [500000.0, 300000.0, 50.0, 400000.0, 30.0, 20.0],
+            "old_balance_orig": [
+                500000.0,
+                300000.0,
+                100.0,
+                400000.0,
+                50.0,
+                100.0,
+            ],
+            "new_balance_orig": [0.0, 0.0, 50.0, 0.0, 20.0, 80.0],
+            "old_balance_dest": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            "new_balance_dest": [500000.0, 300000.0, 0.0, 400000.0, 0.0, 0.0],
+        }
+    )
+    y = np.array([1, 1, 0, 1, 0, 0])
+
+    numeric_cols = [
+        "step",
+        "amount",
+        "old_balance_orig",
+        "new_balance_orig",
+        "old_balance_dest",
+        "new_balance_dest",
+    ]
+    categorical_cols = ["type"]
+
+    def build_lr_pipeline(seed: int):
+        ct = ColumnTransformer(
+            transformers=[
+                ("num", RobustScaler(), numeric_cols),
+                (
+                    "cat",
+                    OneHotEncoder(handle_unknown="ignore", sparse_output=False),
+                    categorical_cols,
+                ),
+            ]
+        )
+        clf = LogisticRegression(random_state=seed, max_iter=200)
+        return Pipeline([("prep", ct), ("clf", clf)])
+
+    main_lr = build_lr_pipeline(seed=42).fit(X, y)
+    rep_lr1 = build_lr_pipeline(seed=43).fit(X, y)
+    rep_lr2 = build_lr_pipeline(seed=44).fit(X, y)
+
+    query_row = X.iloc[[0]]
+    explainer = RealExplainer(top_k=2, stability_min_overlap=0.50)
+
+    explanations, status = explainer.explain(
+        model=main_lr,
+        features_df=query_row,
+        risk_score=0.90,
+        replicates=[rep_lr1, rep_lr2],
+    )
+    assert status == ExplanationStatus.STABLE
+    assert len(explanations) == 2
+    for exp in explanations:
+        assert isinstance(exp.feature, str)
+        assert isinstance(exp.shap_value, float)
+        assert exp.direction in [
+            ShapDirection.INCREASES_RISK,
+            ShapDirection.DECREASES_RISK,
+        ]

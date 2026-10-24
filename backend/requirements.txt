@@ -10,9 +10,10 @@ bcrypt>=4.0.0
 reportlab>=4.0.0
 pytest>=8.0.0
 pytest-cov>=4.1.0
+pytest-timeout>=2.2.0
 httpx>=0.27.0
 numpy>=1.26.0
 scikit-learn>=1.4.0
-xgboost>=2.0.0
-shap>=0.45.0
+xgboost>=3.0.0,<=3.4.1
+shap>=0.45.0,<=0.54.1
 python-dotenv>=1.0.0

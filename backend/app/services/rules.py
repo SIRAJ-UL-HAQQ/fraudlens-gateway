@@ -4,7 +4,6 @@ All rule thresholds are provisional and subject to empirical calibration by the 
 engineering teammate on the training split.
 """
 
-from typing import List
 
 from app.core.config import Settings, settings
 from app.models.schemas import TransactionIn, TransactionType
@@ -70,10 +69,10 @@ def check_very_high_amount_for_type(
 def evaluate_rules(
     tx: TransactionIn,
     cfg: Settings | None = None,
-) -> List[str]:
+) -> list[str]:
     """Execute all heuristic checks on a transaction and return list of triggered flag names."""
     c = cfg or settings
-    flags: List[str] = []
+    flags: list[str] = []
 
     r1 = check_origin_account_drained(tx, drain_ratio=c.RULE_DRAIN_BALANCE_RATIO)
     if r1:
@@ -91,4 +90,4 @@ def evaluate_rules(
     if r4:
         flags.append(r4)
 
-    return sorted(list(set(flags)))
+    return sorted(set(flags))

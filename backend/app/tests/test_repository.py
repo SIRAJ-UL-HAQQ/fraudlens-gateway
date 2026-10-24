@@ -1,10 +1,7 @@
-from datetime import UTC, datetime
-from pathlib import Path
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.db.models import TransactionRecord
 from app.db.repository import (
     DatabaseUnavailableError,
     InMemoryTransactionRepository,

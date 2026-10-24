@@ -1,15 +1,14 @@
-from datetime import UTC, datetime
-from typing import Any, List
 import uuid
+from datetime import UTC, datetime
 
 from sqlalchemy import (
+    JSON,
     Column,
     DateTime,
     Float,
     ForeignKey,
     Index,
     Integer,
-    JSON,
     String,
     Text,
     event,
@@ -22,7 +21,6 @@ from app.db.session import Base
 
 class ImmutableRecordError(Exception):
     """Raised when an attempt is made to update or delete an immutable record."""
-    pass
 
 
 # JSON column with JSONB variant on PostgreSQL

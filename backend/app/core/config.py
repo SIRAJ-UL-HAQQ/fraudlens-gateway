@@ -1,6 +1,6 @@
 import os
-from typing import Any, Dict, List
-from pydantic import Field, field_validator, model_validator
+
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = Field(default_factory=lambda: os.getenv("DATABASE_URL", "sqlite:///./fraudlens.db"))
     
     # CORS
-    BACKEND_CORS_ORIGINS: List[str] = [
+    BACKEND_CORS_ORIGINS: list[str] = [
         "http://localhost",
         "http://localhost:3000",
         "http://localhost:5173",
@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     # Provisional heuristic rule thresholds (to be finalized by data teammate from train split)
     RULE_LARGE_TRANSFER_THRESHOLD: float = 200_000.0  # PROVISIONAL
     RULE_DRAIN_BALANCE_RATIO: float = 0.90           # PROVISIONAL
-    RULE_HIGH_AMOUNT_BY_TYPE: Dict[str, float] = {   # PROVISIONAL
+    RULE_HIGH_AMOUNT_BY_TYPE: dict[str, float] = {   # PROVISIONAL
         "TRANSFER": 500_000.0,
         "CASH_OUT": 300_000.0,
         "PAYMENT": 50_000.0,

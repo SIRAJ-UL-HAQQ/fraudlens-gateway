@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple
+
 import pandas as pd
 
 from app.models.schemas import ExplanationStatus, FeatureExplanation, ShapDirection
@@ -14,8 +14,8 @@ class ExplainerService(ABC):
         model: any,
         features_df: pd.DataFrame,
         risk_score: float,
-        replicates: List[any] | None = None,
-    ) -> Tuple[List[FeatureExplanation], ExplanationStatus]:
+        replicates: list[any] | None = None,
+    ) -> tuple[list[FeatureExplanation], ExplanationStatus]:
         """Compute top-k SHAP explanations and determine explanation stability."""
 
 
@@ -27,8 +27,8 @@ class StubExplainer(ExplainerService):
         model: any,
         features_df: pd.DataFrame,
         risk_score: float,
-        replicates: List[any] | None = None,
-    ) -> Tuple[List[FeatureExplanation], ExplanationStatus]:
+        replicates: list[any] | None = None,
+    ) -> tuple[list[FeatureExplanation], ExplanationStatus]:
         # Top SHAP features with strict direction sign validation
         if risk_score >= 0.50:
             top_features = [
@@ -94,7 +94,7 @@ class RealExplainer(ExplainerService):
         self,
         pipeline: any,
         features_df: pd.DataFrame,
-    ) -> List[Tuple[str, float]]:
+    ) -> list[tuple[str, float]]:
         """Calculate feature attributions for a given pipeline."""
         try:
             import shap
@@ -126,7 +126,7 @@ class RealExplainer(ExplainerService):
                 ranked.append((str(name), float(val)))
             ranked.sort(key=lambda x: abs(x[1]), reverse=True)
             return ranked[: self.top_k]
-        except Exception:
+        except (ImportError, AttributeError, ValueError, RuntimeError, TypeError):
             # Fallback for simple/mock pipelines in tests without full SHAP tree
             ranked = []
             cols = list(features_df.columns)
@@ -140,11 +140,11 @@ class RealExplainer(ExplainerService):
         model: any,
         features_df: pd.DataFrame,
         risk_score: float,
-        replicates: List[any] | None = None,
-    ) -> Tuple[List[FeatureExplanation], ExplanationStatus]:
+        replicates: list[any] | None = None,
+    ) -> tuple[list[FeatureExplanation], ExplanationStatus]:
         main_top = self._extract_top_features_from_model(model, features_df)
 
-        explanations: List[FeatureExplanation] = []
+        explanations: list[FeatureExplanation] = []
         for feat_name, shap_val in main_top:
             direction = (
                 ShapDirection.INCREASES_RISK

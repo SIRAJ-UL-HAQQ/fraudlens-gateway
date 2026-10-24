@@ -1,4 +1,3 @@
-import pytest
 
 from app.models.schemas import TransactionIn, TransactionType
 from app.services.rules import (

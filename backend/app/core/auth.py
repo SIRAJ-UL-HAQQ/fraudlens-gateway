@@ -27,7 +27,7 @@ def verify_password(plain_password: str) -> bool:
             plain_password.encode("utf-8"),
             _HASHED_ANALYST_PASSWORD,
         )
-    except Exception:
+    except (ValueError, TypeError):
         return False
 
 

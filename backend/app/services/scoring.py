@@ -1,9 +1,9 @@
 import json
 import logging
-from pathlib import Path
 import time
-from typing import Any, Dict, List, Tuple
 import uuid
+from pathlib import Path
+from typing import Any
 
 import joblib
 import pandas as pd
@@ -11,10 +11,8 @@ import pandas as pd
 from app.core.config import settings
 from app.models.schemas import (
     ExplanationStatus,
-    FeatureExplanation,
     GatewayDecision,
     PredictionOut,
-    ShapDirection,
     TransactionIn,
     TransactionType,
 )
@@ -29,8 +27,8 @@ class ScoringService:
 
     def __init__(self) -> None:
         self.model: Any = None
-        self.replicates: List[Any] = []
-        self.manifest: Dict[str, Any] = {}
+        self.replicates: list[Any] = []
+        self.manifest: dict[str, Any] = {}
         self.mode: str = "stub"
         self.model_version: str = "stub"
         self.imbalance_strategy: str = "class_weight"
@@ -86,7 +84,7 @@ class ScoringService:
                 for rep_path in replicates_dir.glob("seed_*.joblib"):
                     try:
                         self.replicates.append(joblib.load(rep_path))
-                    except Exception as ex:
+                    except (OSError, KeyError, ValueError, TypeError) as ex:
                         logger.warning(f"Failed to load replicate at {rep_path}: {ex}")
 
             shap_top_k = int(self.manifest.get("shap_top_k", 3))
@@ -119,7 +117,7 @@ class ScoringService:
     def route_decision(
         self,
         risk_score: float,
-        rule_flags: List[str],
+        rule_flags: list[str],
         explanation_status: ExplanationStatus,
     ) -> GatewayDecision:
         """Execute the deterministic gateway decision matrix.
@@ -143,9 +141,7 @@ class ScoringService:
                 return GatewayDecision.ANALYST_REVIEW
             else:
                 return GatewayDecision.HIGH_RISK
-        elif has_rules and not is_review_score:
-            return GatewayDecision.ANALYST_REVIEW
-        elif is_review_score and not is_high_score:
+        elif has_rules and not is_review_score or is_review_score and not is_high_score:
             return GatewayDecision.ANALYST_REVIEW
         else:
             return GatewayDecision.LOW_RISK

@@ -5,7 +5,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
 from app.core.auth import create_access_token, get_current_analyst, verify_password
 from app.core.config import settings
-from app.db.repository import DatabaseUnavailableError, TransactionRepository, get_repository
+from app.db.repository import (
+    DatabaseUnavailableError,
+    TransactionRepository,
+    get_repository,
+)
 from app.models.schemas import (
     AnalystReviewIn,
     AnalystReviewRecord,

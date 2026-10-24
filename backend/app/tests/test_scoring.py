@@ -1,10 +1,16 @@
 import json
 from pathlib import Path
+
 import pytest
 from sklearn.dummy import DummyClassifier
 from sklearn.pipeline import Pipeline
 
-from app.models.schemas import ExplanationStatus, GatewayDecision, TransactionIn, TransactionType
+from app.models.schemas import (
+    ExplanationStatus,
+    GatewayDecision,
+    TransactionIn,
+    TransactionType,
+)
 from app.services.scoring import ScoringService
 
 

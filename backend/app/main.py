@@ -1,10 +1,9 @@
-from contextlib import asynccontextmanager
 import logging
 import time
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, status
-from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -75,7 +74,7 @@ async def latency_and_logging_middleware(request: Request, call_next):
     except Exception as exc:
         duration_ms = (time.perf_counter() - start_time) * 1000.0
         logger.error(f"{request.method} {request.url.path} failed after {duration_ms:.2f}ms: {exc}")
-        raise exc
+        raise
 
 
 @app.exception_handler(DatabaseUnavailableError)

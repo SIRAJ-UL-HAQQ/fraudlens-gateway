@@ -1,18 +1,18 @@
 import csv
-from datetime import UTC, datetime
 import io
 import json
 import math
-from pathlib import Path
-from typing import Any, List, Tuple
 import uuid
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
-from sqlalchemy import func, select
-from sqlalchemy.exc import OperationalError, SQLAlchemyError
+from sqlalchemy import func
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import settings
@@ -39,7 +39,6 @@ from app.models.schemas import (
 
 class DatabaseUnavailableError(Exception):
     """Raised when database connection or execution fails, triggering HTTP 503."""
-    pass
 
 
 def sanitize_csv_cell(value: Any) -> str:
@@ -50,7 +49,7 @@ def sanitize_csv_cell(value: Any) -> str:
     return s
 
 
-def load_ml_reports_metrics() -> Tuple[dict | None, dict | None]:
+def load_ml_reports_metrics() -> tuple[dict | None, dict | None]:
     """Read ML benchmark metrics from ml/reports/metrics.json if present, else fallback to defaults."""
     metrics_path = Path(settings.METRICS_PATH)
     if metrics_path.exists():
@@ -58,7 +57,7 @@ def load_ml_reports_metrics() -> Tuple[dict | None, dict | None]:
             with open(metrics_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 return data.get("strategy_comparison"), data.get("evaluation_metrics")
-        except Exception:
+        except (OSError, json.JSONDecodeError):
             pass
 
     # Default fallback benchmarks conforming to docs/api-contract.md
@@ -77,7 +76,7 @@ def load_ml_reports_metrics() -> Tuple[dict | None, dict | None]:
     return strategy_comparison, evaluation_metrics
 
 
-def generate_pdf_export(items: List[TransactionSummary]) -> bytes:
+def generate_pdf_export(items: list[TransactionSummary]) -> bytes:
     """Generate a clean, styled PDF document using ReportLab."""
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter, leftMargin=36, rightMargin=36, topMargin=36, bottomMargin=36)
@@ -175,7 +174,7 @@ class TransactionRepository:
         created_to: datetime | None = None,
         decision: GatewayDecision | None = None,
         explanation_status: ExplanationStatus | None = None,
-    ) -> Tuple[bytes | str, str, str]:
+    ) -> tuple[bytes | str, str, str]:
         raise NotImplementedError
 
 
@@ -313,7 +312,7 @@ class InMemoryTransactionRepository(TransactionRepository):
 
         stable_count = 0
         total_risk = 0.0
-        latencies: List[float] = []
+        latencies: list[float] = []
 
         for r in records:
             dec = r.prediction.gateway_decision.value
@@ -347,7 +346,7 @@ class InMemoryTransactionRepository(TransactionRepository):
         created_to: datetime | None = None,
         decision: GatewayDecision | None = None,
         explanation_status: ExplanationStatus | None = None,
-    ) -> Tuple[bytes | str, str, str]:
+    ) -> tuple[bytes | str, str, str]:
         page = self.list_transactions(
             step_min=step_min,
             step_max=step_max,
@@ -709,7 +708,7 @@ class SqlAlchemyTransactionRepository(TransactionRepository):
         created_to: datetime | None = None,
         decision: GatewayDecision | None = None,
         explanation_status: ExplanationStatus | None = None,
-    ) -> Tuple[bytes | str, str, str]:
+    ) -> tuple[bytes | str, str, str]:
         page = self.list_transactions(
             step_min=step_min,
             step_max=step_max,

@@ -1,10 +1,11 @@
 from datetime import timedelta
+
 import pytest
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
-from app.core.auth import create_access_token, create_test_token
-from app.core.config import Settings, settings
+from app.core.auth import create_test_token
+from app.core.config import Settings
 from app.main import app
 
 client = TestClient(app)

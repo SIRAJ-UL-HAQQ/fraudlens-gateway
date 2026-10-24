@@ -1,6 +1,6 @@
-import pytest
-from fastapi.testclient import TestClient
 from unittest.mock import patch
+
+from fastapi.testclient import TestClient
 
 from app.core.auth import create_test_token
 from app.db.repository import DatabaseUnavailableError, get_repository

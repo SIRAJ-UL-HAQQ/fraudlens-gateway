@@ -1,54 +1,94 @@
-from typing import List, Tuple
-from app.models.schemas import PredictionRequest, RuleViolation
+"""Pure heuristic safety rules tailored for PaySim financial transaction fraud detection.
 
-class RuleEngine:
+All rule thresholds are provisional and subject to empirical calibration by the data
+engineering teammate on the training split.
+"""
+
+from typing import List
+
+from app.core.config import Settings, settings
+from app.models.schemas import TransactionIn, TransactionType
+
+
+def check_origin_account_drained(
+    tx: TransactionIn,
+    drain_ratio: float = settings.RULE_DRAIN_BALANCE_RATIO,
+) -> str | None:
+    """Check if origin account is virtually or completely drained in a single transfer/cash-out."""
+    if tx.type not in [TransactionType.TRANSFER, TransactionType.CASH_OUT]:
+        return None
+    if tx.old_balance_orig > 0.0 and tx.new_balance_orig == 0.0 and tx.amount >= tx.old_balance_orig * drain_ratio:
+        return "ORIGIN_ACCOUNT_DRAINED"
+    return None
+
+
+def check_large_transfer_amount(
+    tx: TransactionIn,
+    large_transfer_threshold: float = settings.RULE_LARGE_TRANSFER_THRESHOLD,
+) -> str | None:
+    """Check if transaction amount equals or exceeds the high-value transfer safeguard threshold."""
+    if tx.type not in [TransactionType.TRANSFER, TransactionType.CASH_OUT]:
+        return None
+    if tx.amount >= large_transfer_threshold:
+        return "LARGE_TRANSFER_AMOUNT"
+    return None
+
+
+def check_dest_balance_inconsistency(
+    tx: TransactionIn,
+) -> str | None:
+    """Check if destination balance change fails to reflect transaction amount.
+
+    Scoped strictly to TRANSFER and CASH_OUT, and evaluated only for customer-to-customer
+    transactions where destination balance is tracked (i.e. name_dest begins with 'C').
+    Merchant destinations ('M...') in PaySim do not track balance deltas.
     """
-    Deterministic heuristic safety layer that runs before or alongside ML inference.
-    """
-    HIGH_AMOUNT_THRESHOLD = 5000.0
-    CRITICAL_AMOUNT_THRESHOLD = 20000.0
-    RISKY_LOCATIONS = {"XX", "NK", "IR"}
+    if tx.type not in [TransactionType.TRANSFER, TransactionType.CASH_OUT]:
+        return None
+    if not tx.name_dest.startswith("C"):
+        return None
 
-    def evaluate(self, req: PredictionRequest) -> Tuple[List[RuleViolation], str]:
-        violations: List[RuleViolation] = []
-        rule_decision = "PASS"  # PASS, REVIEW, BLOCK
+    expected_delta = tx.amount
+    actual_delta = tx.new_balance_dest - tx.old_balance_dest
+    if abs(actual_delta - expected_delta) > 0.01:
+        return "DEST_BALANCE_INCONSISTENCY"
+    return None
 
-        # Rule 1: High Transaction Amount
-        if req.amount >= self.CRITICAL_AMOUNT_THRESHOLD:
-            violations.append(RuleViolation(
-                rule_name="CRITICAL_AMOUNT_EXCEEDED",
-                description=f"Transaction amount ${req.amount:,.2f} exceeds critical safeguard threshold.",
-                severity="CRITICAL"
-            ))
-            rule_decision = "BLOCK"
-        elif req.amount >= self.HIGH_AMOUNT_THRESHOLD:
-            violations.append(RuleViolation(
-                rule_name="HIGH_VALUE_TRANSACTION",
-                description=f"Transaction amount ${req.amount:,.2f} requires supervisory review.",
-                severity="MEDIUM"
-            ))
-            if rule_decision != "BLOCK":
-                rule_decision = "REVIEW"
 
-        # Rule 2: High Risk Geolocation
-        if req.location.upper() in self.RISKY_LOCATIONS:
-            violations.append(RuleViolation(
-                rule_name="HIGH_RISK_GEO_LOCATION",
-                description=f"Originated from restricted/high-risk jurisdiction: {req.location}",
-                severity="CRITICAL"
-            ))
-            rule_decision = "BLOCK"
+def check_very_high_amount_for_type(
+    tx: TransactionIn,
+    high_amount_by_type: dict[str, float] | None = None,
+) -> str | None:
+    """Check if transaction amount exceeds historical high-percentile threshold for its type."""
+    type_thresholds = high_amount_by_type or settings.RULE_HIGH_AMOUNT_BY_TYPE
+    threshold = type_thresholds.get(tx.type.value)
+    if threshold is not None and tx.amount >= threshold:
+        return "VERY_HIGH_AMOUNT_FOR_TYPE"
+    return None
 
-        # Rule 3: Velocity Check Simulation
-        if req.custom_features and req.custom_features.get("velocity_1h", 0) > 10:
-            violations.append(RuleViolation(
-                rule_name="BURST_VELOCITY_ANOMALY",
-                description="More than 10 transactions detected within a 1-hour window.",
-                severity="MEDIUM"
-            ))
-            if rule_decision != "BLOCK":
-                rule_decision = "REVIEW"
 
-        return violations, rule_decision
+def evaluate_rules(
+    tx: TransactionIn,
+    cfg: Settings | None = None,
+) -> List[str]:
+    """Execute all heuristic checks on a transaction and return list of triggered flag names."""
+    c = cfg or settings
+    flags: List[str] = []
 
-rule_engine = RuleEngine()
+    r1 = check_origin_account_drained(tx, drain_ratio=c.RULE_DRAIN_BALANCE_RATIO)
+    if r1:
+        flags.append(r1)
+
+    r2 = check_large_transfer_amount(tx, large_transfer_threshold=c.RULE_LARGE_TRANSFER_THRESHOLD)
+    if r2:
+        flags.append(r2)
+
+    r3 = check_dest_balance_inconsistency(tx)
+    if r3:
+        flags.append(r3)
+
+    r4 = check_very_high_amount_for_type(tx, high_amount_by_type=c.RULE_HIGH_AMOUNT_BY_TYPE)
+    if r4:
+        flags.append(r4)
+
+    return sorted(list(set(flags)))

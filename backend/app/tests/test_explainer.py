@@ -53,7 +53,9 @@ def test_validate_model_supported():
     assert validate_model_supported(pipe_lr) == "linear"
 
     knn = KNeighborsClassifier()
-    with pytest.raises(TypeError, match="Only tree-based and linear models are supported"):
+    with pytest.raises(
+        TypeError, match="Only tree-based and linear models are supported"
+    ):
         validate_model_supported(knn)
 
 
@@ -102,13 +104,19 @@ def test_real_explainer_unstable(deterministic_signal_data):
 def test_real_explainer_pipeline_with_preprocessor(deterministic_signal_data):
     """RealExplainer correctly extracts features through an sklearn Pipeline."""
     X_main, _, y = deterministic_signal_data
-    pipe_main = Pipeline([("scaler", StandardScaler()), ("clf", DecisionTreeClassifier(random_state=42))])
+    pipe_main = Pipeline(
+        [("scaler", StandardScaler()), ("clf", DecisionTreeClassifier(random_state=42))]
+    )
     pipe_main.fit(X_main, y)
 
-    pipe_rep1 = Pipeline([("scaler", StandardScaler()), ("clf", DecisionTreeClassifier(random_state=43))])
+    pipe_rep1 = Pipeline(
+        [("scaler", StandardScaler()), ("clf", DecisionTreeClassifier(random_state=43))]
+    )
     pipe_rep1.fit(X_main, y)
 
-    pipe_rep2 = Pipeline([("scaler", StandardScaler()), ("clf", DecisionTreeClassifier(random_state=44))])
+    pipe_rep2 = Pipeline(
+        [("scaler", StandardScaler()), ("clf", DecisionTreeClassifier(random_state=44))]
+    )
     pipe_rep2.fit(X_main, y)
 
     single_row = X_main.iloc[[0]]
@@ -149,8 +157,14 @@ def test_stability_boundary_conditions():
     - 2/3 vs 3/3 with k=3
     - Exact integer case where min_overlap * k is an integer
     """
+
     class MockOverlapExplainer(RealExplainer):
-        def __init__(self, top_k: int, min_overlap: float, fixed_reps_top: list[list[tuple[str, float]]]):
+        def __init__(
+            self,
+            top_k: int,
+            min_overlap: float,
+            fixed_reps_top: list[list[tuple[str, float]]],
+        ):
             super().__init__(top_k=top_k, stability_min_overlap=min_overlap)
             self._fixed_reps = fixed_reps_top
 
@@ -247,7 +261,9 @@ def test_replicates_fail_closed_at_request_time(deterministic_signal_data):
 
     # 2. Replicate that fails with exception at request time -> Unstable
     bad_replicate = "unsupported_string_model"
-    _, status_bad = explainer.explain(main_dt, single_row, 0.85, replicates=[rep1, bad_replicate])
+    _, status_bad = explainer.explain(
+        main_dt, single_row, 0.85, replicates=[rep1, bad_replicate]
+    )
     assert status_bad == ExplanationStatus.UNSTABLE
 
     # 3. Replicate returning empty features -> Unstable
@@ -265,7 +281,9 @@ def test_replicates_fail_closed_at_request_time(deterministic_signal_data):
             return [("f_a", 0.5)]
 
     exp_empty_main = EmptyMainExplainer(top_k=1, stability_min_overlap=0.67)
-    exps, status_main_empty = exp_empty_main.explain("main", single_row, 0.85, replicates=[rep1, rep1])
+    exps, status_main_empty = exp_empty_main.explain(
+        "main", single_row, 0.85, replicates=[rep1, rep1]
+    )
     assert len(exps) == 1
     assert status_main_empty == ExplanationStatus.STABLE
 
@@ -273,7 +291,9 @@ def test_replicates_fail_closed_at_request_time(deterministic_signal_data):
 def test_top_k_larger_than_feature_count(deterministic_signal_data):
     """When top_k is larger than available features, all features are returned without error."""
     X_main, _, y = deterministic_signal_data
-    dt = DecisionTreeClassifier(max_depth=2, random_state=42).fit(X_main[["f_a", "f_b"]], y)
+    dt = DecisionTreeClassifier(max_depth=2, random_state=42).fit(
+        X_main[["f_a", "f_b"]], y
+    )
 
     explainer = RealExplainer(top_k=10, stability_min_overlap=0.67)
     explanations, _ = explainer.explain(

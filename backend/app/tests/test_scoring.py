@@ -55,25 +55,33 @@ def test_decision_matrix_all_cells(scoring_svc: ScoringService):
 
     # 3. Rules present, score >= review (0.50 >= 0.40), Stable -> High Risk
     assert (
-        scoring_svc.route_decision(0.50, ["LARGE_TRANSFER_AMOUNT"], ExplanationStatus.STABLE)
+        scoring_svc.route_decision(
+            0.50, ["LARGE_TRANSFER_AMOUNT"], ExplanationStatus.STABLE
+        )
         == GatewayDecision.HIGH_RISK
     )
 
     # 4. Rules present, score >= review (0.50 >= 0.40), Unstable -> Analyst Review
     assert (
-        scoring_svc.route_decision(0.50, ["LARGE_TRANSFER_AMOUNT"], ExplanationStatus.UNSTABLE)
+        scoring_svc.route_decision(
+            0.50, ["LARGE_TRANSFER_AMOUNT"], ExplanationStatus.UNSTABLE
+        )
         == GatewayDecision.ANALYST_REVIEW
     )
 
     # 5. Rules present, score < review (0.20 < 0.40), Stable -> Analyst Review
     assert (
-        scoring_svc.route_decision(0.20, ["LARGE_TRANSFER_AMOUNT"], ExplanationStatus.STABLE)
+        scoring_svc.route_decision(
+            0.20, ["LARGE_TRANSFER_AMOUNT"], ExplanationStatus.STABLE
+        )
         == GatewayDecision.ANALYST_REVIEW
     )
 
     # 6. Rules present, score < review (0.20 < 0.40), Unstable -> Analyst Review
     assert (
-        scoring_svc.route_decision(0.20, ["LARGE_TRANSFER_AMOUNT"], ExplanationStatus.UNSTABLE)
+        scoring_svc.route_decision(
+            0.20, ["LARGE_TRANSFER_AMOUNT"], ExplanationStatus.UNSTABLE
+        )
         == GatewayDecision.ANALYST_REVIEW
     )
 
@@ -174,7 +182,9 @@ def test_manifest_validation_strategy_enum():
         "shap_top_k": 2,
         "stability_min_overlap": 0.67,
     }
-    with pytest.raises(RuntimeError, match="Input should be 'none', 'class_weight' or 'smote_enn'"):
+    with pytest.raises(
+        RuntimeError, match="Input should be 'none', 'class_weight' or 'smote_enn'"
+    ):
         validate_manifest(manifest, clf, [Path("seed_1.joblib"), Path("seed_2.joblib")])
 
 
@@ -213,7 +223,9 @@ def test_manifest_validation_n_replicates_mismatch(tmp_path: Path):
         "stability_min_overlap": 0.67,
     }
     files = [tmp_path / "seed_42.joblib", tmp_path / "seed_43.joblib"]
-    with pytest.raises(RuntimeError, match="does not match number of replicate files found"):
+    with pytest.raises(
+        RuntimeError, match="does not match number of replicate files found"
+    ):
         validate_manifest(manifest, clf, files)
 
 
@@ -238,10 +250,13 @@ def test_manifest_validation_feature_names_mismatch():
 
 def test_extract_pipeline_feature_names_fails_if_undetectable():
     """Fails startup if pipeline input columns cannot be determined."""
+
     class DummyModelWithoutFeatures:
         pass
 
-    with pytest.raises(RuntimeError, match="Pipeline input columns cannot be determined"):
+    with pytest.raises(
+        RuntimeError, match="Pipeline input columns cannot be determined"
+    ):
         extract_pipeline_feature_names(DummyModelWithoutFeatures())
 
 
@@ -281,7 +296,14 @@ def test_trained_model_pipeline_fixture(tmp_path: Path):
         "old_balance_dest",
         "new_balance_dest",
     ]
-    numeric_cols = ["step", "amount", "old_balance_orig", "new_balance_orig", "old_balance_dest", "new_balance_dest"]
+    numeric_cols = [
+        "step",
+        "amount",
+        "old_balance_orig",
+        "new_balance_orig",
+        "old_balance_dest",
+        "new_balance_dest",
+    ]
 
     preprocessor = ColumnTransformer(
         transformers=[("num", "passthrough", numeric_cols)],
@@ -290,30 +312,32 @@ def test_trained_model_pipeline_fixture(tmp_path: Path):
     clf = DecisionTreeClassifier(random_state=42)
     pipeline = Pipeline([("prep", preprocessor), ("clf", clf)])
 
-    X_train = pd.DataFrame([
-        {
-            "step": 1,
-            "type": "TRANSFER",
-            "amount": 100.0,
-            "name_orig": "C1",
-            "old_balance_orig": 100.0,
-            "new_balance_orig": 0.0,
-            "name_dest": "C2",
-            "old_balance_dest": 0.0,
-            "new_balance_dest": 100.0,
-        },
-        {
-            "step": 2,
-            "type": "PAYMENT",
-            "amount": 20.0,
-            "name_orig": "C3",
-            "old_balance_orig": 50.0,
-            "new_balance_orig": 30.0,
-            "name_dest": "M4",
-            "old_balance_dest": 0.0,
-            "new_balance_dest": 0.0,
-        },
-    ])
+    X_train = pd.DataFrame(
+        [
+            {
+                "step": 1,
+                "type": "TRANSFER",
+                "amount": 100.0,
+                "name_orig": "C1",
+                "old_balance_orig": 100.0,
+                "new_balance_orig": 0.0,
+                "name_dest": "C2",
+                "old_balance_dest": 0.0,
+                "new_balance_dest": 100.0,
+            },
+            {
+                "step": 2,
+                "type": "PAYMENT",
+                "amount": 20.0,
+                "name_orig": "C3",
+                "old_balance_orig": 50.0,
+                "new_balance_orig": 30.0,
+                "name_dest": "M4",
+                "old_balance_dest": 0.0,
+                "new_balance_dest": 0.0,
+            },
+        ]
+    )
     y_train = np.array([1, 0])
     pipeline.fit(X_train, y_train)
 

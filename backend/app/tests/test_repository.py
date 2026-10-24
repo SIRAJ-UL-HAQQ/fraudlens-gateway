@@ -37,7 +37,9 @@ def get_postgres_engine_or_skip():
     test_db_url = os.environ.get("TEST_DATABASE_URL")
     if not test_db_url:
         if os.environ.get("REQUIRE_POSTGRES") == "1":
-            pytest.fail("REQUIRE_POSTGRES=1 is set but TEST_DATABASE_URL is not configured.")
+            pytest.fail(
+                "REQUIRE_POSTGRES=1 is set but TEST_DATABASE_URL is not configured."
+            )
         pytest.skip("TEST_DATABASE_URL is unset; skipping PostgreSQL repository tests.")
 
     url = make_url(test_db_url)
@@ -100,8 +102,16 @@ def make_sample_tx(
         transaction_id=tx_id,
         risk_score=0.15 if decision == GatewayDecision.LOW_RISK else 0.85,
         top_features=[
-            FeatureExplanation(feature="amount", shap_value=0.25, direction=ShapDirection.INCREASES_RISK),
-            FeatureExplanation(feature="old_balance_orig", shap_value=-0.15, direction=ShapDirection.DECREASES_RISK),
+            FeatureExplanation(
+                feature="amount",
+                shap_value=0.25,
+                direction=ShapDirection.INCREASES_RISK,
+            ),
+            FeatureExplanation(
+                feature="old_balance_orig",
+                shap_value=-0.15,
+                direction=ShapDirection.DECREASES_RISK,
+            ),
         ],
         explanation_status=ExplanationStatus.STABLE,
         gateway_decision=decision,
@@ -134,12 +144,16 @@ def test_repository_list_and_pagination(repo):
             f"tx-{i:03d}",
             amount=100.0 + i,
             step=i + 1,
-            decision=GatewayDecision.HIGH_RISK if i % 2 == 0 else GatewayDecision.LOW_RISK,
+            decision=GatewayDecision.HIGH_RISK
+            if i % 2 == 0
+            else GatewayDecision.LOW_RISK,
         )
         repo.save_transaction(tx_in, pred_out)
 
     # Filter by decision
-    high_page = repo.list_transactions(decision=GatewayDecision.HIGH_RISK, page=1, page_size=10)
+    high_page = repo.list_transactions(
+        decision=GatewayDecision.HIGH_RISK, page=1, page_size=10
+    )
     assert high_page.total == 8
     assert len(high_page.items) == 8
     for item in high_page.items:
@@ -192,7 +206,9 @@ def test_repository_export_csv_and_pdf(repo):
     assert filename == "transactions_export.csv"
     assert "tx-exp" in csv_data
 
-    pdf_data, pdf_media, pdf_filename = repo.export_transactions(format=ExportFormat.PDF)
+    pdf_data, pdf_media, pdf_filename = repo.export_transactions(
+        format=ExportFormat.PDF
+    )
     assert pdf_media == "application/pdf"
     assert pdf_filename == "transactions_export.pdf"
     assert isinstance(pdf_data, bytes)
@@ -224,24 +240,40 @@ def test_persistence_failure_raises_db_unavailable():
 # -------------------------------------------------------------------------
 # PostgreSQL Specific Tests (JSONB, UTC-aware timestamps, ordering, migrations)
 # -------------------------------------------------------------------------
+def _truncate_postgres(engine):
+    with engine.connect() as conn:
+        conn.execute(text("TRUNCATE TABLE transactions, analyst_reviews CASCADE;"))
+        conn.commit()
+
+
 def test_postgres_jsonb_roundtrip():
     """Verify JSONB serialization and deserialization of rule_flags and top_features."""
     engine = get_postgres_engine_or_skip()
+    _truncate_postgres(engine)
     Session = sessionmaker(bind=engine)
     repo = SqlAlchemyTransactionRepository(session_factory=Session)
 
     tx_in, pred_out = make_sample_tx("tx-jsonb")
     pred_out.rule_flags = ["ORIGIN_ACCOUNT_DRAINED", "LARGE_TRANSFER_AMOUNT"]
     pred_out.top_features = [
-        FeatureExplanation(feature="amount", shap_value=0.45, direction=ShapDirection.INCREASES_RISK),
-        FeatureExplanation(feature="balance_delta_orig", shap_value=-0.25, direction=ShapDirection.DECREASES_RISK),
+        FeatureExplanation(
+            feature="amount", shap_value=0.45, direction=ShapDirection.INCREASES_RISK
+        ),
+        FeatureExplanation(
+            feature="balance_delta_orig",
+            shap_value=-0.25,
+            direction=ShapDirection.DECREASES_RISK,
+        ),
     ]
 
     repo.save_transaction(tx_in, pred_out)
     fetched = repo.get_transaction("tx-jsonb")
 
     assert fetched is not None
-    assert fetched.prediction.rule_flags == ["ORIGIN_ACCOUNT_DRAINED", "LARGE_TRANSFER_AMOUNT"]
+    assert fetched.prediction.rule_flags == [
+        "ORIGIN_ACCOUNT_DRAINED",
+        "LARGE_TRANSFER_AMOUNT",
+    ]
     assert len(fetched.prediction.top_features) == 2
     assert fetched.prediction.top_features[0].feature == "amount"
     assert fetched.prediction.top_features[0].shap_value == 0.45
@@ -251,6 +283,7 @@ def test_postgres_jsonb_roundtrip():
 def test_postgres_utc_aware_created_at():
     """Verify timestamps are persisted and retrieved as timezone-aware UTC."""
     engine = get_postgres_engine_or_skip()
+    _truncate_postgres(engine)
     Session = sessionmaker(bind=engine)
     repo = SqlAlchemyTransactionRepository(session_factory=Session)
 
@@ -269,6 +302,7 @@ def test_postgres_utc_aware_created_at():
 def test_postgres_deterministic_ordering():
     """Verify deterministic ordering: created_at desc, transaction_id asc."""
     engine = get_postgres_engine_or_skip()
+    _truncate_postgres(engine)
     Session = sessionmaker(bind=engine)
     repo = SqlAlchemyTransactionRepository(session_factory=Session)
 
@@ -291,11 +325,23 @@ def test_postgres_deterministic_ordering():
 
 def test_postgres_alembic_migrations():
     """Verify Alembic migration lifecycle: upgrade head -> downgrade base -> upgrade head -> check."""
-    get_postgres_engine_or_skip()
-    from alembic import command
+    engine = get_postgres_engine_or_skip()
     from alembic.config import Config
 
-    alembic_cfg_path = Path(__file__).resolve().parents[2] / "alembic.ini"
+    from alembic import command
+
+    # Drop existing tables and alembic version tracking to test full migration lifecycle cleanly
+    with engine.connect() as conn:
+        conn.execute(
+            text(
+                "DROP TABLE IF EXISTS transactions, analyst_reviews, alembic_version CASCADE;"
+            )
+        )
+        conn.commit()
+
+    alembic_cfg_path = Path(__file__).resolve().parents[3] / "alembic.ini"
+    if not alembic_cfg_path.exists():
+        alembic_cfg_path = Path(__file__).resolve().parents[2] / "alembic.ini"
     assert alembic_cfg_path.exists(), f"alembic.ini not found at {alembic_cfg_path}"
 
     alembic_cfg = Config(str(alembic_cfg_path))

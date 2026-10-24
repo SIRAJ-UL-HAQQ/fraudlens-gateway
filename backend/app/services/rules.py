@@ -4,7 +4,6 @@ All rule thresholds are provisional and subject to empirical calibration by the 
 engineering teammate on the training split.
 """
 
-
 from app.core.config import Settings, settings
 from app.models.schemas import TransactionIn, TransactionType
 
@@ -16,7 +15,11 @@ def check_origin_account_drained(
     """Check if origin account is virtually or completely drained in a single transfer/cash-out."""
     if tx.type not in [TransactionType.TRANSFER, TransactionType.CASH_OUT]:
         return None
-    if tx.old_balance_orig > 0.0 and tx.new_balance_orig == 0.0 and tx.amount >= tx.old_balance_orig * drain_ratio:
+    if (
+        tx.old_balance_orig > 0.0
+        and tx.new_balance_orig == 0.0
+        and tx.amount >= tx.old_balance_orig * drain_ratio
+    ):
         return "ORIGIN_ACCOUNT_DRAINED"
     return None
 
@@ -78,7 +81,9 @@ def evaluate_rules(
     if r1:
         flags.append(r1)
 
-    r2 = check_large_transfer_amount(tx, large_transfer_threshold=c.RULE_LARGE_TRANSFER_THRESHOLD)
+    r2 = check_large_transfer_amount(
+        tx, large_transfer_threshold=c.RULE_LARGE_TRANSFER_THRESHOLD
+    )
     if r2:
         flags.append(r2)
 
@@ -86,7 +91,9 @@ def evaluate_rules(
     if r3:
         flags.append(r3)
 
-    r4 = check_very_high_amount_for_type(tx, high_amount_by_type=c.RULE_HIGH_AMOUNT_BY_TYPE)
+    r4 = check_very_high_amount_for_type(
+        tx, high_amount_by_type=c.RULE_HIGH_AMOUNT_BY_TYPE
+    )
     if r4:
         flags.append(r4)
 

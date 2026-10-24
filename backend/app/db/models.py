@@ -35,7 +35,9 @@ class TransactionRecord(Base):
         Index("ix_transactions_decision_created_at", "gateway_decision", "created_at"),
     )
 
-    transaction_id = Column(String(64), primary_key=True, default=lambda: str(uuid.uuid4()))
+    transaction_id = Column(
+        String(64), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
     step = Column(Integer, nullable=False)
     type = Column(String(16), nullable=False)
     amount = Column(Float, nullable=False)
@@ -98,19 +100,27 @@ class AnalystReviewModel(Base):
 # -------------------------------------------------------------------------
 @event.listens_for(TransactionRecord, "before_update")
 def disallow_transaction_update(mapper, connection, target):
-    raise ImmutableRecordError("Transactions table is append-only: updates are strictly forbidden.")
+    raise ImmutableRecordError(
+        "Transactions table is append-only: updates are strictly forbidden."
+    )
 
 
 @event.listens_for(TransactionRecord, "before_delete")
 def disallow_transaction_delete(mapper, connection, target):
-    raise ImmutableRecordError("Transactions table is append-only: deletions are strictly forbidden.")
+    raise ImmutableRecordError(
+        "Transactions table is append-only: deletions are strictly forbidden."
+    )
 
 
 @event.listens_for(AnalystReviewModel, "before_update")
 def disallow_review_update(mapper, connection, target):
-    raise ImmutableRecordError("Analyst reviews table is append-only: updates are strictly forbidden.")
+    raise ImmutableRecordError(
+        "Analyst reviews table is append-only: updates are strictly forbidden."
+    )
 
 
 @event.listens_for(AnalystReviewModel, "before_delete")
 def disallow_review_delete(mapper, connection, target):
-    raise ImmutableRecordError("Analyst reviews table is append-only: deletions are strictly forbidden.")
+    raise ImmutableRecordError(
+        "Analyst reviews table is append-only: deletions are strictly forbidden."
+    )

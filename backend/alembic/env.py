@@ -2,8 +2,9 @@ import sys
 from logging.config import fileConfig
 from pathlib import Path
 
-from alembic import context
 from sqlalchemy import engine_from_config, pool
+
+from alembic import context
 
 # Ensure backend directory is in sys.path
 backend_dir = Path(__file__).resolve().parents[1]
@@ -23,6 +24,9 @@ target_metadata = Base.metadata
 
 
 def get_url():
+    cfg_url = config.get_main_option("sqlalchemy.url")
+    if cfg_url and "driver://user:pass" not in cfg_url:
+        return cfg_url
     return settings.DATABASE_URL
 
 

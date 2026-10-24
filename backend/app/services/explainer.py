@@ -31,7 +31,9 @@ def validate_model_supported(pipeline_or_estimator: Any) -> str:
         or "gradient_boosting" in est_module
         or "xgboost" in est_module
         or "lightgbm" in est_module
-        or any(k in est_class for k in ["Tree", "Forest", "GBM", "XGB", "LGBM", "CatBoost"])
+        or any(
+            k in est_class for k in ["Tree", "Forest", "GBM", "XGB", "LGBM", "CatBoost"]
+        )
     ):
         return "tree"
 
@@ -39,7 +41,16 @@ def validate_model_supported(pipeline_or_estimator: Any) -> str:
     if (
         hasattr(estimator, "coef_")
         or "linear_model" in est_module
-        or any(k in est_class for k in ["LogisticRegression", "LinearRegression", "Ridge", "Lasso", "SGDClassifier"])
+        or any(
+            k in est_class
+            for k in [
+                "LogisticRegression",
+                "LinearRegression",
+                "Ridge",
+                "Lasso",
+                "SGDClassifier",
+            ]
+        )
     ):
         return "linear"
 
@@ -111,7 +122,9 @@ class StubExplainer(ExplainerService):
                 ),
             ]
 
-        amount = float(features_df["amount"].iloc[0]) if "amount" in features_df else 0.0
+        amount = (
+            float(features_df["amount"].iloc[0]) if "amount" in features_df else 0.0
+        )
         tx_type = str(features_df["type"].iloc[0]) if "type" in features_df else ""
         if amount > 50_000.0 and tx_type == "TRANSFER":
             status = ExplanationStatus.UNSTABLE
@@ -152,7 +165,11 @@ class RealExplainer(ExplainerService):
                 elif hasattr(X_trans, "columns"):
                     feature_names = list(X_trans.columns)
                 else:
-                    ncols = X_trans.shape[1] if hasattr(X_trans, "shape") else len(features_df.columns)
+                    ncols = (
+                        X_trans.shape[1]
+                        if hasattr(X_trans, "shape")
+                        else len(features_df.columns)
+                    )
                     feature_names = [f"f_{i}" for i in range(ncols)]
             else:
                 X_trans = features_df
@@ -235,10 +252,24 @@ class RealExplainer(ExplainerService):
             try:
                 rep_top = self._extract_top_features_from_model(rep, features_df)
                 if not rep_top:
-                    logger.error("Replicate %d returned empty top features; failing closed to Unstable.", i)
+                    logger.error(
+                        "Replicate %d returned empty top features; failing closed to Unstable.",
+                        i,
+                    )
                     return explanations, ExplanationStatus.UNSTABLE
-            except (ValueError, TypeError, KeyError, AttributeError, RuntimeError, OSError) as e:
-                logger.error("Replicate %d feature extraction failed (%s); failing closed to Unstable.", i, e)
+            except (
+                ValueError,
+                TypeError,
+                KeyError,
+                AttributeError,
+                RuntimeError,
+                OSError,
+            ) as e:
+                logger.error(
+                    "Replicate %d feature extraction failed (%s); failing closed to Unstable.",
+                    i,
+                    e,
+                )
                 return explanations, ExplanationStatus.UNSTABLE
 
             rep_set = {f[0] for f in rep_top}
@@ -254,5 +285,7 @@ class RealExplainer(ExplainerService):
         threshold_count = math.ceil(self.stability_min_overlap * self.top_k - 1e-9)
         is_stable = avg_overlap_count >= threshold_count
 
-        stability = ExplanationStatus.STABLE if is_stable else ExplanationStatus.UNSTABLE
+        stability = (
+            ExplanationStatus.STABLE if is_stable else ExplanationStatus.UNSTABLE
+        )
         return explanations, stability

@@ -63,7 +63,11 @@ def run_startup_self_test(model: Any, feature_names: list[str]) -> None:
     try:
         if hasattr(model, "predict_proba"):
             proba = model.predict_proba(sample_df)
-            if hasattr(proba, "shape") and len(proba.shape) >= 2 and proba.shape[1] >= 2:
+            if (
+                hasattr(proba, "shape")
+                and len(proba.shape) >= 2
+                and proba.shape[1] >= 2
+            ):
                 score = float(proba[0][1])
             elif hasattr(proba, "shape") and len(proba.shape) == 1:
                 score = float(proba[0])
@@ -74,9 +78,13 @@ def run_startup_self_test(model: Any, feature_names: list[str]) -> None:
             score = float(pred[0])
 
         if not (0.0 <= score <= 1.0):
-            raise RuntimeError(f"Startup self-test produced score {score} outside [0.0, 1.0].")
+            raise RuntimeError(
+                f"Startup self-test produced score {score} outside [0.0, 1.0]."
+            )
     except Exception as e:
-        raise RuntimeError(f"Startup self-test failed: pipeline inference error: {e}") from e
+        raise RuntimeError(
+            f"Startup self-test failed: pipeline inference error: {e}"
+        ) from e
 
 
 def validate_manifest(
@@ -133,7 +141,9 @@ class ScoringService:
         """Load trained model bundle or initialize deterministic stub per environment policy."""
         if not model_path_str:
             if settings.APP_ENV.lower() in ["dev", "development", "test"]:
-                logger.info("MODEL_PATH is unset; initializing deterministic STUB model for dev/test.")
+                logger.info(
+                    "MODEL_PATH is unset; initializing deterministic STUB model for dev/test."
+                )
                 self.mode = "stub"
                 self.model_version = "stub"
                 self.imbalance_strategy = "class_weight"
@@ -142,7 +152,9 @@ class ScoringService:
                 self.threshold_review = settings.FRAUD_THRESHOLD_REVIEW
                 return
             else:
-                raise RuntimeError("MODEL_PATH must be configured in non-dev/production environments.")
+                raise RuntimeError(
+                    "MODEL_PATH must be configured in non-dev/production environments."
+                )
 
         bundle_dir = Path(model_path_str)
         if bundle_dir.is_file():
@@ -151,7 +163,11 @@ class ScoringService:
         manifest_path = bundle_dir / "manifest.json"
         model_file = bundle_dir / "model.joblib"
 
-        if not bundle_dir.exists() or not manifest_path.exists() or not model_file.exists():
+        if (
+            not bundle_dir.exists()
+            or not manifest_path.exists()
+            or not model_file.exists()
+        ):
             raise RuntimeError(
                 f"Model artifact directory '{bundle_dir}' is invalid or missing required files "
                 "(manifest.json, model.joblib)."
@@ -170,7 +186,9 @@ class ScoringService:
                 replicate_files = sorted(replicates_dir.glob("seed_*.joblib"))
 
             # Strict manifest validation against contract
-            parsed_manifest = validate_manifest(self.manifest, self.model, replicate_files)
+            parsed_manifest = validate_manifest(
+                self.manifest, self.model, replicate_files
+            )
 
             # Startup self-test
             run_startup_self_test(self.model, parsed_manifest.feature_names)
@@ -190,21 +208,31 @@ class ScoringService:
                     validate_model_supported(rep_model)
                     self.replicates.append(rep_model)
                 except Exception as ex:
-                    raise RuntimeError(f"Failed to load replicate pipeline from {rep_path}: {ex}") from ex
+                    raise RuntimeError(
+                        f"Failed to load replicate pipeline from {rep_path}: {ex}"
+                    ) from ex
 
             if len(self.replicates) < 2:
-                raise RuntimeError(f"ML artifact requires at least 2 replicates, found {len(self.replicates)}.")
+                raise RuntimeError(
+                    f"ML artifact requires at least 2 replicates, found {len(self.replicates)}."
+                )
 
             self.explainer = RealExplainer(
                 top_k=parsed_manifest.shap_top_k,
                 stability_min_overlap=parsed_manifest.stability_min_overlap,
             )
             self.mode = "trained"
-            logger.info("Successfully loaded trained model '%s' from %s", self.model_version, bundle_dir)
+            logger.info(
+                "Successfully loaded trained model '%s' from %s",
+                self.model_version,
+                bundle_dir,
+            )
         except RuntimeError:
             raise
         except Exception as e:
-            raise RuntimeError(f"Failed to load ML artifact from {bundle_dir}: {e}") from e
+            raise RuntimeError(
+                f"Failed to load ML artifact from {bundle_dir}: {e}"
+            ) from e
 
     def route_decision(
         self,
@@ -216,7 +244,11 @@ class ScoringService:
         has_rules = len(rule_flags) > 0
         candidate_high_risk = False
 
-        if risk_score >= self.threshold_high or has_rules and risk_score >= self.threshold_review:
+        if (
+            risk_score >= self.threshold_high
+            or has_rules
+            and risk_score >= self.threshold_review
+        ):
             candidate_high_risk = True
 
         if candidate_high_risk:
@@ -297,18 +329,25 @@ class ScoringService:
         )
         return score, top_features, explanation_status
 
-    def predict(self, tx: TransactionIn, transaction_id: str | None = None) -> PredictionOut:
+    def predict(
+        self, tx: TransactionIn, transaction_id: str | None = None
+    ) -> PredictionOut:
         """Execute full scoring lifecycle: heuristic rules, ML inference, explanation, and gateway routing."""
         if not transaction_id:
             import uuid
+
             transaction_id = str(uuid.uuid4())
         rule_flags = evaluate_rules(tx)
         features_df = self._to_dataframe(tx)
 
         if self.mode == "trained" and self.model is not None:
-            score, top_features, explanation_status = self._predict_trained(tx, features_df)
+            score, top_features, explanation_status = self._predict_trained(
+                tx, features_df
+            )
         else:
-            score, top_features, explanation_status = self._predict_stub(tx, features_df)
+            score, top_features, explanation_status = self._predict_stub(
+                tx, features_df
+            )
 
         decision = self.route_decision(score, rule_flags, explanation_status)
 

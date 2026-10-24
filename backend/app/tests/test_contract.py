@@ -33,7 +33,13 @@ AUTH_HEADERS = {"Authorization": f"Bearer {create_test_token()}"}
 # -------------------------------------------------------------------------
 def test_fixtures_json_conforms_to_pydantic_schemas():
     """Verify that frontend/src/mocks/fixtures.json parses cleanly into Pydantic models."""
-    fixtures_path = Path(__file__).resolve().parents[3] / "frontend" / "src" / "mocks" / "fixtures.json"
+    fixtures_path = (
+        Path(__file__).resolve().parents[3]
+        / "frontend"
+        / "src"
+        / "mocks"
+        / "fixtures.json"
+    )
     assert fixtures_path.exists(), f"fixtures.json not found at {fixtures_path}"
 
     with open(fixtures_path, "r", encoding="utf-8") as f:
@@ -73,8 +79,13 @@ def test_fixtures_json_conforms_to_pydantic_schemas():
 
     # 6. Sample review
     assert "sample_review_record" in fixtures_data
-    validated_review = AnalystReviewRecord.model_validate(fixtures_data["sample_review_record"])
-    assert validated_review.outcome in [ReviewOutcome.CONFIRMED_FRAUD, ReviewOutcome.FALSE_POSITIVE]
+    validated_review = AnalystReviewRecord.model_validate(
+        fixtures_data["sample_review_record"]
+    )
+    assert validated_review.outcome in [
+        ReviewOutcome.CONFIRMED_FRAUD,
+        ReviewOutcome.FALSE_POSITIVE,
+    ]
 
 
 # -------------------------------------------------------------------------
@@ -210,12 +221,16 @@ def test_protected_endpoints_return_401_without_token():
             res = client.get(path)
         else:
             res = client.post(path, json={})
-        assert res.status_code == 401, f"Expected 401 for {method} {path}, got {res.status_code}"
+        assert res.status_code == 401, (
+            f"Expected 401 for {method} {path}, got {res.status_code}"
+        )
 
 
 def test_protected_endpoints_reject_invalid_token():
     """Supplying a garbage token yields 401."""
-    res = client.get("/api/v1/metrics", headers={"Authorization": "Bearer bad-token-123"})
+    res = client.get(
+        "/api/v1/metrics", headers={"Authorization": "Bearer bad-token-123"}
+    )
     assert res.status_code == 401
 
 
@@ -250,7 +265,9 @@ def test_predict_and_transaction_lifecycle():
     tx_id = validated_pred.transaction_id
 
     # 2. GET /transactions (Verify it appears in list)
-    res_list = client.get("/api/v1/transactions?page=1&page_size=10", headers=AUTH_HEADERS)
+    res_list = client.get(
+        "/api/v1/transactions?page=1&page_size=10", headers=AUTH_HEADERS
+    )
     assert res_list.status_code == 200
     page_data = PaginatedTransactionsResponse.model_validate(res_list.json())
     assert page_data.total >= 1
@@ -337,11 +354,21 @@ def test_metrics_contract_both_states(tmp_path: Path, monkeypatch):
     # 2. Available state (valid file)
     valid_report = {
         "strategy_comparison": {
-            "class_weight": {"precision": 0.91, "recall": 0.84, "f1": 0.87, "pr_auc": 0.89, "stability": 0.88}
+            "class_weight": {
+                "precision": 0.91,
+                "recall": 0.84,
+                "f1": 0.87,
+                "pr_auc": 0.89,
+                "stability": 0.88,
+            }
         },
         "evaluation_metrics": {
-            "precision": 0.91, "recall": 0.84, "f1": 0.87, "pr_auc": 0.89, "mcc": 0.86
-        }
+            "precision": 0.91,
+            "recall": 0.84,
+            "f1": 0.87,
+            "pr_auc": 0.89,
+            "mcc": 0.86,
+        },
     }
     report_file = tmp_path / "valid_metrics.json"
     with open(report_file, "w", encoding="utf-8") as f:
@@ -359,7 +386,13 @@ def test_metrics_contract_both_states(tmp_path: Path, monkeypatch):
 
 def test_fixtures_json_conforms_to_schema():
     """Verify frontend/src/mocks/fixtures.json contains valid data matching schemas."""
-    fixtures_path = Path(__file__).resolve().parents[3] / "frontend" / "src" / "mocks" / "fixtures.json"
+    fixtures_path = (
+        Path(__file__).resolve().parents[3]
+        / "frontend"
+        / "src"
+        / "mocks"
+        / "fixtures.json"
+    )
     assert fixtures_path.exists()
     with open(fixtures_path, "r", encoding="utf-8") as f:
         fixtures = json.load(f)
@@ -394,4 +427,3 @@ def test_metrics_service_malformed_and_invalid_schema(tmp_path: Path):
     _, status_inv, reason_inv = service_invalid.load_ml_metrics()
     assert status_inv == "unavailable"
     assert "Invalid ML benchmark report schema" in reason_inv
-

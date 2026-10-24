@@ -49,16 +49,23 @@ def sanitize_csv_cell(value: Any) -> str:
     return s
 
 
-
-
 def generate_pdf_export(items: list[TransactionSummary]) -> bytes:
     """Generate a clean, styled PDF document using ReportLab."""
     buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter, leftMargin=36, rightMargin=36, topMargin=36, bottomMargin=36)
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        leftMargin=36,
+        rightMargin=36,
+        topMargin=36,
+        bottomMargin=36,
+    )
     styles = getSampleStyleSheet()
     elements = []
 
-    title = Paragraph("<b>FraudLens Gateway — Transaction Export Report</b>", styles["Title"])
+    title = Paragraph(
+        "<b>FraudLens Gateway — Transaction Export Report</b>", styles["Title"]
+    )
     elements.append(title)
     elements.append(Spacer(1, 12))
 
@@ -73,29 +80,35 @@ def generate_pdf_export(items: list[TransactionSummary]) -> bytes:
         ["Tx ID", "Step", "Type", "Amount", "Decision", "Status", "Score", "Time (UTC)"]
     ]
     for it in items:
-        table_data.append([
-            it.transaction_id[:8] + "...",
-            str(it.step),
-            it.type.value,
-            f"{it.amount:,.2f}",
-            it.gateway_decision.value,
-            it.explanation_status.value,
-            f"{it.risk_score:.2f}",
-            it.created_at.strftime("%Y-%m-%d %H:%M"),
-        ])
+        table_data.append(
+            [
+                it.transaction_id[:8] + "...",
+                str(it.step),
+                it.type.value,
+                f"{it.amount:,.2f}",
+                it.gateway_decision.value,
+                it.explanation_status.value,
+                f"{it.risk_score:.2f}",
+                it.created_at.strftime("%Y-%m-%d %H:%M"),
+            ]
+        )
 
     col_widths = [65, 35, 60, 75, 80, 60, 45, 110]
     t = Table(table_data, colWidths=col_widths)
-    t.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1e293b")),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
-        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("FONTSIZE", (0, 0), (-1, -1), 8),
-        ("BOTTOMPADDING", (0, 0), (-1, 0), 6),
-        ("BACKGROUND", (0, 1), (-1, -1), colors.HexColor("#f8fafc")),
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
-    ]))
+    t.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1e293b")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, -1), 8),
+                ("BOTTOMPADDING", (0, 0), (-1, 0), 6),
+                ("BACKGROUND", (0, 1), (-1, -1), colors.HexColor("#f8fafc")),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
+            ]
+        )
+    )
     elements.append(t)
     doc.build(elements)
     buffer.seek(0)
@@ -205,9 +218,15 @@ class InMemoryTransactionRepository(TransactionRepository):
         if created_to is not None:
             filtered = [t for t in filtered if t.created_at <= created_to]
         if decision is not None:
-            filtered = [t for t in filtered if t.prediction.gateway_decision == decision]
+            filtered = [
+                t for t in filtered if t.prediction.gateway_decision == decision
+            ]
         if explanation_status is not None:
-            filtered = [t for t in filtered if t.prediction.explanation_status == explanation_status]
+            filtered = [
+                t
+                for t in filtered
+                if t.prediction.explanation_status == explanation_status
+            ]
 
         # Deterministic ordering: created_at desc, transaction_id asc
         filtered.sort(key=lambda t: (-t.created_at.timestamp(), t.transaction_id))
@@ -343,34 +362,42 @@ class InMemoryTransactionRepository(TransactionRepository):
         if format == ExportFormat.CSV:
             output = io.StringIO()
             writer = csv.writer(output)
-            writer.writerow([
-                "Transaction ID",
-                "Step",
-                "Type",
-                "Amount",
-                "Origin",
-                "Destination",
-                "Risk Score",
-                "Gateway Decision",
-                "Explanation Status",
-                "Rule Flags",
-                "Created At",
-            ])
+            writer.writerow(
+                [
+                    "Transaction ID",
+                    "Step",
+                    "Type",
+                    "Amount",
+                    "Origin",
+                    "Destination",
+                    "Risk Score",
+                    "Gateway Decision",
+                    "Explanation Status",
+                    "Rule Flags",
+                    "Created At",
+                ]
+            )
             for it in page.items:
-                writer.writerow([
-                    sanitize_csv_cell(it.transaction_id),
-                    sanitize_csv_cell(it.step),
-                    sanitize_csv_cell(it.type.value),
-                    sanitize_csv_cell(it.amount),
-                    sanitize_csv_cell(it.name_orig),
-                    sanitize_csv_cell(it.name_dest),
-                    sanitize_csv_cell(it.risk_score),
-                    sanitize_csv_cell(it.gateway_decision.value),
-                    sanitize_csv_cell(it.explanation_status.value),
-                    sanitize_csv_cell(";".join(it.rule_flags)),
-                    sanitize_csv_cell(it.created_at.isoformat()),
-                ])
-            return output.getvalue(), "text/csv; charset=utf-8", "transactions_export.csv"
+                writer.writerow(
+                    [
+                        sanitize_csv_cell(it.transaction_id),
+                        sanitize_csv_cell(it.step),
+                        sanitize_csv_cell(it.type.value),
+                        sanitize_csv_cell(it.amount),
+                        sanitize_csv_cell(it.name_orig),
+                        sanitize_csv_cell(it.name_dest),
+                        sanitize_csv_cell(it.risk_score),
+                        sanitize_csv_cell(it.gateway_decision.value),
+                        sanitize_csv_cell(it.explanation_status.value),
+                        sanitize_csv_cell(";".join(it.rule_flags)),
+                        sanitize_csv_cell(it.created_at.isoformat()),
+                    ]
+                )
+            return (
+                output.getvalue(),
+                "text/csv; charset=utf-8",
+                "transactions_export.csv",
+            )
         else:
             pdf_bytes = generate_pdf_export(page.items)
             return pdf_bytes, "application/pdf", "transactions_export.pdf"
@@ -441,7 +468,11 @@ class SqlAlchemyTransactionRepository(TransactionRepository):
     def get_transaction(self, transaction_id: str) -> TransactionDetail | None:
         db = self._get_session()
         try:
-            rec = db.query(TransactionRecord).filter(TransactionRecord.transaction_id == transaction_id).first()
+            rec = (
+                db.query(TransactionRecord)
+                .filter(TransactionRecord.transaction_id == transaction_id)
+                .first()
+            )
             if not rec:
                 return None
 
@@ -529,15 +560,22 @@ class SqlAlchemyTransactionRepository(TransactionRepository):
             if created_to is not None:
                 query = query.filter(TransactionRecord.created_at <= created_to)
             if decision is not None:
-                query = query.filter(TransactionRecord.gateway_decision == decision.value)
+                query = query.filter(
+                    TransactionRecord.gateway_decision == decision.value
+                )
             if explanation_status is not None:
-                query = query.filter(TransactionRecord.explanation_status == explanation_status.value)
+                query = query.filter(
+                    TransactionRecord.explanation_status == explanation_status.value
+                )
 
             total = query.count()
             total_pages = math.ceil(total / page_size) if total > 0 else 0
 
             # Deterministic ordering: created_at desc, transaction_id asc
-            query = query.order_by(TransactionRecord.created_at.desc(), TransactionRecord.transaction_id.asc())
+            query = query.order_by(
+                TransactionRecord.created_at.desc(),
+                TransactionRecord.transaction_id.asc(),
+            )
 
             offset = (page - 1) * page_size
             records = query.offset(offset).limit(page_size).all()
@@ -580,7 +618,11 @@ class SqlAlchemyTransactionRepository(TransactionRepository):
     ) -> AnalystReviewRecord:
         db = self._get_session()
         try:
-            tx = db.query(TransactionRecord).filter(TransactionRecord.transaction_id == transaction_id).first()
+            tx = (
+                db.query(TransactionRecord)
+                .filter(TransactionRecord.transaction_id == transaction_id)
+                .first()
+            )
             if not tx:
                 raise KeyError(f"Transaction {transaction_id} not found")
 
@@ -634,7 +676,10 @@ class SqlAlchemyTransactionRepository(TransactionRepository):
 
             # Decision distribution counts
             dec_counts = (
-                db.query(TransactionRecord.gateway_decision, func.count(TransactionRecord.transaction_id))
+                db.query(
+                    TransactionRecord.gateway_decision,
+                    func.count(TransactionRecord.transaction_id),
+                )
                 .group_by(TransactionRecord.gateway_decision)
                 .all()
             )
@@ -644,7 +689,10 @@ class SqlAlchemyTransactionRepository(TransactionRepository):
             # Stability count
             stable_count = (
                 db.query(TransactionRecord)
-                .filter(TransactionRecord.explanation_status == ExplanationStatus.STABLE.value)
+                .filter(
+                    TransactionRecord.explanation_status
+                    == ExplanationStatus.STABLE.value
+                )
                 .count()
             )
 
@@ -652,7 +700,12 @@ class SqlAlchemyTransactionRepository(TransactionRepository):
             avg_risk = db.query(func.avg(TransactionRecord.risk_score)).scalar() or 0.0
 
             # p50 / p95 latency directly from stored latency_ms of scored transactions
-            latencies = [row[0] for row in db.query(TransactionRecord.latency_ms).order_by(TransactionRecord.latency_ms.asc()).all()]
+            latencies = [
+                row[0]
+                for row in db.query(TransactionRecord.latency_ms)
+                .order_by(TransactionRecord.latency_ms.asc())
+                .all()
+            ]
             p50 = latencies[int(len(latencies) * 0.50)] if latencies else 0.0
             p95 = latencies[int(len(latencies) * 0.95)] if latencies else 0.0
 
@@ -702,34 +755,42 @@ class SqlAlchemyTransactionRepository(TransactionRepository):
         if format == ExportFormat.CSV:
             output = io.StringIO()
             writer = csv.writer(output)
-            writer.writerow([
-                "Transaction ID",
-                "Step",
-                "Type",
-                "Amount",
-                "Origin",
-                "Destination",
-                "Risk Score",
-                "Gateway Decision",
-                "Explanation Status",
-                "Rule Flags",
-                "Created At",
-            ])
+            writer.writerow(
+                [
+                    "Transaction ID",
+                    "Step",
+                    "Type",
+                    "Amount",
+                    "Origin",
+                    "Destination",
+                    "Risk Score",
+                    "Gateway Decision",
+                    "Explanation Status",
+                    "Rule Flags",
+                    "Created At",
+                ]
+            )
             for it in page.items:
-                writer.writerow([
-                    sanitize_csv_cell(it.transaction_id),
-                    sanitize_csv_cell(it.step),
-                    sanitize_csv_cell(it.type.value),
-                    sanitize_csv_cell(it.amount),
-                    sanitize_csv_cell(it.name_orig),
-                    sanitize_csv_cell(it.name_dest),
-                    sanitize_csv_cell(it.risk_score),
-                    sanitize_csv_cell(it.gateway_decision.value),
-                    sanitize_csv_cell(it.explanation_status.value),
-                    sanitize_csv_cell(";".join(it.rule_flags)),
-                    sanitize_csv_cell(it.created_at.isoformat()),
-                ])
-            return output.getvalue(), "text/csv; charset=utf-8", "transactions_export.csv"
+                writer.writerow(
+                    [
+                        sanitize_csv_cell(it.transaction_id),
+                        sanitize_csv_cell(it.step),
+                        sanitize_csv_cell(it.type.value),
+                        sanitize_csv_cell(it.amount),
+                        sanitize_csv_cell(it.name_orig),
+                        sanitize_csv_cell(it.name_dest),
+                        sanitize_csv_cell(it.risk_score),
+                        sanitize_csv_cell(it.gateway_decision.value),
+                        sanitize_csv_cell(it.explanation_status.value),
+                        sanitize_csv_cell(";".join(it.rule_flags)),
+                        sanitize_csv_cell(it.created_at.isoformat()),
+                    ]
+                )
+            return (
+                output.getvalue(),
+                "text/csv; charset=utf-8",
+                "transactions_export.csv",
+            )
         else:
             pdf_bytes = generate_pdf_export(page.items)
             return pdf_bytes, "application/pdf", "transactions_export.pdf"

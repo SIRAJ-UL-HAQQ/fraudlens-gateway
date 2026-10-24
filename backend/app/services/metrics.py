@@ -17,14 +17,20 @@ class MetricsService:
     def __init__(self, metrics_path: Path | str | None = None) -> None:
         self.metrics_path = Path(metrics_path or settings.METRICS_PATH)
 
-    def load_ml_metrics(self) -> tuple[MLMetrics | None, Literal["available", "unavailable"], str | None]:
+    def load_ml_metrics(
+        self,
+    ) -> tuple[MLMetrics | None, Literal["available", "unavailable"], str | None]:
         """Load and validate ML benchmark metrics from report JSON.
 
         Returns:
             tuple: (ml_metrics, status, reason)
         """
         if not self.metrics_path.exists():
-            return None, "unavailable", f"ML benchmark report not found at {self.metrics_path}."
+            return (
+                None,
+                "unavailable",
+                f"ML benchmark report not found at {self.metrics_path}.",
+            )
 
         try:
             with open(self.metrics_path, "r", encoding="utf-8") as f:

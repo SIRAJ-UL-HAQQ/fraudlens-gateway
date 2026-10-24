@@ -25,10 +25,14 @@ logger = logging.getLogger("fraudlens.gateway")
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan manager: load ML artifact bundle once at startup."""
-    logger.info(f"Starting {settings.PROJECT_NAME} in environment: '{settings.APP_ENV}'")
+    logger.info(
+        f"Starting {settings.PROJECT_NAME} in environment: '{settings.APP_ENV}'"
+    )
     # Verify or initialize ML model artifact per contract
     scoring_service.load_artifact(settings.MODEL_PATH)
-    logger.info(f"Model initialized: mode={scoring_service.mode}, version={scoring_service.model_version}")
+    logger.info(
+        f"Model initialized: mode={scoring_service.mode}, version={scoring_service.model_version}"
+    )
     yield
     logger.info("Shutting down FraudLens Gateway.")
 
@@ -41,7 +45,10 @@ app = FastAPI(
     openapi_tags=[
         {"name": "Health", "description": "Liveness and health checks"},
         {"name": "Authentication", "description": "Analyst login and token management"},
-        {"name": "Prediction", "description": "Transaction fraud scoring and explanation"},
+        {
+            "name": "Prediction",
+            "description": "Transaction fraud scoring and explanation",
+        },
         {"name": "Transactions", "description": "Query and view scored transactions"},
         {"name": "Reviews", "description": "Analyst audit reviews and feedback"},
         {"name": "Metrics", "description": "Operational and model evaluation metrics"},
@@ -73,16 +80,22 @@ async def latency_and_logging_middleware(request: Request, call_next):
         return response
     except Exception as exc:
         duration_ms = (time.perf_counter() - start_time) * 1000.0
-        logger.error(f"{request.method} {request.url.path} failed after {duration_ms:.2f}ms: {exc}")
+        logger.error(
+            f"{request.method} {request.url.path} failed after {duration_ms:.2f}ms: {exc}"
+        )
         raise
 
 
 @app.exception_handler(DatabaseUnavailableError)
-async def database_unavailable_exception_handler(request: Request, exc: DatabaseUnavailableError):
+async def database_unavailable_exception_handler(
+    request: Request, exc: DatabaseUnavailableError
+):
     """Return clean HTTP 503 when database connectivity is unavailable."""
     return JSONResponse(
         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-        content={"detail": "Database service is currently unavailable. Operation aborted to preserve audit integrity."},
+        content={
+            "detail": "Database service is currently unavailable. Operation aborted to preserve audit integrity."
+        },
     )
 
 
@@ -131,4 +144,5 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

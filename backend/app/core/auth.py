@@ -64,7 +64,9 @@ def create_test_token(
 
 
 def get_current_analyst(
-    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(security)] = None,
+    credentials: Annotated[
+        HTTPAuthorizationCredentials | None, Depends(security)
+    ] = None,
 ) -> dict:
     """Validate bearer JWT token for protected endpoints.
 

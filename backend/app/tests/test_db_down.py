@@ -23,6 +23,7 @@ def test_health_check_db_down():
 
 def test_predict_db_down_returns_503():
     """When DB is down during scoring persistence, return 503 without leaking unpersisted decision."""
+
     class FailingRepo:
         def save_transaction(self, tx_in, pred_out):
             raise DatabaseUnavailableError("Database connection timed out.")

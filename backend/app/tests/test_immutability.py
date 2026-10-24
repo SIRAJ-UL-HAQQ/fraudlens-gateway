@@ -122,7 +122,9 @@ def test_analyst_review_update_and_delete_forbidden(db_session):
     db_session.rollback()
 
     # Attempting delete raises ImmutableRecordError
-    rev_to_del = db_session.query(AnalystReviewModel).filter_by(review_id="rev-1").first()
+    rev_to_del = (
+        db_session.query(AnalystReviewModel).filter_by(review_id="rev-1").first()
+    )
     with pytest.raises(ImmutableRecordError) as exc_info:
         db_session.delete(rev_to_del)
         db_session.commit()

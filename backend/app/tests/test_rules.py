@@ -1,4 +1,3 @@
-
 from app.models.schemas import TransactionIn, TransactionType
 from app.services.rules import (
     check_dest_balance_inconsistency,
@@ -35,7 +34,9 @@ def test_origin_account_drained_boundary():
     assert check_origin_account_drained(tx_below_90) is None
 
     # New balance > 0 -> does not trigger
-    tx_nonzero_new = make_tx(old_balance_orig=100.0, new_balance_orig=0.01, amount=99.99)
+    tx_nonzero_new = make_tx(
+        old_balance_orig=100.0, new_balance_orig=0.01, amount=99.99
+    )
     assert check_origin_account_drained(tx_nonzero_new) is None
 
     # Old balance zero -> does not trigger
@@ -87,7 +88,10 @@ def test_dest_balance_inconsistency():
         new_balance_dest=0.0,
         amount=500.0,
     )
-    assert check_dest_balance_inconsistency(tx_inconsistent) == "DEST_BALANCE_INCONSISTENCY"
+    assert (
+        check_dest_balance_inconsistency(tx_inconsistent)
+        == "DEST_BALANCE_INCONSISTENCY"
+    )
 
     # Merchant destination ('M...') ignored even if balance delta doesn't match
     tx_merchant = make_tx(

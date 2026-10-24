@@ -42,13 +42,19 @@ def login(credentials: LoginRequest) -> TokenResponse:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username and password are required",
         )
-    if credentials.username != settings.ANALYST_USERNAME or not verify_password(credentials.password):
+    if credentials.username != settings.ANALYST_USERNAME or not verify_password(
+        credentials.password
+    ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid username or password",
         )
     token = create_access_token(
-        data={"sub": credentials.username, "username": credentials.username, "role": "analyst"}
+        data={
+            "sub": credentials.username,
+            "username": credentials.username,
+            "role": "analyst",
+        }
     )
     return TokenResponse(
         access_token=token,
@@ -94,12 +100,24 @@ def predict(
 def list_transactions(
     repo: Annotated[TransactionRepository, Depends(get_repository)],
     user: Annotated[dict, Depends(get_current_analyst)],
-    step_min: Annotated[int | None, Query(ge=1, description="Minimum PaySim step (>=1)")] = None,
-    step_max: Annotated[int | None, Query(ge=1, description="Maximum PaySim step (>=1)")] = None,
-    created_from: Annotated[datetime | None, Query(description="Filter by scoring ISO datetime (from)")] = None,
-    created_to: Annotated[datetime | None, Query(description="Filter by scoring ISO datetime (to)")] = None,
-    decision: Annotated[GatewayDecision | None, Query(description="Filter by Gateway Decision")] = None,
-    explanation_status: Annotated[ExplanationStatus | None, Query(description="Filter by explanation stability")] = None,
+    step_min: Annotated[
+        int | None, Query(ge=1, description="Minimum PaySim step (>=1)")
+    ] = None,
+    step_max: Annotated[
+        int | None, Query(ge=1, description="Maximum PaySim step (>=1)")
+    ] = None,
+    created_from: Annotated[
+        datetime | None, Query(description="Filter by scoring ISO datetime (from)")
+    ] = None,
+    created_to: Annotated[
+        datetime | None, Query(description="Filter by scoring ISO datetime (to)")
+    ] = None,
+    decision: Annotated[
+        GatewayDecision | None, Query(description="Filter by Gateway Decision")
+    ] = None,
+    explanation_status: Annotated[
+        ExplanationStatus | None, Query(description="Filter by explanation stability")
+    ] = None,
     page: Annotated[int, Query(ge=1, description="Page number")] = 1,
     page_size: Annotated[int, Query(ge=1, le=200, description="Items per page")] = 50,
 ) -> PaginatedTransactionsResponse:
@@ -210,13 +228,25 @@ def get_metrics(
 def export_transactions(
     repo: Annotated[TransactionRepository, Depends(get_repository)],
     user: Annotated[dict, Depends(get_current_analyst)],
-    format: Annotated[ExportFormat, Query(description="Export file format")] = ExportFormat.CSV,
-    step_min: Annotated[int | None, Query(ge=1, description="Minimum step filter")] = None,
-    step_max: Annotated[int | None, Query(ge=1, description="Maximum step filter")] = None,
-    created_from: Annotated[datetime | None, Query(description="Scoring time from")] = None,
+    format: Annotated[
+        ExportFormat, Query(description="Export file format")
+    ] = ExportFormat.CSV,
+    step_min: Annotated[
+        int | None, Query(ge=1, description="Minimum step filter")
+    ] = None,
+    step_max: Annotated[
+        int | None, Query(ge=1, description="Maximum step filter")
+    ] = None,
+    created_from: Annotated[
+        datetime | None, Query(description="Scoring time from")
+    ] = None,
     created_to: Annotated[datetime | None, Query(description="Scoring time to")] = None,
-    decision: Annotated[GatewayDecision | None, Query(description="Gateway decision filter")] = None,
-    explanation_status: Annotated[ExplanationStatus | None, Query(description="Explanation stability filter")] = None,
+    decision: Annotated[
+        GatewayDecision | None, Query(description="Gateway decision filter")
+    ] = None,
+    explanation_status: Annotated[
+        ExplanationStatus | None, Query(description="Explanation stability filter")
+    ] = None,
 ) -> Response:
     """Export filtered transaction records."""
     try:

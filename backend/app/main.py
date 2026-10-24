@@ -12,7 +12,7 @@ from app.core.config import settings
 from app.db.repository import DatabaseUnavailableError
 from app.db.session import check_db_connection
 from app.models.schemas import HealthResponse, ModelInfo
-from app.services.scoring import scoring_service
+from app.services.scoring import ModelNotLoadedError, scoring_service
 
 # Structured logging setup
 logging.basicConfig(
@@ -99,6 +99,19 @@ async def database_unavailable_exception_handler(
     )
 
 
+@app.exception_handler(ModelNotLoadedError)
+async def model_not_loaded_exception_handler(
+    request: Request, exc: ModelNotLoadedError
+):
+    """Return clean HTTP 503 when model artifact has not been loaded."""
+    return JSONResponse(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        content={
+            "detail": "Model service is not loaded. Transaction scoring unavailable."
+        },
+    )
+
+
 @app.get(
     "/health",
     response_model=HealthResponse,
@@ -108,17 +121,19 @@ async def database_unavailable_exception_handler(
 def health_check() -> JSONResponse:
     """Return health status including live database connectivity and ML model metadata."""
     is_db_connected = check_db_connection()
+    is_model_loaded = scoring_service.mode != "unloaded"
+
     model_info = ModelInfo(
         mode=scoring_service.mode,
         version=scoring_service.model_version,
     )
 
-    if not is_db_connected:
+    if not is_db_connected or not is_model_loaded:
         response_data = HealthResponse(
             status="unhealthy",
             service=settings.PROJECT_NAME,
             version="1.0.0",
-            database="disconnected",
+            database="connected" if is_db_connected else "disconnected",
             model=model_info,
         )
         return JSONResponse(

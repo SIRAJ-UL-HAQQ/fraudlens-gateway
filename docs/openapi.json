@@ -911,8 +911,13 @@
         "properties": {
           "mode": {
             "type": "string",
+            "enum": [
+              "trained",
+              "stub",
+              "unloaded"
+            ],
             "title": "Mode",
-            "description": "Model runtime mode: 'stub' or 'trained'",
+            "description": "Model runtime mode: 'trained', 'stub', or 'unloaded'",
             "default": "stub"
           },
           "version": {

@@ -27,6 +27,10 @@ from app.services.rules import evaluate_rules
 logger = logging.getLogger(__name__)
 
 
+class ModelNotLoadedError(Exception):
+    """Raised when transaction scoring is attempted before a model artifact has been loaded."""
+
+
 def extract_pipeline_feature_names(model: Any) -> list[str]:
     """Extract input feature column names expected by the model/pipeline.
 
@@ -130,12 +134,24 @@ class ScoringService:
         self.model: Any = None
         self.replicates: list[Any] = []
         self.manifest: dict[str, Any] = {}
-        self.mode: str = "stub"
-        self.model_version: str = "stub"
+        self.mode: str = "unloaded"
+        self.model_version: str = "none"
         self.imbalance_strategy: str = "class_weight"
-        self.explainer: ExplainerService = StubExplainer()
+        self.explainer: ExplainerService | None = None
         self.threshold_high: float = settings.FRAUD_THRESHOLD_HIGH
         self.threshold_review: float = settings.FRAUD_THRESHOLD_REVIEW
+
+    def reset(self) -> None:
+        """Reset service state back to uninitialized unloaded mode."""
+        self.model = None
+        self.replicates = []
+        self.manifest = {}
+        self.mode = "unloaded"
+        self.model_version = "none"
+        self.imbalance_strategy = "class_weight"
+        self.explainer = None
+        self.threshold_high = settings.FRAUD_THRESHOLD_HIGH
+        self.threshold_review = settings.FRAUD_THRESHOLD_REVIEW
 
     def load_artifact(self, model_path_str: str | None) -> None:
         """Load trained model bundle or initialize deterministic stub per environment policy."""
@@ -333,6 +349,10 @@ class ScoringService:
         self, tx: TransactionIn, transaction_id: str | None = None
     ) -> PredictionOut:
         """Execute full scoring lifecycle: heuristic rules, ML inference, explanation, and gateway routing."""
+        if self.mode == "unloaded" or self.model_version == "none":
+            raise ModelNotLoadedError(
+                "Model artifact has not been loaded. Service is not ready to score transactions."
+            )
         if not transaction_id:
             import uuid
 

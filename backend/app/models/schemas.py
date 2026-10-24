@@ -321,8 +321,8 @@ class TokenResponse(BaseModel):
 class ModelInfo(BaseModel):
     """Runtime model mode and version information."""
 
-    mode: str = Field(
-        default="stub", description="Model runtime mode: 'stub' or 'trained'"
+    mode: Literal["trained", "stub", "unloaded"] = Field(
+        default="stub", description="Model runtime mode: 'trained', 'stub', or 'unloaded'"
     )
     version: str = Field(default="stub", description="Model version tag or identifier")
 

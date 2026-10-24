@@ -102,6 +102,21 @@ Analyst reviews (`POST /api/v1/transactions/{id}/review`) append new review reco
 }
 ```
 
+#### Error Response (`503 Service Unavailable`)
+Returned when the database connection is down or the ML model service has not been loaded (`mode: "unloaded"`):
+```json
+{
+  "status": "unhealthy",
+  "service": "FraudLens Gateway",
+  "version": "1.0.0",
+  "database": "connected",
+  "model": {
+    "mode": "unloaded",
+    "version": "none"
+  }
+}
+```
+
 ---
 
 ### 3.3. Score Transaction: Predict
@@ -161,6 +176,7 @@ Analyst reviews (`POST /api/v1/transactions/{id}/review`) append new review reco
 #### Errors
 - `401 Unauthorized`: Missing or invalid Bearer token.
 - `422 Unprocessable Entity`: Validation failure (e.g. `step < 1`, `amount < 0`, negative balances).
+- `503 Service Unavailable`: Database persistence failed or model artifact is in an unloaded state (`{"detail": "Model service is not loaded. Transaction scoring unavailable."}`).
 
 ---
 

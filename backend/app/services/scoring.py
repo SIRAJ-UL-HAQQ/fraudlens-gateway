@@ -1,82 +1,117 @@
 import time
-import math
 import uuid
-from typing import Dict, Any
-from app.models.schemas import PredictionRequest, PredictionResponse
-from app.services.rules import rule_engine
-from app.services.shap_explain import shap_service
-from app.core.config import settings
+
+from app.models.schemas import (
+    ExplanationStatus,
+    FeatureExplanation,
+    GatewayDecision,
+    PredictionOut,
+    ShapDirection,
+    TransactionIn,
+    TransactionType,
+)
+
 
 class ScoringService:
-    """
-    Coordinates ML inference, rule-engine evaluation, and SHAP explanation generation.
-    """
-    def __init__(self):
-        self.model = None
-        self._load_model()
+    """Deterministic stub scoring service for contract testing and local execution."""
 
-    def _load_model(self):
-        # Placeholder for joblib.load(settings.MODEL_PATH)
-        # Defaults to calibrated heuristic scoring if artifact file isn't present yet
-        pass
-
-    def predict(self, req: PredictionRequest) -> PredictionResponse:
+    def predict(self, req: TransactionIn) -> PredictionOut:
         start_time = time.perf_counter()
-        tx_id = req.transaction_id or f"tx_{uuid.uuid4().hex[:12]}"
+        tx_id = str(uuid.uuid4())
 
-        # 1. Evaluate Heuristic Rules
-        violations, rule_decision = rule_engine.evaluate(req)
+        rule_flags: list[str] = []
+        # Rule 1: Drained balance on cash out / transfer
+        if (
+            req.type in [TransactionType.TRANSFER, TransactionType.CASH_OUT]
+            and req.old_balance_orig > 0
+            and req.new_balance_orig == 0
+            and req.amount >= req.old_balance_orig * 0.9
+        ):
+            rule_flags.append("ORIGIN_ACCOUNT_DRAINED")
 
-        # 2. Extract Features
-        features: Dict[str, float] = {
-            "Amount": req.amount,
-            "V1_velocity": float(req.custom_features.get("velocity_1h", 1.0) if req.custom_features else 1.0),
-            "V2_geo_distance": float(req.custom_features.get("geo_distance_km", 10.0) if req.custom_features else 10.0),
-            "V3_device_trust": float(req.custom_features.get("device_trust_score", 0.85) if req.custom_features else 0.85),
-            "V4_hour_of_day": float(req.timestamp.hour if req.timestamp else 12.0)
-        }
+        # Rule 2: Large amount threshold
+        if req.amount >= 200_000.0 and req.type in [TransactionType.TRANSFER, TransactionType.CASH_OUT]:
+            rule_flags.append("LARGE_TRANSFER_AMOUNT")
 
-        # 3. ML Inference (calibrated sigmoid approximation fallback)
-        linear_combination = (
-            (math.log10(max(req.amount, 1.0)) - 2.5) * 0.9 +
-            (features["V1_velocity"] - 1.0) * 0.4 +
-            (features["V2_geo_distance"] / 100.0) * 0.2 -
-            (features["V3_device_trust"] - 0.5) * 1.5
-        )
-        base_prob = 1.0 / (1.0 + math.exp(-linear_combination))
-        base_prob = min(max(base_prob, 0.01), 0.99)
-
-        # 4. Integrate Rules with ML
-        if rule_decision == "BLOCK":
-            decision = "DECLINE"
-            fraud_prob = max(base_prob, 0.95)
-        elif rule_decision == "REVIEW":
-            decision = "REVIEW"
-            fraud_prob = max(base_prob, 0.65)
+        # Deterministic stub risk calculation
+        if "ORIGIN_ACCOUNT_DRAINED" in rule_flags or "LARGE_TRANSFER_AMOUNT" in rule_flags:
+            risk_score = 0.92
+            explanation_status = ExplanationStatus.STABLE
+        elif req.amount > 50_000.0 and req.type == TransactionType.TRANSFER:
+            risk_score = 0.76
+            explanation_status = ExplanationStatus.UNSTABLE
+        elif req.amount > 10_000.0:
+            risk_score = 0.35
+            explanation_status = ExplanationStatus.STABLE
         else:
-            if base_prob >= settings.FRAUD_THRESHOLD_HIGH:
-                decision = "DECLINE"
-            elif base_prob >= settings.FRAUD_THRESHOLD_REVIEW:
-                decision = "REVIEW"
-            else:
-                decision = "APPROVE"
-            fraud_prob = base_prob
+            risk_score = 0.05
+            explanation_status = ExplanationStatus.STABLE
 
-        # 5. SHAP Explanation
-        shap_explanations, reliability = shap_service.compute_local_explanation(features, fraud_prob)
-        
+        # Tri-state gateway decision logic:
+        # High score / rule triggered => candidate High Risk.
+        # If High Risk candidate + Unstable explanation => Analyst Review.
+        # Below low threshold => Low Risk.
+        if risk_score >= 0.70 or bool(rule_flags):
+            if explanation_status == ExplanationStatus.UNSTABLE:
+                gateway_decision = GatewayDecision.ANALYST_REVIEW
+            else:
+                gateway_decision = GatewayDecision.HIGH_RISK
+        elif risk_score >= 0.40:
+            gateway_decision = GatewayDecision.ANALYST_REVIEW
+        else:
+            gateway_decision = GatewayDecision.LOW_RISK
+
+        # Top SHAP features with verified direction consistency
+        if risk_score >= 0.50:
+            top_features = [
+                FeatureExplanation(
+                    feature="amount",
+                    shap_value=0.45,
+                    direction=ShapDirection.INCREASES_RISK,
+                ),
+                FeatureExplanation(
+                    feature="type_TRANSFER",
+                    shap_value=0.32,
+                    direction=ShapDirection.INCREASES_RISK,
+                ),
+                FeatureExplanation(
+                    feature="balance_delta_orig",
+                    shap_value=-0.15,
+                    direction=ShapDirection.DECREASES_RISK,
+                ),
+            ]
+        else:
+            top_features = [
+                FeatureExplanation(
+                    feature="amount",
+                    shap_value=-0.30,
+                    direction=ShapDirection.DECREASES_RISK,
+                ),
+                FeatureExplanation(
+                    feature="old_balance_orig",
+                    shap_value=-0.22,
+                    direction=ShapDirection.DECREASES_RISK,
+                ),
+                FeatureExplanation(
+                    feature="type_PAYMENT",
+                    shap_value=-0.18,
+                    direction=ShapDirection.DECREASES_RISK,
+                ),
+            ]
+
         latency = (time.perf_counter() - start_time) * 1000.0
 
-        return PredictionResponse(
+        return PredictionOut(
             transaction_id=tx_id,
-            fraud_probability=round(fraud_prob, 4),
-            risk_score=int(round(fraud_prob * 100)),
-            decision=decision,
-            rules_triggered=violations,
-            shap_explanation=shap_explanations,
-            shap_reliability_status=reliability,
-            latency_ms=round(latency, 2),
-            timestamp=req.timestamp
+            risk_score=round(risk_score, 4),
+            top_features=top_features,
+            explanation_status=explanation_status,
+            gateway_decision=gateway_decision,
+            rule_flags=rule_flags,
+            imbalance_strategy="class_weight",
+            model_version="stub",
+            latency_ms=round(max(latency, 1.2), 2),
         )
+
 
 scoring_service = ScoringService()

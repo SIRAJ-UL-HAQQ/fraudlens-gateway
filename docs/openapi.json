@@ -1,0 +1,1338 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FraudLens Gateway",
+    "description": "Real-Time Fraud Detection Gateway with Explainable AI (SHAP) & Hybrid Rules",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Analyst login",
+        "description": "Authenticate an analyst and issue a JWT bearer token.",
+        "operationId": "login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/predict": {
+      "post": {
+        "tags": [
+          "Prediction"
+        ],
+        "summary": "Score a transaction",
+        "description": "Score incoming transaction with ML model, heuristic rules, and SHAP stability.",
+        "operationId": "predict_api_v1_predict_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PredictionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/transactions": {
+      "get": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "List transactions with filters and pagination",
+        "description": "Query transactions using dataset time (step) and system scoring time (created_at).",
+        "operationId": "list_transactions_api_v1_transactions_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "step_min",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Minimum PaySim step (>=1)",
+              "title": "Step Min"
+            },
+            "description": "Minimum PaySim step (>=1)"
+          },
+          {
+            "name": "step_max",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Maximum PaySim step (>=1)",
+              "title": "Step Max"
+            },
+            "description": "Maximum PaySim step (>=1)"
+          },
+          {
+            "name": "created_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by scoring ISO datetime (from)",
+              "title": "Created From"
+            },
+            "description": "Filter by scoring ISO datetime (from)"
+          },
+          {
+            "name": "created_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by scoring ISO datetime (to)",
+              "title": "Created To"
+            },
+            "description": "Filter by scoring ISO datetime (to)"
+          },
+          {
+            "name": "decision",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/GatewayDecision"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by Gateway Decision",
+              "title": "Decision"
+            },
+            "description": "Filter by Gateway Decision"
+          },
+          {
+            "name": "explanation_status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ExplanationStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by explanation stability",
+              "title": "Explanation Status"
+            },
+            "description": "Filter by explanation stability"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Page number",
+              "default": 1,
+              "title": "Page"
+            },
+            "description": "Page number"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "description": "Items per page",
+              "default": 50,
+              "title": "Page Size"
+            },
+            "description": "Items per page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedTransactionsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transactions/{transaction_id}": {
+      "get": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Get transaction details and explanation",
+        "description": "Retrieve full transaction record including SHAP attribution and audit reviews.",
+        "operationId": "get_transaction_api_v1_transactions__transaction_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "transaction_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Transaction Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transactions/{transaction_id}/review": {
+      "post": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Submit analyst review",
+        "description": "Append a human review to the transaction's immutable audit log.",
+        "operationId": "submit_review_api_v1_transactions__transaction_id__review_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "transaction_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Transaction Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalystReviewIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalystReviewRecord"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/metrics": {
+      "get": {
+        "tags": [
+          "Metrics"
+        ],
+        "summary": "Operational and ML performance metrics",
+        "description": "Retrieve current system latency, decision breakdown, and ML benchmark metrics.",
+        "operationId": "get_metrics_api_v1_metrics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricsSummary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/export": {
+      "get": {
+        "tags": [
+          "Export"
+        ],
+        "summary": "Export transactions as CSV or PDF",
+        "description": "Export filtered transaction records.",
+        "operationId": "export_transactions_api_v1_export_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ExportFormat",
+              "description": "Export file format",
+              "default": "csv"
+            },
+            "description": "Export file format"
+          },
+          {
+            "name": "step_min",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Minimum step filter",
+              "title": "Step Min"
+            },
+            "description": "Minimum step filter"
+          },
+          {
+            "name": "step_max",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Maximum step filter",
+              "title": "Step Max"
+            },
+            "description": "Maximum step filter"
+          },
+          {
+            "name": "created_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoring time from",
+              "title": "Created From"
+            },
+            "description": "Scoring time from"
+          },
+          {
+            "name": "created_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoring time to",
+              "title": "Created To"
+            },
+            "description": "Scoring time to"
+          },
+          {
+            "name": "decision",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/GatewayDecision"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Gateway decision filter",
+              "title": "Decision"
+            },
+            "description": "Gateway decision filter"
+          },
+          {
+            "name": "explanation_status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ExplanationStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Explanation stability filter",
+              "title": "Explanation Status"
+            },
+            "description": "Explanation stability filter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Service health check",
+        "description": "Return health status of the FraudLens Gateway.",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AnalystReviewIn": {
+        "properties": {
+          "outcome": {
+            "$ref": "#/components/schemas/ReviewOutcome",
+            "description": "Confirmed Fraud or False Positive"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note",
+            "description": "Analyst review notes or investigation comments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "outcome"
+        ],
+        "title": "AnalystReviewIn",
+        "description": "Payload for submitting an analyst review decision."
+      },
+      "AnalystReviewRecord": {
+        "properties": {
+          "review_id": {
+            "type": "string",
+            "title": "Review Id",
+            "description": "Unique review UUID"
+          },
+          "transaction_id": {
+            "type": "string",
+            "title": "Transaction Id",
+            "description": "Associated transaction UUID"
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/ReviewOutcome",
+            "description": "Review outcome"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note",
+            "description": "Analyst review notes"
+          },
+          "reviewed_by": {
+            "type": "string",
+            "title": "Reviewed By",
+            "description": "Analyst username"
+          },
+          "reviewed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Reviewed At",
+            "description": "Timestamp of the review"
+          }
+        },
+        "type": "object",
+        "required": [
+          "review_id",
+          "transaction_id",
+          "outcome",
+          "reviewed_by",
+          "reviewed_at"
+        ],
+        "title": "AnalystReviewRecord",
+        "description": "Append-only audit log entry for an analyst review."
+      },
+      "ExplanationStatus": {
+        "type": "string",
+        "enum": [
+          "Stable",
+          "Unstable"
+        ],
+        "title": "ExplanationStatus",
+        "description": "SHAP explanation reliability under class imbalance."
+      },
+      "ExportFormat": {
+        "type": "string",
+        "enum": [
+          "csv",
+          "pdf"
+        ],
+        "title": "ExportFormat",
+        "description": "Supported export formats."
+      },
+      "FeatureExplanation": {
+        "properties": {
+          "feature": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Feature",
+            "description": "Feature name"
+          },
+          "shap_value": {
+            "type": "number",
+            "title": "Shap Value",
+            "description": "SHAP attribution value"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/ShapDirection",
+            "description": "Direction: 'increases_risk' or 'decreases_risk'"
+          }
+        },
+        "type": "object",
+        "required": [
+          "feature",
+          "shap_value",
+          "direction"
+        ],
+        "title": "FeatureExplanation",
+        "description": "SHAP feature attribution with strict direction sign validation."
+      },
+      "GatewayDecision": {
+        "type": "string",
+        "enum": [
+          "Low Risk",
+          "High Risk",
+          "Analyst Review"
+        ],
+        "title": "GatewayDecision",
+        "description": "Tri-state gateway risk routing decision."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Health status indicator",
+            "default": "healthy"
+          },
+          "service": {
+            "type": "string",
+            "title": "Service",
+            "description": "Service name",
+            "default": "FraudLens Gateway"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "Service version",
+            "default": "1.0.0"
+          },
+          "database": {
+            "type": "string",
+            "title": "Database",
+            "description": "Database connectivity state",
+            "default": "connected"
+          }
+        },
+        "type": "object",
+        "title": "HealthResponse",
+        "description": "System health check status."
+      },
+      "LoginRequest": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Username",
+            "description": "Username"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Password",
+            "description": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "LoginRequest",
+        "description": "Analyst authentication credentials."
+      },
+      "MetricsSummary": {
+        "properties": {
+          "total_transactions": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total Transactions",
+            "description": "Total transactions processed"
+          },
+          "decision_distribution": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Decision Distribution",
+            "description": "Count of decisions by GatewayDecision"
+          },
+          "explanation_stability_ratio": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Explanation Stability Ratio",
+            "description": "Fraction of explanations scored Stable"
+          },
+          "average_risk_score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Average Risk Score",
+            "description": "Average risk score across transactions"
+          },
+          "latency_p50_ms": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Latency P50 Ms",
+            "description": "Median latency in milliseconds"
+          },
+          "latency_p95_ms": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Latency P95 Ms",
+            "description": "95th percentile latency in milliseconds"
+          },
+          "strategy_comparison": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strategy Comparison",
+            "description": "Metrics breakdown across imbalance strategies"
+          },
+          "evaluation_metrics": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evaluation Metrics",
+            "description": "Core ML metrics (Precision, Recall, F1, PR-AUC, MCC)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_transactions",
+          "decision_distribution",
+          "explanation_stability_ratio",
+          "average_risk_score",
+          "latency_p50_ms",
+          "latency_p95_ms"
+        ],
+        "title": "MetricsSummary",
+        "description": "Aggregated operational and ML metrics summary."
+      },
+      "PaginatedTransactionsResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TransactionSummary"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "Page items"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total",
+            "description": "Total matching records count"
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Page",
+            "description": "Current page number"
+          },
+          "page_size": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Page Size",
+            "description": "Items per page"
+          },
+          "total_pages": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total Pages",
+            "description": "Total number of pages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "page",
+          "page_size",
+          "total_pages"
+        ],
+        "title": "PaginatedTransactionsResponse",
+        "description": "Paginated response envelope for transaction feeds."
+      },
+      "PredictionOut": {
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "title": "Transaction Id",
+            "description": "Unique transaction UUID"
+          },
+          "risk_score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Risk Score",
+            "description": "Calibrated risk probability score (0.0 to 1.0)"
+          },
+          "top_features": {
+            "items": {
+              "$ref": "#/components/schemas/FeatureExplanation"
+            },
+            "type": "array",
+            "title": "Top Features",
+            "description": "Top SHAP feature attributions"
+          },
+          "explanation_status": {
+            "$ref": "#/components/schemas/ExplanationStatus",
+            "description": "Explanation stability: Stable or Unstable"
+          },
+          "gateway_decision": {
+            "$ref": "#/components/schemas/GatewayDecision",
+            "description": "Routing decision: Low Risk, High Risk, or Analyst Review"
+          },
+          "rule_flags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Rule Flags",
+            "description": "List of rule flags triggered"
+          },
+          "imbalance_strategy": {
+            "type": "string",
+            "title": "Imbalance Strategy",
+            "description": "Imbalance strategy used (e.g. 'none', 'class_weight', 'smote_enn')"
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version",
+            "description": "Model version tag or 'stub'"
+          },
+          "latency_ms": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Latency Ms",
+            "description": "Prediction inference latency in milliseconds"
+          }
+        },
+        "type": "object",
+        "required": [
+          "transaction_id",
+          "risk_score",
+          "explanation_status",
+          "gateway_decision",
+          "imbalance_strategy",
+          "model_version",
+          "latency_ms"
+        ],
+        "title": "PredictionOut",
+        "description": "System prediction output containing score, SHAP explanation, and gateway decision."
+      },
+      "ReviewOutcome": {
+        "type": "string",
+        "enum": [
+          "Confirmed Fraud",
+          "False Positive"
+        ],
+        "title": "ReviewOutcome",
+        "description": "Analyst review disposition."
+      },
+      "ShapDirection": {
+        "type": "string",
+        "enum": [
+          "increases_risk",
+          "decreases_risk"
+        ],
+        "title": "ShapDirection",
+        "description": "Direction of SHAP feature impact on fraud probability."
+      },
+      "TokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token",
+            "description": "JWT access token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "description": "Token type",
+            "default": "bearer"
+          },
+          "expires_in": {
+            "type": "integer",
+            "title": "Expires In",
+            "description": "Token lifetime in seconds",
+            "default": 3600
+          },
+          "username": {
+            "type": "string",
+            "title": "Username",
+            "description": "Authenticated username"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "description": "User role",
+            "default": "analyst"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "username"
+        ],
+        "title": "TokenResponse",
+        "description": "JWT bearer token response."
+      },
+      "TransactionDetail": {
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "title": "Transaction Id",
+            "description": "Transaction UUID"
+          },
+          "transaction_data": {
+            "$ref": "#/components/schemas/TransactionIn",
+            "description": "Original transaction input data"
+          },
+          "prediction": {
+            "$ref": "#/components/schemas/PredictionOut",
+            "description": "Gateway prediction and explanation"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Timestamp of initial scoring"
+          },
+          "reviews": {
+            "items": {
+              "$ref": "#/components/schemas/AnalystReviewRecord"
+            },
+            "type": "array",
+            "title": "Reviews",
+            "description": "Append-only audit review log"
+          },
+          "latest_review": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AnalystReviewRecord"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Derived latest review record"
+          }
+        },
+        "type": "object",
+        "required": [
+          "transaction_id",
+          "transaction_data",
+          "prediction",
+          "created_at"
+        ],
+        "title": "TransactionDetail",
+        "description": "Full transaction record including input data, prediction output, and audit log."
+      },
+      "TransactionIn": {
+        "properties": {
+          "step": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Step",
+            "description": "Simulation step in hours (>= 1)"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TransactionType",
+            "description": "Transaction type"
+          },
+          "amount": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Amount",
+            "description": "Transaction amount in currency units (>= 0)"
+          },
+          "name_orig": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name Orig",
+            "description": "Origin account ID (e.g. C123456789)"
+          },
+          "old_balance_orig": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Old Balance Orig",
+            "description": "Initial balance of origin before transaction"
+          },
+          "new_balance_orig": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "New Balance Orig",
+            "description": "New balance of origin after transaction"
+          },
+          "name_dest": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name Dest",
+            "description": "Destination account ID (e.g. M123456789 or C987654321)"
+          },
+          "old_balance_dest": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Old Balance Dest",
+            "description": "Initial balance of destination before transaction"
+          },
+          "new_balance_dest": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "New Balance Dest",
+            "description": "New balance of destination after transaction"
+          }
+        },
+        "type": "object",
+        "required": [
+          "step",
+          "type",
+          "amount",
+          "name_orig",
+          "old_balance_orig",
+          "new_balance_orig",
+          "name_dest",
+          "old_balance_dest",
+          "new_balance_dest"
+        ],
+        "title": "TransactionIn",
+        "description": "Incoming transaction schema using snake_case PaySim field mappings."
+      },
+      "TransactionSummary": {
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "title": "Transaction Id",
+            "description": "Transaction UUID"
+          },
+          "step": {
+            "type": "integer",
+            "title": "Step",
+            "description": "Step hour"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TransactionType",
+            "description": "Transaction type"
+          },
+          "amount": {
+            "type": "number",
+            "title": "Amount",
+            "description": "Transaction amount"
+          },
+          "name_orig": {
+            "type": "string",
+            "title": "Name Orig",
+            "description": "Origin account ID"
+          },
+          "name_dest": {
+            "type": "string",
+            "title": "Name Dest",
+            "description": "Destination account ID"
+          },
+          "risk_score": {
+            "type": "number",
+            "title": "Risk Score",
+            "description": "Risk score"
+          },
+          "gateway_decision": {
+            "$ref": "#/components/schemas/GatewayDecision",
+            "description": "Gateway decision"
+          },
+          "explanation_status": {
+            "$ref": "#/components/schemas/ExplanationStatus",
+            "description": "Explanation stability"
+          },
+          "rule_flags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Rule Flags",
+            "description": "Rule flags"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Timestamp of scoring"
+          },
+          "reviewed": {
+            "type": "boolean",
+            "title": "Reviewed",
+            "description": "Whether transaction has been reviewed",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "transaction_id",
+          "step",
+          "type",
+          "amount",
+          "name_orig",
+          "name_dest",
+          "risk_score",
+          "gateway_decision",
+          "explanation_status",
+          "created_at"
+        ],
+        "title": "TransactionSummary",
+        "description": "Summary item for transaction list feeds and tables."
+      },
+      "TransactionType": {
+        "type": "string",
+        "enum": [
+          "PAYMENT",
+          "TRANSFER",
+          "CASH_OUT",
+          "DEBIT",
+          "CASH_IN"
+        ],
+        "title": "TransactionType",
+        "description": "PaySim transaction types."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Health",
+      "description": "Liveness and health checks"
+    },
+    {
+      "name": "Authentication",
+      "description": "Analyst login and token management"
+    },
+    {
+      "name": "Prediction",
+      "description": "Transaction fraud scoring and explanation"
+    },
+    {
+      "name": "Transactions",
+      "description": "Query and view scored transactions"
+    },
+    {
+      "name": "Reviews",
+      "description": "Analyst audit reviews and feedback"
+    },
+    {
+      "name": "Metrics",
+      "description": "Operational and model evaluation metrics"
+    },
+    {
+      "name": "Export",
+      "description": "Audit and compliance data export"
+    }
+  ]
+}

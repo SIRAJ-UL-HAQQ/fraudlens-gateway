@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -143,16 +143,47 @@ class TransactionDetail(BaseModel):
         return self
 
 
-class MetricsSummary(BaseModel):
-    """Aggregated operational and ML metrics summary."""
+class MLMetrics(BaseModel):
+    """Machine learning benchmark evaluation metrics from research reports."""
+    strategy_comparison: dict[str, Any] = Field(..., description="Breakdown across imbalance strategies")
+    evaluation_metrics: dict[str, float] = Field(..., description="Evaluation metrics (Precision, Recall, F1, PR-AUC, MCC)")
+
+
+class OperationalMetrics(BaseModel):
+    """Database-aggregated live operational metrics."""
     total_transactions: int = Field(..., ge=0, description="Total transactions processed")
     decision_distribution: dict[str, int] = Field(..., description="Count of decisions by GatewayDecision")
     explanation_stability_ratio: float = Field(..., ge=0.0, le=1.0, description="Fraction of explanations scored Stable")
     average_risk_score: float = Field(..., ge=0.0, le=1.0, description="Average risk score across transactions")
     latency_p50_ms: float = Field(..., ge=0.0, description="Median latency in milliseconds")
     latency_p95_ms: float = Field(..., ge=0.0, description="95th percentile latency in milliseconds")
-    strategy_comparison: dict[str, Any] | None = Field(default=None, description="Metrics breakdown across imbalance strategies, or null if benchmark report is unavailable")
-    evaluation_metrics: dict[str, float] | None = Field(default=None, description="Core ML metrics (Precision, Recall, F1, PR-AUC, MCC), or null if benchmark report is unavailable")
+
+
+class MetricsSummary(BaseModel):
+    """Aggregated operational telemetry and ML research metrics summary."""
+    total_transactions: int = Field(..., ge=0, description="Total transactions processed")
+    decision_distribution: dict[str, int] = Field(..., description="Count of decisions by GatewayDecision")
+    explanation_stability_ratio: float = Field(..., ge=0.0, le=1.0, description="Fraction of explanations scored Stable")
+    average_risk_score: float = Field(..., ge=0.0, le=1.0, description="Average risk score across transactions")
+    latency_p50_ms: float = Field(..., ge=0.0, description="Median latency in milliseconds")
+    latency_p95_ms: float = Field(..., ge=0.0, description="95th percentile latency in milliseconds")
+    ml_metrics: MLMetrics | None = Field(default=None, description="ML benchmark metrics or null when unavailable")
+    ml_metrics_status: Literal["available", "unavailable"] = Field(..., description="Availability status of ML metrics")
+    ml_metrics_reason: str | None = Field(default=None, description="Explanation when ml_metrics is unavailable")
+
+    @model_validator(mode="after")
+    def validate_metrics_availability(self) -> "MetricsSummary":
+        if self.ml_metrics_status == "unavailable":
+            if self.ml_metrics is not None:
+                raise ValueError("ml_metrics must be None when ml_metrics_status is 'unavailable'.")
+            if not self.ml_metrics_reason:
+                raise ValueError("ml_metrics_reason must be provided when ml_metrics_status is 'unavailable'.")
+        elif self.ml_metrics_status == "available":
+            if self.ml_metrics is None:
+                raise ValueError("ml_metrics cannot be None when ml_metrics_status is 'available'.")
+            if self.ml_metrics_reason is not None:
+                raise ValueError("ml_metrics_reason must be None when ml_metrics_status is 'available'.")
+        return self
 
 
 class LoginRequest(BaseModel):

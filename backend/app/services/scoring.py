@@ -1,95 +1,118 @@
 import json
 import logging
-import time
-import uuid
 from pathlib import Path
 from typing import Any
 
 import joblib
 import pandas as pd
+from pydantic import ValidationError
 
 from app.core.config import settings
+from app.models.manifest import ManifestSchema
 from app.models.schemas import (
     ExplanationStatus,
+    FeatureExplanation,
     GatewayDecision,
     PredictionOut,
     TransactionIn,
-    TransactionType,
 )
-from app.services.explainer import ExplainerService, RealExplainer, StubExplainer
+from app.services.explainer import (
+    ExplainerService,
+    RealExplainer,
+    StubExplainer,
+    validate_model_supported,
+)
 from app.services.rules import evaluate_rules
 
 logger = logging.getLogger(__name__)
 
 
-def validate_manifest(
-    manifest: dict[str, Any],
-    model: Any,
-    replicate_files: list[Path],
-) -> None:
-    """Validate manifest.json against ML artifact contract specifications.
+def extract_pipeline_feature_names(model: Any) -> list[str]:
+    """Extract input feature column names expected by the model/pipeline.
 
-    Raises RuntimeError if any contract condition is violated:
-    - feature_names must match model's expected features
-    - thresholds must satisfy 0 < review < high < 1
-    - n_replicates must match the count of replicate files found
-    - shap_top_k >= 1 and 0 <= stability_min_overlap <= 1
+    Fails startup with RuntimeError if pipeline input columns cannot be determined.
     """
-    # 1. Feature names validation
-    feat_names = manifest.get("feature_names")
-    if not isinstance(feat_names, list) or len(feat_names) == 0:
-        raise RuntimeError("Manifest must define a non-empty 'feature_names' list.")
-
-    # If pipeline/model declares expected input features, verify matching
-    expected_model_features = None
     if hasattr(model, "feature_names_in_"):
-        expected_model_features = list(model.feature_names_in_)
-    elif hasattr(model, "named_steps"):
+        return list(model.feature_names_in_)
+    if hasattr(model, "named_steps"):
         for step in model.named_steps.values():
             if hasattr(step, "feature_names_in_"):
-                expected_model_features = list(step.feature_names_in_)
-                break
+                return list(step.feature_names_in_)
+    raise RuntimeError(
+        "Model pipeline does not expose input feature names ('feature_names_in_'). "
+        "Pipeline input columns cannot be determined."
+    )
 
-    if expected_model_features is not None and list(expected_model_features) != list(feat_names):
-            raise RuntimeError(
-                f"Manifest feature_names {feat_names} do not match pipeline expected features "
-                f"{expected_model_features}."
-            )
 
-    # 2. Thresholds validation: strictly 0 < review < high < 1
-    thresholds = manifest.get("thresholds")
-    if not isinstance(thresholds, dict) or "high" not in thresholds or "review" not in thresholds:
-        raise RuntimeError("Manifest must contain 'thresholds' with both 'high' and 'review' keys.")
+def make_sample_row_from_features(feature_names: list[str]) -> pd.DataFrame:
+    """Build a deterministic synthetic row conforming to the manifest feature names."""
+    data = {}
+    for col in feature_names:
+        if col == "type":
+            data[col] = ["TRANSFER"]
+        elif "name" in col.lower():
+            data[col] = ["C123456789"]
+        else:
+            data[col] = [0.0]
+    return pd.DataFrame(data)
 
-    high = float(thresholds["high"])
-    review = float(thresholds["review"])
-    if not (0.0 < review < high < 1.0):
+
+def run_startup_self_test(model: Any, feature_names: list[str]) -> None:
+    """Score a single sample row built from the manifest and check probability is in [0, 1]."""
+    sample_df = make_sample_row_from_features(feature_names)
+    try:
+        if hasattr(model, "predict_proba"):
+            proba = model.predict_proba(sample_df)
+            if hasattr(proba, "shape") and len(proba.shape) >= 2 and proba.shape[1] >= 2:
+                score = float(proba[0][1])
+            elif hasattr(proba, "shape") and len(proba.shape) == 1:
+                score = float(proba[0])
+            else:
+                score = float(proba[0][0])
+        else:
+            pred = model.predict(sample_df)
+            score = float(pred[0])
+
+        if not (0.0 <= score <= 1.0):
+            raise RuntimeError(f"Startup self-test produced score {score} outside [0.0, 1.0].")
+    except Exception as e:
+        raise RuntimeError(f"Startup self-test failed: pipeline inference error: {e}") from e
+
+
+def validate_manifest(
+    manifest_data: dict[str, Any],
+    model: Any,
+    replicate_files: list[Path],
+) -> ManifestSchema:
+    """Validate manifest.json against ML artifact contract using ManifestSchema.
+
+    Fails fast with RuntimeError on any contract violation.
+    """
+    try:
+        parsed = ManifestSchema.model_validate(manifest_data)
+    except ValidationError as ve:
+        raise RuntimeError(f"Manifest schema validation failed: {ve}") from ve
+
+    # 1. Supported model type check
+    validate_model_supported(model)
+
+    # 2. Pipeline feature column detection
+    expected_model_features = extract_pipeline_feature_names(model)
+    if list(expected_model_features) != list(parsed.feature_names):
         raise RuntimeError(
-            f"Invalid thresholds in manifest: must satisfy 0 < review < high < 1. Got review={review}, high={high}."
+            f"Manifest feature_names {parsed.feature_names} do not match pipeline expected features "
+            f"{expected_model_features}."
         )
 
-    # 3. n_replicates validation
-    n_replicates = manifest.get("n_replicates")
-    if n_replicates is None or not isinstance(n_replicates, int) or n_replicates < 0:
-        raise RuntimeError(f"Manifest must define an integer 'n_replicates' >= 0, got {n_replicates}.")
-
+    # 3. Replicate count matching
     actual_file_count = len(replicate_files)
-    if n_replicates != actual_file_count:
+    if parsed.n_replicates != actual_file_count:
         raise RuntimeError(
-            f"Manifest n_replicates ({n_replicates}) does not match number of replicate files found "
+            f"Manifest n_replicates ({parsed.n_replicates}) does not match number of replicate files found "
             f"({actual_file_count})."
         )
 
-    # 4. SHAP parameters validation
-    shap_top_k = manifest.get("shap_top_k", 3)
-    if not isinstance(shap_top_k, int) or shap_top_k < 1:
-        raise RuntimeError(f"Manifest shap_top_k must be an integer >= 1, got {shap_top_k}.")
-
-    stability_min_overlap = manifest.get("stability_min_overlap", 0.67)
-    if not isinstance(stability_min_overlap, (int, float)) or not (0.0 <= stability_min_overlap <= 1.0):
-        raise RuntimeError(
-            f"Manifest stability_min_overlap must be in range [0.0, 1.0], got {stability_min_overlap}."
-        )
+    return parsed
 
 
 class ScoringService:
@@ -147,29 +170,34 @@ class ScoringService:
                 replicate_files = sorted(replicates_dir.glob("seed_*.joblib"))
 
             # Strict manifest validation against contract
-            validate_manifest(self.manifest, self.model, replicate_files)
+            parsed_manifest = validate_manifest(self.manifest, self.model, replicate_files)
 
-            self.model_version = self.manifest.get("model_version", "v1.0.0")
-            self.imbalance_strategy = self.manifest.get("imbalance_strategy", "class_weight")
+            # Startup self-test
+            run_startup_self_test(self.model, parsed_manifest.feature_names)
+
+            self.model_version = parsed_manifest.model_version
+            self.imbalance_strategy = parsed_manifest.imbalance_strategy.value
 
             # Extract calibrated thresholds from manifest
-            thresholds = self.manifest["thresholds"]
-            self.threshold_high = float(thresholds["high"])
-            self.threshold_review = float(thresholds["review"])
+            self.threshold_high = parsed_manifest.thresholds.high
+            self.threshold_review = parsed_manifest.thresholds.review
 
-            # Load replicate pipelines
+            # Load replicate pipelines fail-closed: missing/unloadable replicates stop the app
             self.replicates = []
             for rep_path in replicate_files:
                 try:
-                    self.replicates.append(joblib.load(rep_path))
-                except (OSError, KeyError, ValueError, TypeError) as ex:
-                    logger.warning("Failed to load replicate at %s: %s", rep_path, ex)
+                    rep_model = joblib.load(rep_path)
+                    validate_model_supported(rep_model)
+                    self.replicates.append(rep_model)
+                except Exception as ex:
+                    raise RuntimeError(f"Failed to load replicate pipeline from {rep_path}: {ex}") from ex
 
-            shap_top_k = int(self.manifest.get("shap_top_k", 3))
-            stability_min_overlap = float(self.manifest.get("stability_min_overlap", 0.67))
+            if len(self.replicates) < 2:
+                raise RuntimeError(f"ML artifact requires at least 2 replicates, found {len(self.replicates)}.")
+
             self.explainer = RealExplainer(
-                top_k=shap_top_k,
-                stability_min_overlap=stability_min_overlap,
+                top_k=parsed_manifest.shap_top_k,
+                stability_min_overlap=parsed_manifest.stability_min_overlap,
             )
             self.mode = "trained"
             logger.info("Successfully loaded trained model '%s' from %s", self.model_version, bundle_dir)
@@ -178,124 +206,123 @@ class ScoringService:
         except Exception as e:
             raise RuntimeError(f"Failed to load ML artifact from {bundle_dir}: {e}") from e
 
-    def _to_dataframe(self, tx: TransactionIn) -> pd.DataFrame:
-        """Map transaction input to single-row DataFrame using snake_case API column names."""
-        return pd.DataFrame([
-            {
-                "step": tx.step,
-                "type": tx.type.value,
-                "amount": tx.amount,
-                "name_orig": tx.name_orig,
-                "old_balance_orig": tx.old_balance_orig,
-                "new_balance_orig": tx.new_balance_orig,
-                "name_dest": tx.name_dest,
-                "old_balance_dest": tx.old_balance_dest,
-                "new_balance_dest": tx.new_balance_dest,
-            }
-        ])
-
     def route_decision(
         self,
         risk_score: float,
         rule_flags: list[str],
         explanation_status: ExplanationStatus,
     ) -> GatewayDecision:
-        """Execute the deterministic gateway decision matrix.
-
-        Matrix rules:
-        - score >= high -> candidate High Risk.
-        - rule flags present AND score >= review -> candidate High Risk.
-        - rule flags present AND score < review -> Analyst Review.
-        - candidate High Risk + Unstable -> Analyst Review; + Stable -> High Risk.
-        - review <= score < high (with no rule flags) -> Analyst Review.
-        - Otherwise Low Risk.
-        """
+        """Route transaction using calibrated thresholds, heuristic flags, and explanation stability."""
         has_rules = len(rule_flags) > 0
-        is_high_score = risk_score >= self.threshold_high
-        is_review_score = risk_score >= self.threshold_review
+        candidate_high_risk = False
 
-        is_candidate_high_risk = is_high_score or (has_rules and is_review_score)
+        if risk_score >= self.threshold_high or has_rules and risk_score >= self.threshold_review:
+            candidate_high_risk = True
 
-        if is_candidate_high_risk:
-            if explanation_status == ExplanationStatus.UNSTABLE:
-                return GatewayDecision.ANALYST_REVIEW
-            else:
+        if candidate_high_risk:
+            if explanation_status == ExplanationStatus.STABLE:
                 return GatewayDecision.HIGH_RISK
-        elif has_rules and not is_review_score or is_review_score and not is_high_score:
+            else:
+                return GatewayDecision.ANALYST_REVIEW
+
+        if has_rules and risk_score < self.threshold_review:
             return GatewayDecision.ANALYST_REVIEW
-        else:
-            return GatewayDecision.LOW_RISK
 
-    def predict(self, req: TransactionIn) -> PredictionOut:
-        """Score incoming transaction, compute SHAP attribution, and route gateway decision.
+        if self.threshold_review <= risk_score < self.threshold_high:
+            return GatewayDecision.ANALYST_REVIEW
 
-        Latency recorded captures both ML scoring and SHAP explanation duration.
-        """
-        start_time = time.perf_counter()
-        tx_id = str(uuid.uuid4())
+        return GatewayDecision.LOW_RISK
 
-        # 1. Heuristic safety rules evaluation
-        rule_flags = evaluate_rules(req)
-
-        # 2. Score probability and compute explanations
-        features_df = self._to_dataframe(req)
-
-        if self.mode == "trained" and self.model is not None:
-            proba = self.model.predict_proba(features_df)
-            if hasattr(proba, "shape") and len(proba.shape) > 1 and proba.shape[1] >= 2:
-                risk_score = float(proba[0][1])
-            elif hasattr(proba, "shape") and len(proba.shape) > 1 and proba.shape[1] == 1:
-                risk_score = float(proba[0][0])
-            else:
-                risk_score = float(proba[0]) if hasattr(proba, "__getitem__") else float(proba)
-
-            top_features, explanation_status = self.explainer.explain(
-                self.model,
-                features_df,
-                risk_score,
-                self.replicates,
-            )
-        else:
-            # Deterministic stub logic
-            if "ORIGIN_ACCOUNT_DRAINED" in rule_flags or "LARGE_TRANSFER_AMOUNT" in rule_flags:
-                risk_score = 0.92
-            elif req.amount > 50_000.0 and req.type == TransactionType.TRANSFER:
-                risk_score = 0.76
-            elif req.amount > 10_000.0:
-                risk_score = 0.45
-            else:
-                risk_score = 0.05
-
-            top_features, explanation_status = self.explainer.explain(
-                None,
-                features_df,
-                risk_score,
-                None,
-            )
-
-        # 3. Route tri-state gateway decision
-        gateway_decision = self.route_decision(
-            risk_score=risk_score,
-            rule_flags=rule_flags,
-            explanation_status=explanation_status,
+    def _to_dataframe(self, tx: TransactionIn) -> pd.DataFrame:
+        """Map API TransactionIn model to snake_case DataFrame input."""
+        return pd.DataFrame(
+            [
+                {
+                    "step": tx.step,
+                    "type": tx.type.value,
+                    "amount": tx.amount,
+                    "name_orig": tx.name_orig,
+                    "old_balance_orig": tx.old_balance_orig,
+                    "new_balance_orig": tx.new_balance_orig,
+                    "name_dest": tx.name_dest,
+                    "old_balance_dest": tx.old_balance_dest,
+                    "new_balance_dest": tx.new_balance_dest,
+                }
+            ]
         )
 
-        # Latency records scoring + explanation duration
-        latency_ms = (time.perf_counter() - start_time) * 1000.0
+    def _predict_stub(
+        self,
+        tx: TransactionIn,
+        features_df: pd.DataFrame,
+    ) -> tuple[float, list[FeatureExplanation], ExplanationStatus]:
+        """Compute heuristic probability and deterministic explanations for stub mode."""
+        score = 0.05
+        if tx.type.value in ["TRANSFER", "CASH_OUT"]:
+            score += 0.25
+        if tx.amount > 200_000.0:
+            score += 0.35
+        if tx.old_balance_orig > 0 and tx.new_balance_orig == 0:
+            score += 0.30
+
+        score = min(max(round(score, 4), 0.0), 1.0)
+        top_features, explanation_status = self.explainer.explain(
+            model=None,
+            features_df=features_df,
+            risk_score=score,
+            replicates=None,
+        )
+        return score, top_features, explanation_status
+
+    def _predict_trained(
+        self,
+        tx: TransactionIn,
+        features_df: pd.DataFrame,
+    ) -> tuple[float, list[FeatureExplanation], ExplanationStatus]:
+        """Score input DataFrame against the trained sklearn Pipeline and explain via SHAP."""
+        proba = self.model.predict_proba(features_df)
+        if hasattr(proba, "shape") and len(proba.shape) >= 2 and proba.shape[1] >= 2:
+            score = float(proba[0][1])
+        elif hasattr(proba, "shape") and len(proba.shape) == 1:
+            score = float(proba[0])
+        else:
+            score = float(proba[0][0])
+        score = min(max(round(score, 4), 0.0), 1.0)
+
+        top_features, explanation_status = self.explainer.explain(
+            model=self.model,
+            features_df=features_df,
+            risk_score=score,
+            replicates=self.replicates,
+        )
+        return score, top_features, explanation_status
+
+    def predict(self, tx: TransactionIn, transaction_id: str | None = None) -> PredictionOut:
+        """Execute full scoring lifecycle: heuristic rules, ML inference, explanation, and gateway routing."""
+        if not transaction_id:
+            import uuid
+            transaction_id = str(uuid.uuid4())
+        rule_flags = evaluate_rules(tx)
+        features_df = self._to_dataframe(tx)
+
+        if self.mode == "trained" and self.model is not None:
+            score, top_features, explanation_status = self._predict_trained(tx, features_df)
+        else:
+            score, top_features, explanation_status = self._predict_stub(tx, features_df)
+
+        decision = self.route_decision(score, rule_flags, explanation_status)
 
         return PredictionOut(
-            transaction_id=tx_id,
-            risk_score=round(max(0.0, min(1.0, risk_score)), 4),
+            transaction_id=transaction_id,
+            risk_score=score,
             top_features=top_features,
             explanation_status=explanation_status,
-            gateway_decision=gateway_decision,
+            gateway_decision=decision,
             rule_flags=rule_flags,
             imbalance_strategy=self.imbalance_strategy,
             model_version=self.model_version,
-            latency_ms=round(max(latency_ms, 1.0), 2),
+            latency_ms=0.0,
         )
 
 
 scoring_service = ScoringService()
-# Initialize default based on env
-scoring_service.load_artifact(settings.MODEL_PATH)

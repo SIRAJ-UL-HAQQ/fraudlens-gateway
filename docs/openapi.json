@@ -794,6 +794,31 @@
         "title": "LoginRequest",
         "description": "Analyst authentication credentials."
       },
+      "MLMetrics": {
+        "properties": {
+          "strategy_comparison": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Strategy Comparison",
+            "description": "Breakdown across imbalance strategies"
+          },
+          "evaluation_metrics": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Evaluation Metrics",
+            "description": "Evaluation metrics (Precision, Recall, F1, PR-AUC, MCC)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "strategy_comparison",
+          "evaluation_metrics"
+        ],
+        "title": "MLMetrics",
+        "description": "Machine learning benchmark evaluation metrics from research reports."
+      },
       "MetricsSummary": {
         "properties": {
           "total_transactions": {
@@ -836,33 +861,37 @@
             "title": "Latency P95 Ms",
             "description": "95th percentile latency in milliseconds"
           },
-          "strategy_comparison": {
+          "ml_metrics": {
             "anyOf": [
               {
-                "additionalProperties": true,
-                "type": "object"
+                "$ref": "#/components/schemas/MLMetrics"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Strategy Comparison",
-            "description": "Metrics breakdown across imbalance strategies, or null if benchmark report is unavailable"
+            "description": "ML benchmark metrics or null when unavailable"
           },
-          "evaluation_metrics": {
+          "ml_metrics_status": {
+            "type": "string",
+            "enum": [
+              "available",
+              "unavailable"
+            ],
+            "title": "Ml Metrics Status",
+            "description": "Availability status of ML metrics"
+          },
+          "ml_metrics_reason": {
             "anyOf": [
               {
-                "additionalProperties": {
-                  "type": "number"
-                },
-                "type": "object"
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Evaluation Metrics",
-            "description": "Core ML metrics (Precision, Recall, F1, PR-AUC, MCC), or null if benchmark report is unavailable"
+            "title": "Ml Metrics Reason",
+            "description": "Explanation when ml_metrics is unavailable"
           }
         },
         "type": "object",
@@ -872,10 +901,11 @@
           "explanation_stability_ratio",
           "average_risk_score",
           "latency_p50_ms",
-          "latency_p95_ms"
+          "latency_p95_ms",
+          "ml_metrics_status"
         ],
         "title": "MetricsSummary",
-        "description": "Aggregated operational and ML metrics summary."
+        "description": "Aggregated operational telemetry and ML research metrics summary."
       },
       "ModelInfo": {
         "properties": {

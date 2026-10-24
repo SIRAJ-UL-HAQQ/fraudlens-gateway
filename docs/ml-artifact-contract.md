@@ -72,7 +72,20 @@ Metadata file containing training details, hyperparameter thresholds, and stabil
 ---
 
 ## 4. Replicate Pipelines (`replicates/seed_*.joblib`)
-- Contains $N$ replicate models trained with different random seeds on the same training split and strategy.
-- Each replicate is a self-contained `Pipeline` with the same input contract.
-- Used to compute local explanation stability: top-$k$ SHAP features are calculated for the main model and each replicate. If the overlap fraction across replicates $\ge \text{stability\_min\_overlap}$, `explanation_status` is `"Stable"`; otherwise `"Unstable"`.
-- Stability is evaluated across random seed replicates for the **active strategy**, never across strategies at inference time.
+- Contains $N$ ($N \ge 2$) replicate models trained with different random seeds on the same training split and strategy.
+- Each replicate is a self-contained `Pipeline` with the same input contract. Supported models are restricted to tree-based and linear models (KernelExplainer fallback is strictly prohibited).
+- **Stability Aggregation & Mathematical Definition**:
+  For an input transaction:
+  1. Main model top-$k$ SHAP features: $\text{topk}(\text{main})$.
+  2. For each replicate pipeline $r \in \{1, \dots, R\}$ ($R \ge 2$):
+     $$\text{overlap}_r = \frac{|\text{topk}(\text{main}) \cap \text{topk}(r)|}{k}$$
+  3. Aggregate overlap ratio across replicates:
+     $$\bar{O} = \frac{1}{R} \sum_{r=1}^R \frac{|\text{topk}(\text{main}) \cap \text{topk}(r)|}{k}$$
+  4. Average overlap count across replicates:
+     $$\text{overlap\_count} = \bar{O} \times k = \frac{1}{R} \sum_{r=1}^R |\text{topk}(\text{main}) \cap \text{topk}(r)|$$
+  5. Stability determination using integer counts:
+     $$\text{explanation\_status} = \begin{cases} \text{"Stable"} & \text{if } \text{overlap\_count} \ge \lceil \text{stability\_min\_overlap} \times k - 10^{-9} \rceil \\ \text{"Unstable"} & \text{otherwise} \end{cases}$$
+- **Fail-Closed Runtime Semantics**:
+  - Missing or unloadable replicate pipelines at gateway startup immediately stop application launch.
+  - Any replicate failure during request-time feature attribution triggers an error log and fails closed to `"Unstable"`.
+- Stability is evaluated strictly across random seed replicates for the **active strategy**, never across strategies at inference time.

@@ -1,4 +1,5 @@
 import logging
+import math
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -7,6 +8,45 @@ import pandas as pd
 from app.models.schemas import ExplanationStatus, FeatureExplanation, ShapDirection
 
 logger = logging.getLogger(__name__)
+
+
+def validate_model_supported(pipeline_or_estimator: Any) -> str:
+    """Validate that the model is explicitly a tree-based or linear model.
+
+    Raises TypeError if model is unsupported. Silent KernelExplainer fallback is forbidden.
+    """
+    estimator = pipeline_or_estimator
+    if hasattr(pipeline_or_estimator, "named_steps"):
+        estimator = pipeline_or_estimator.steps[-1][1]
+
+    est_class = estimator.__class__.__name__
+    est_module = getattr(estimator.__class__, "__module__", "")
+
+    # Tree-based check
+    if (
+        hasattr(estimator, "tree_")
+        or hasattr(estimator, "estimators_")
+        or "tree" in est_module
+        or "forest" in est_module
+        or "gradient_boosting" in est_module
+        or "xgboost" in est_module
+        or "lightgbm" in est_module
+        or any(k in est_class for k in ["Tree", "Forest", "GBM", "XGB", "LGBM", "CatBoost"])
+    ):
+        return "tree"
+
+    # Linear check
+    if (
+        hasattr(estimator, "coef_")
+        or "linear_model" in est_module
+        or any(k in est_class for k in ["LogisticRegression", "LinearRegression", "Ridge", "Lasso", "SGDClassifier"])
+    ):
+        return "linear"
+
+    raise TypeError(
+        f"Unsupported model type '{est_class}'. Only tree-based and linear models are supported. "
+        "Silent KernelExplainer fallback is forbidden."
+    )
 
 
 class ExplainerService(ABC):
@@ -98,14 +138,15 @@ class RealExplainer(ExplainerService):
         features_df: pd.DataFrame,
     ) -> list[tuple[str, float]]:
         """Calculate feature attributions for a given pipeline."""
-        try:
-            import shap
+        model_type = validate_model_supported(pipeline)
+        import shap
 
-            if hasattr(pipeline, "named_steps"):
-                step_names = list(pipeline.named_steps.keys())
-                preprocessor = pipeline[:-1] if len(step_names) > 1 else None
-                estimator = pipeline[-1]
-                X_trans = preprocessor.transform(features_df) if preprocessor else features_df
+        if hasattr(pipeline, "named_steps"):
+            step_names = list(pipeline.named_steps.keys())
+            preprocessor = pipeline[:-1] if len(step_names) > 1 else None
+            estimator = pipeline[-1]
+            if preprocessor:
+                X_trans = preprocessor.transform(features_df)
                 if hasattr(preprocessor, "get_feature_names_out"):
                     feature_names = list(preprocessor.get_feature_names_out())
                 elif hasattr(X_trans, "columns"):
@@ -114,39 +155,36 @@ class RealExplainer(ExplainerService):
                     ncols = X_trans.shape[1] if hasattr(X_trans, "shape") else len(features_df.columns)
                     feature_names = [f"f_{i}" for i in range(ncols)]
             else:
-                estimator = pipeline
                 X_trans = features_df
                 feature_names = list(features_df.columns)
+        else:
+            estimator = pipeline
+            X_trans = features_df
+            feature_names = list(features_df.columns)
 
-            # Compute SHAP values via TreeExplainer or fallback to Explainer
-            try:
-                tree_exp = shap.TreeExplainer(estimator)
-                sv = tree_exp.shap_values(X_trans)
-                if hasattr(sv, "shape") and len(sv.shape) == 3:
-                    vals = sv[0, :, 1]
-                elif isinstance(sv, list) and len(sv) >= 2:
-                    vals = sv[1][0]
-                elif hasattr(sv, "values"):
-                    vals = sv.values[0]
-                    if len(vals.shape) > 1 and vals.shape[-1] == 2:
-                        vals = vals[:, 1]
-                else:
-                    vals = sv[0]
-            except (ValueError, TypeError, AttributeError, RuntimeError):
-                gen_exp = shap.Explainer(estimator)
-                shap_res = gen_exp(X_trans)
-                vals = shap_res.values[0]
-                if len(vals.shape) > 1 and vals.shape[-1] == 2:
-                    vals = vals[:, 1]
+        # Compute SHAP values via TreeExplainer or LinearExplainer
+        if model_type == "tree":
+            tree_exp = shap.TreeExplainer(estimator)
+            sv = tree_exp.shap_values(X_trans)
+            if isinstance(sv, list):
+                vals = sv[1][0] if len(sv) >= 2 else sv[0]
+            elif hasattr(sv, "shape") and len(sv.shape) == 3:
+                vals = sv[0, :, 1]
+            else:
+                vals = sv[0]
+        else:  # linear
+            lin_exp = shap.LinearExplainer(estimator, X_trans)
+            sv = lin_exp.shap_values(X_trans)
+            if isinstance(sv, list):
+                vals = sv[1][0] if len(sv) >= 2 else sv[0]
+            else:
+                vals = sv[0]
 
-            ranked = []
-            for name, val in zip(feature_names, vals):
-                ranked.append((str(name), float(val)))
-            ranked.sort(key=lambda x: abs(x[1]), reverse=True)
-            return ranked[: self.top_k]
-        except (ImportError, AttributeError, ValueError, RuntimeError, TypeError) as e:
-            logger.debug("SHAP attribution extraction failed: %s", e)
-            return []
+        ranked = []
+        for name, val in zip(feature_names, vals):
+            ranked.append((str(name), float(val)))
+        ranked.sort(key=lambda x: abs(x[1]), reverse=True)
+        return ranked[: self.top_k]
 
     def explain(
         self,
@@ -182,27 +220,39 @@ class RealExplainer(ExplainerService):
                 )
             )
 
-        # Assess stability across random seed replicates for the active strategy
-        if replicates and len(replicates) > 0:
-            main_features_set = {f[0] for f in main_top}
-            overlaps: list[float] = []
-            for rep in replicates:
+        # Fail-closed: require replicates list with at least 2 replicates
+        if not replicates or len(replicates) < 2:
+            logger.warning(
+                "Fewer than 2 replicates provided (%s); failing closed to Unstable.",
+                len(replicates) if replicates else 0,
+            )
+            return explanations, ExplanationStatus.UNSTABLE
+
+        main_features_set = {f[0] for f in main_top}
+        overlaps: list[float] = []
+
+        for i, rep in enumerate(replicates):
+            try:
                 rep_top = self._extract_top_features_from_model(rep, features_df)
                 if not rep_top:
-                    overlaps.append(0.0)
-                    continue
-                rep_set = {f[0] for f in rep_top}
-                intersect = len(main_features_set.intersection(rep_set))
-                union_size = max(len(main_features_set), 1)
-                overlaps.append(intersect / union_size)
+                    logger.error("Replicate %d returned empty top features; failing closed to Unstable.", i)
+                    return explanations, ExplanationStatus.UNSTABLE
+            except (ValueError, TypeError, KeyError, AttributeError, RuntimeError, OSError) as e:
+                logger.error("Replicate %d feature extraction failed (%s); failing closed to Unstable.", i, e)
+                return explanations, ExplanationStatus.UNSTABLE
 
-            avg_overlap = sum(overlaps) / len(overlaps)
-            stability = (
-                ExplanationStatus.STABLE
-                if avg_overlap >= self.stability_min_overlap
-                else ExplanationStatus.UNSTABLE
-            )
-        else:
-            stability = ExplanationStatus.STABLE
+            rep_set = {f[0] for f in rep_top}
+            intersect = len(main_features_set.intersection(rep_set))
+            # Fraction of main model's top-k features present in this replicate
+            overlaps.append(intersect / self.top_k)
 
+        # Aggregation: mean over replicates of |topk(main) ∩ topk(replicate)| / k
+        mean_overlap_ratio = sum(overlaps) / len(overlaps)
+        avg_overlap_count = mean_overlap_ratio * self.top_k
+
+        # Threshold using integer counts: Stable iff overlap_count >= ceil(min_overlap * k - 1e-9)
+        threshold_count = math.ceil(self.stability_min_overlap * self.top_k - 1e-9)
+        is_stable = avg_overlap_count >= threshold_count
+
+        stability = ExplanationStatus.STABLE if is_stable else ExplanationStatus.UNSTABLE
         return explanations, stability

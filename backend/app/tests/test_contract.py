@@ -297,11 +297,18 @@ def test_predict_and_transaction_lifecycle():
     assert detail_after.latest_review is not None
     assert detail_after.latest_review.outcome == ReviewOutcome.CONFIRMED_FRAUD
 
-    # 6. GET /metrics
+    # 6. GET /metrics (tested for both unavailable and available states)
     res_metrics = client.get("/api/v1/metrics", headers=AUTH_HEADERS)
     assert res_metrics.status_code == 200
     metrics = MetricsSummary.model_validate(res_metrics.json())
     assert metrics.total_transactions >= 1
+    assert metrics.ml_metrics_status in ["available", "unavailable"]
+    if metrics.ml_metrics_status == "unavailable":
+        assert metrics.ml_metrics is None
+        assert metrics.ml_metrics_reason is not None
+    else:
+        assert metrics.ml_metrics is not None
+        assert metrics.ml_metrics_reason is None
 
     # 7. GET /export
     res_export_csv = client.get("/api/v1/export?format=csv", headers=AUTH_HEADERS)
@@ -312,3 +319,79 @@ def test_predict_and_transaction_lifecycle():
     res_export_pdf = client.get("/api/v1/export?format=pdf", headers=AUTH_HEADERS)
     assert res_export_pdf.status_code == 200
     assert "application/pdf" in res_export_pdf.headers["content-type"]
+
+
+def test_metrics_contract_both_states(tmp_path: Path, monkeypatch):
+    """Verify /metrics for both available and unavailable benchmark report states."""
+
+    # 1. Unavailable state (missing file)
+    missing_path = tmp_path / "nonexistent_metrics.json"
+    monkeypatch.setattr(settings, "METRICS_PATH", str(missing_path))
+    res_unavail = client.get("/api/v1/metrics", headers=AUTH_HEADERS)
+    assert res_unavail.status_code == 200
+    metrics_unavail = MetricsSummary.model_validate(res_unavail.json())
+    assert metrics_unavail.ml_metrics_status == "unavailable"
+    assert metrics_unavail.ml_metrics is None
+    assert metrics_unavail.ml_metrics_reason is not None
+
+    # 2. Available state (valid file)
+    valid_report = {
+        "strategy_comparison": {
+            "class_weight": {"precision": 0.91, "recall": 0.84, "f1": 0.87, "pr_auc": 0.89, "stability": 0.88}
+        },
+        "evaluation_metrics": {
+            "precision": 0.91, "recall": 0.84, "f1": 0.87, "pr_auc": 0.89, "mcc": 0.86
+        }
+    }
+    report_file = tmp_path / "valid_metrics.json"
+    with open(report_file, "w", encoding="utf-8") as f:
+        json.dump(valid_report, f)
+
+    monkeypatch.setattr(settings, "METRICS_PATH", str(report_file))
+    res_avail = client.get("/api/v1/metrics", headers=AUTH_HEADERS)
+    assert res_avail.status_code == 200
+    metrics_avail = MetricsSummary.model_validate(res_avail.json())
+    assert metrics_avail.ml_metrics_status == "available"
+    assert metrics_avail.ml_metrics is not None
+    assert metrics_avail.ml_metrics_reason is None
+    assert "class_weight" in metrics_avail.ml_metrics.strategy_comparison
+
+
+def test_fixtures_json_conforms_to_schema():
+    """Verify frontend/src/mocks/fixtures.json contains valid data matching schemas."""
+    fixtures_path = Path(__file__).resolve().parents[3] / "frontend" / "src" / "mocks" / "fixtures.json"
+    assert fixtures_path.exists()
+    with open(fixtures_path, "r", encoding="utf-8") as f:
+        fixtures = json.load(f)
+
+    # Validate both available and unavailable metrics fixtures
+    m_avail = MetricsSummary.model_validate(fixtures["metrics"])
+    assert m_avail.ml_metrics_status == "available"
+    assert m_avail.ml_metrics is not None
+
+    m_unavail = MetricsSummary.model_validate(fixtures["metrics_unavailable"])
+    assert m_unavail.ml_metrics_status == "unavailable"
+    assert m_unavail.ml_metrics is None
+    assert m_unavail.ml_metrics_reason is not None
+
+
+def test_metrics_service_malformed_and_invalid_schema(tmp_path: Path):
+    """Verify MetricsService returns unavailable on malformed JSON and invalid schema."""
+    from app.services.metrics import MetricsService
+
+    # 1. Malformed JSON
+    bad_json_file = tmp_path / "corrupt.json"
+    bad_json_file.write_text("{ broken json: ...", encoding="utf-8")
+    service_bad = MetricsService(metrics_path=bad_json_file)
+    _, status, reason = service_bad.load_ml_metrics()
+    assert status == "unavailable"
+    assert "Malformed ML benchmark report" in reason
+
+    # 2. Invalid schema (missing required fields)
+    invalid_schema_file = tmp_path / "invalid_schema.json"
+    invalid_schema_file.write_text(json.dumps({"unexpected": 123}), encoding="utf-8")
+    service_invalid = MetricsService(metrics_path=invalid_schema_file)
+    _, status_inv, reason_inv = service_invalid.load_ml_metrics()
+    assert status_inv == "unavailable"
+    assert "Invalid ML benchmark report schema" in reason_inv
+

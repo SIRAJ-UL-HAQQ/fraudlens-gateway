@@ -1,10 +1,8 @@
 import csv
 import io
-import json
 import math
 import uuid
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import Any
 
 from reportlab.lib import colors
@@ -26,6 +24,7 @@ from app.models.schemas import (
     FeatureExplanation,
     GatewayDecision,
     MetricsSummary,
+    OperationalMetrics,
     PaginatedTransactionsResponse,
     PredictionOut,
     ReviewOutcome,
@@ -35,6 +34,7 @@ from app.models.schemas import (
     TransactionSummary,
     TransactionType,
 )
+from app.services.metrics import MetricsService
 
 
 class DatabaseUnavailableError(Exception):
@@ -49,18 +49,6 @@ def sanitize_csv_cell(value: Any) -> str:
     return s
 
 
-def load_ml_reports_metrics() -> tuple[dict | None, dict | None]:
-    """Read ML benchmark metrics from ml/reports/metrics.json if present, else return None (unavailable)."""
-    metrics_path = Path(settings.METRICS_PATH)
-    if metrics_path.exists():
-        try:
-            with open(metrics_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                return data.get("strategy_comparison"), data.get("evaluation_metrics")
-        except (OSError, json.JSONDecodeError):
-            pass
-
-    return None, None
 
 
 def generate_pdf_export(items: list[TransactionSummary]) -> bytes:
@@ -149,8 +137,11 @@ class TransactionRepository:
     ) -> AnalystReviewRecord:
         raise NotImplementedError
 
-    def get_metrics(self) -> MetricsSummary:
+    def get_operational_metrics(self) -> OperationalMetrics:
         raise NotImplementedError
+
+    def get_metrics(self) -> MetricsSummary:
+        return MetricsService().get_metrics_summary(self.get_operational_metrics())
 
     def export_transactions(
         self,
@@ -275,7 +266,7 @@ class InMemoryTransactionRepository(TransactionRepository):
         tx.latest_review = record
         return record
 
-    def get_metrics(self) -> MetricsSummary:
+    def get_operational_metrics(self) -> OperationalMetrics:
         records = list(self._transactions.values())
         total = len(records)
         distribution = {
@@ -283,18 +274,15 @@ class InMemoryTransactionRepository(TransactionRepository):
             GatewayDecision.HIGH_RISK.value: 0,
             GatewayDecision.ANALYST_REVIEW.value: 0,
         }
-        strat_comp, eval_metrics = load_ml_reports_metrics()
 
         if total == 0:
-            return MetricsSummary(
+            return OperationalMetrics(
                 total_transactions=0,
                 decision_distribution=distribution,
                 explanation_stability_ratio=1.0,
                 average_risk_score=0.0,
                 latency_p50_ms=12.0,
                 latency_p95_ms=25.0,
-                strategy_comparison=strat_comp,
-                evaluation_metrics=eval_metrics,
             )
 
         stable_count = 0
@@ -313,16 +301,17 @@ class InMemoryTransactionRepository(TransactionRepository):
         p50 = latencies[int(len(latencies) * 0.50)]
         p95 = latencies[int(len(latencies) * 0.95)]
 
-        return MetricsSummary(
+        return OperationalMetrics(
             total_transactions=total,
             decision_distribution=distribution,
             explanation_stability_ratio=round(stable_count / total, 3),
             average_risk_score=round(total_risk / total, 3),
             latency_p50_ms=round(p50, 2),
             latency_p95_ms=round(p95, 2),
-            strategy_comparison=strat_comp,
-            evaluation_metrics=eval_metrics,
         )
+
+    def get_metrics(self) -> MetricsSummary:
+        return MetricsService().get_metrics_summary(self.get_operational_metrics())
 
     def export_transactions(
         self,
@@ -623,12 +612,10 @@ class SqlAlchemyTransactionRepository(TransactionRepository):
         finally:
             db.close()
 
-    def get_metrics(self) -> MetricsSummary:
+    def get_operational_metrics(self) -> OperationalMetrics:
         db = self._get_session()
         try:
             total = db.query(TransactionRecord).count()
-            strat_comp, eval_metrics = load_ml_reports_metrics()
-
             distribution = {
                 GatewayDecision.LOW_RISK.value: 0,
                 GatewayDecision.HIGH_RISK.value: 0,
@@ -636,15 +623,13 @@ class SqlAlchemyTransactionRepository(TransactionRepository):
             }
 
             if total == 0:
-                return MetricsSummary(
+                return OperationalMetrics(
                     total_transactions=0,
                     decision_distribution=distribution,
                     explanation_stability_ratio=1.0,
                     average_risk_score=0.0,
                     latency_p50_ms=12.0,
                     latency_p95_ms=25.0,
-                    strategy_comparison=strat_comp,
-                    evaluation_metrics=eval_metrics,
                 )
 
             # Decision distribution counts
@@ -671,20 +656,21 @@ class SqlAlchemyTransactionRepository(TransactionRepository):
             p50 = latencies[int(len(latencies) * 0.50)] if latencies else 0.0
             p95 = latencies[int(len(latencies) * 0.95)] if latencies else 0.0
 
-            return MetricsSummary(
+            return OperationalMetrics(
                 total_transactions=total,
                 decision_distribution=distribution,
                 explanation_stability_ratio=round(stable_count / total, 3),
                 average_risk_score=round(float(avg_risk), 3),
                 latency_p50_ms=round(float(p50), 2),
                 latency_p95_ms=round(float(p95), 2),
-                strategy_comparison=strat_comp,
-                evaluation_metrics=eval_metrics,
             )
         except SQLAlchemyError as e:
             raise DatabaseUnavailableError(f"Database metrics query failed: {e}") from e
         finally:
             db.close()
+
+    def get_metrics(self) -> MetricsSummary:
+        return MetricsService().get_metrics_summary(self.get_operational_metrics())
 
     def export_transactions(
         self,

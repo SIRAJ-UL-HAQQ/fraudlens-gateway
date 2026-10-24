@@ -761,6 +761,10 @@
             "title": "Database",
             "description": "Database connectivity state",
             "default": "connected"
+          },
+          "model": {
+            "$ref": "#/components/schemas/ModelInfo",
+            "description": "Model runtime mode and version"
           }
         },
         "type": "object",
@@ -872,6 +876,25 @@
         ],
         "title": "MetricsSummary",
         "description": "Aggregated operational and ML metrics summary."
+      },
+      "ModelInfo": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "description": "Model runtime mode: 'stub' or 'trained'",
+            "default": "stub"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "Model version tag or identifier",
+            "default": "stub"
+          }
+        },
+        "type": "object",
+        "title": "ModelInfo",
+        "description": "Runtime model mode and version information."
       },
       "PaginatedTransactionsResponse": {
         "properties": {

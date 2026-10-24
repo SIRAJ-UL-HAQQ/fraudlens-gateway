@@ -170,9 +170,16 @@ class TokenResponse(BaseModel):
     role: str = Field(default="analyst", description="User role")
 
 
+class ModelInfo(BaseModel):
+    """Runtime model mode and version information."""
+    mode: str = Field(default="stub", description="Model runtime mode: 'stub' or 'trained'")
+    version: str = Field(default="stub", description="Model version tag or identifier")
+
+
 class HealthResponse(BaseModel):
     """System health check status."""
     status: str = Field(default="healthy", description="Health status indicator")
     service: str = Field(default="FraudLens Gateway", description="Service name")
     version: str = Field(default="1.0.0", description="Service version")
     database: str = Field(default="connected", description="Database connectivity state")
+    model: ModelInfo = Field(default_factory=ModelInfo, description="Model runtime mode and version")

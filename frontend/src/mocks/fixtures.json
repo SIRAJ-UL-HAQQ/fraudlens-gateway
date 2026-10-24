@@ -259,7 +259,11 @@
     "status": "healthy",
     "service": "FraudLens Gateway",
     "version": "1.0.0",
-    "database": "connected"
+    "database": "connected",
+    "model": {
+      "mode": "stub",
+      "version": "stub"
+    }
   },
   "sample_review_record": {
     "review_id": "5f3a0984-dfae-481b-aef3-d6c29c8e1462",

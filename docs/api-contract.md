@@ -94,7 +94,11 @@ Analyst reviews (`POST /api/v1/transactions/{id}/review`) append new review reco
   "status": "healthy",
   "service": "FraudLens Gateway",
   "version": "1.0.0",
-  "database": "connected"
+  "database": "connected",
+  "model": {
+    "mode": "stub",
+    "version": "stub"
+  }
 }
 ```
 

@@ -1,4 +1,4 @@
-.PHONY: test openapi run smoke lint
+.PHONY: test openapi run smoke lint seed benchmark test-postgres
 
 test:
 	cd backend && python -m pytest app/tests -v --tb=short
@@ -14,3 +14,12 @@ smoke:
 
 lint:
 	ruff check backend/
+
+seed:
+	python scripts/seed_demo.py
+
+benchmark:
+	python scripts/benchmark_latency.py
+
+test-postgres:
+	cd backend && REQUIRE_POSTGRES=1 python -m pytest app/tests/test_repository.py -k "postgres" -v

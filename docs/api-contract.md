@@ -63,14 +63,14 @@ Analyst reviews (`POST /api/v1/transactions/{id}/review`) append new review reco
 ```json
 {
   "username": "analyst_1",
-  "password": "analyst_secure_password"
+  "password": "<analyst_password>"
 }
 ```
 
 #### Response (`200 OK`)
 ```json
 {
-  "access_token": "fraudlens-analyst-token-secret",
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbmFseXN0XzEifQ.sample_signature",
   "token_type": "bearer",
   "expires_in": 3600,
   "username": "analyst_1",
@@ -94,7 +94,26 @@ Analyst reviews (`POST /api/v1/transactions/{id}/review`) append new review reco
   "status": "healthy",
   "service": "FraudLens Gateway",
   "version": "1.0.0",
-  "database": "connected"
+  "database": "connected",
+  "model": {
+    "mode": "stub",
+    "version": "stub"
+  }
+}
+```
+
+#### Error Response (`503 Service Unavailable`)
+Returned when the database connection is down or the ML model service has not been loaded (`mode: "unloaded"`):
+```json
+{
+  "status": "unhealthy",
+  "service": "FraudLens Gateway",
+  "version": "1.0.0",
+  "database": "connected",
+  "model": {
+    "mode": "unloaded",
+    "version": "none"
+  }
 }
 ```
 
@@ -157,6 +176,7 @@ Analyst reviews (`POST /api/v1/transactions/{id}/review`) append new review reco
 #### Errors
 - `401 Unauthorized`: Missing or invalid Bearer token.
 - `422 Unprocessable Entity`: Validation failure (e.g. `step < 1`, `amount < 0`, negative balances).
+- `503 Service Unavailable`: Database persistence failed or model artifact is in an unloaded state (`{"detail": "Model service is not loaded. Transaction scoring unavailable."}`).
 
 ---
 
@@ -311,9 +331,9 @@ Analyst reviews (`POST /api/v1/transactions/{id}/review`) append new review reco
 ### 3.7. Operational & ML Metrics
 - **Endpoint**: `GET /api/v1/metrics`
 - **Access**: Protected (Bearer token required)
-- **Description**: Returns live system telemetry (decision breakdown, p50/p95 latency) alongside ML research benchmark metrics comparing imbalance strategies.
+- **Description**: Returns live system telemetry (decision breakdown, p50/p95 latency) alongside ML research benchmark metrics comparing imbalance strategies. When benchmark reports (`ml/reports/metrics.json`) are missing or malformed, `ml_metrics` returns `null`, `ml_metrics_status` is `"unavailable"`, and `ml_metrics_reason` provides diagnostic information so the frontend dashboard displays an appropriate unavailable notice rather than invented values.
 
-#### Response (`200 OK` - `MetricsSummary`)
+#### Response: Available ML Metrics (`200 OK` - `MetricsSummary`)
 ```json
 {
   "total_transactions": 1450,
@@ -326,36 +346,59 @@ Analyst reviews (`POST /api/v1/transactions/{id}/review`) append new review reco
   "average_risk_score": 0.14,
   "latency_p50_ms": 13.4,
   "latency_p95_ms": 24.8,
-  "strategy_comparison": {
-    "none": {
-      "precision": 0.88,
-      "recall": 0.62,
-      "f1": 0.73,
-      "pr_auc": 0.74,
-      "stability": 0.71
+  "ml_metrics": {
+    "strategy_comparison": {
+      "none": {
+        "precision": 0.88,
+        "recall": 0.62,
+        "f1": 0.73,
+        "pr_auc": 0.74,
+        "stability": 0.71
+      },
+      "class_weight": {
+        "precision": 0.91,
+        "recall": 0.84,
+        "f1": 0.87,
+        "pr_auc": 0.89,
+        "stability": 0.88
+      },
+      "smote_enn": {
+        "precision": 0.85,
+        "recall": 0.87,
+        "f1": 0.86,
+        "pr_auc": 0.87,
+        "stability": 0.80
+      }
     },
-    "class_weight": {
+    "evaluation_metrics": {
       "precision": 0.91,
       "recall": 0.84,
       "f1": 0.87,
       "pr_auc": 0.89,
-      "stability": 0.88
-    },
-    "smote_enn": {
-      "precision": 0.85,
-      "recall": 0.87,
-      "f1": 0.86,
-      "pr_auc": 0.87,
-      "stability": 0.80
+      "mcc": 0.86
     }
   },
-  "evaluation_metrics": {
-    "precision": 0.91,
-    "recall": 0.84,
-    "f1": 0.87,
-    "pr_auc": 0.89,
-    "mcc": 0.86
-  }
+  "ml_metrics_status": "available",
+  "ml_metrics_reason": null
+}
+```
+
+#### Response: Unavailable ML Metrics (`200 OK` - `MetricsSummary`)
+```json
+{
+  "total_transactions": 1450,
+  "decision_distribution": {
+    "Low Risk": 1280,
+    "High Risk": 95,
+    "Analyst Review": 75
+  },
+  "explanation_stability_ratio": 0.88,
+  "average_risk_score": 0.14,
+  "latency_p50_ms": 13.4,
+  "latency_p95_ms": 24.8,
+  "ml_metrics": null,
+  "ml_metrics_status": "unavailable",
+  "ml_metrics_reason": "ML benchmark report not found at ml/reports/metrics.json."
 }
 ```
 

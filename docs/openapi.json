@@ -6,6 +6,28 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Service health check",
+        "description": "Return health status including live database connectivity and ML model metadata.",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/login": {
       "post": {
         "tags": [
@@ -54,7 +76,7 @@
           "Prediction"
         ],
         "summary": "Score a transaction",
-        "description": "Score incoming transaction with ML model, heuristic rules, and SHAP stability.",
+        "description": "Score incoming transaction, compute SHAP attribution, and persist audit record before responding.\n\nIf database write fails, returns HTTP 503 without exposing an unpersisted decision.",
         "operationId": "predict_api_v1_predict_post",
         "requestBody": {
           "content": {
@@ -385,7 +407,7 @@
           "Metrics"
         ],
         "summary": "Operational and ML performance metrics",
-        "description": "Retrieve current system latency, decision breakdown, and ML benchmark metrics.",
+        "description": "Retrieve system latency, decision breakdown, and ML benchmark metrics.",
         "operationId": "get_metrics_api_v1_metrics_get",
         "responses": {
           "200": {
@@ -559,28 +581,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/health": {
-      "get": {
-        "tags": [
-          "Health"
-        ],
-        "summary": "Service health check",
-        "description": "Return health status of the FraudLens Gateway.",
-        "operationId": "health_check_health_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HealthResponse"
                 }
               }
             }
@@ -761,6 +761,10 @@
             "title": "Database",
             "description": "Database connectivity state",
             "default": "connected"
+          },
+          "model": {
+            "$ref": "#/components/schemas/ModelInfo",
+            "description": "Model runtime mode and version"
           }
         },
         "type": "object",
@@ -789,6 +793,31 @@
         ],
         "title": "LoginRequest",
         "description": "Analyst authentication credentials."
+      },
+      "MLMetrics": {
+        "properties": {
+          "strategy_comparison": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Strategy Comparison",
+            "description": "Breakdown across imbalance strategies"
+          },
+          "evaluation_metrics": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Evaluation Metrics",
+            "description": "Evaluation metrics (Precision, Recall, F1, PR-AUC, MCC)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "strategy_comparison",
+          "evaluation_metrics"
+        ],
+        "title": "MLMetrics",
+        "description": "Machine learning benchmark evaluation metrics from research reports."
       },
       "MetricsSummary": {
         "properties": {
@@ -832,33 +861,37 @@
             "title": "Latency P95 Ms",
             "description": "95th percentile latency in milliseconds"
           },
-          "strategy_comparison": {
+          "ml_metrics": {
             "anyOf": [
               {
-                "additionalProperties": true,
-                "type": "object"
+                "$ref": "#/components/schemas/MLMetrics"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Strategy Comparison",
-            "description": "Metrics breakdown across imbalance strategies"
+            "description": "ML benchmark metrics or null when unavailable"
           },
-          "evaluation_metrics": {
+          "ml_metrics_status": {
+            "type": "string",
+            "enum": [
+              "available",
+              "unavailable"
+            ],
+            "title": "Ml Metrics Status",
+            "description": "Availability status of ML metrics"
+          },
+          "ml_metrics_reason": {
             "anyOf": [
               {
-                "additionalProperties": {
-                  "type": "number"
-                },
-                "type": "object"
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Evaluation Metrics",
-            "description": "Core ML metrics (Precision, Recall, F1, PR-AUC, MCC)"
+            "title": "Ml Metrics Reason",
+            "description": "Explanation when ml_metrics is unavailable"
           }
         },
         "type": "object",
@@ -868,10 +901,35 @@
           "explanation_stability_ratio",
           "average_risk_score",
           "latency_p50_ms",
-          "latency_p95_ms"
+          "latency_p95_ms",
+          "ml_metrics_status"
         ],
         "title": "MetricsSummary",
-        "description": "Aggregated operational and ML metrics summary."
+        "description": "Aggregated operational telemetry and ML research metrics summary."
+      },
+      "ModelInfo": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "trained",
+              "stub",
+              "unloaded"
+            ],
+            "title": "Mode",
+            "description": "Model runtime mode: 'trained', 'stub', or 'unloaded'",
+            "default": "stub"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "Model version tag or identifier",
+            "default": "stub"
+          }
+        },
+        "type": "object",
+        "title": "ModelInfo",
+        "description": "Runtime model mode and version information."
       },
       "PaginatedTransactionsResponse": {
         "properties": {

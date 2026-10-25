@@ -32,6 +32,26 @@ COLUMN_MAPPING: dict[str, str] = {
 }
 
 
+DEFAULT_DRAIN_RATIO = 0.90
+DEFAULT_LARGE_TRANSFER_THRESHOLD = 200_000.0
+DEFAULT_HIGH_AMOUNT_BY_TYPE = {
+    "TRANSFER": 500_000.0,
+    "CASH_OUT": 300_000.0,
+    "PAYMENT": 50_000.0,
+    "DEBIT": 10_000.0,
+    "CASH_IN": 500_000.0,
+}
+
+try:
+    from app.core.config import settings
+
+    DEFAULT_DRAIN_RATIO = settings.RULE_DRAIN_BALANCE_RATIO
+    DEFAULT_LARGE_TRANSFER_THRESHOLD = settings.RULE_LARGE_TRANSFER_THRESHOLD
+    DEFAULT_HIGH_AMOUNT_BY_TYPE = settings.RULE_HIGH_AMOUNT_BY_TYPE
+except ImportError:
+    pass
+
+
 def map_raw_to_api_columns(df: pd.DataFrame) -> pd.DataFrame:
     """Map raw PaySim column names to the snake_case API schema.
 
@@ -99,52 +119,129 @@ def split_chronological(
     return train_df, val_df, test_df
 
 
-def evaluate_rules_baseline_vectorized(df: pd.DataFrame) -> dict[str, Any]:
-    """Evaluate SRS FR-7 rules-only baseline heuristics using backend rule semantics.
+def evaluate_rules_baseline_vectorized(
+    df: pd.DataFrame,
+    drain_ratio: float | None = None,
+    large_transfer_threshold: float | None = None,
+    high_amount_by_type: dict[str, float] | None = None,
+) -> dict[str, Any]:
+    """Evaluate backend heuristic safety rules and SRS FR-7 baselines in a vectorized manner.
 
     Matches app.services.rules definitions:
-    1. check_origin_account_drained:
+    1. ORIGIN_ACCOUNT_DRAINED:
        - type in ['TRANSFER', 'CASH_OUT']
        - old_balance_orig > 0.0 (old_balance_orig == 0 is strictly NOT drained)
        - new_balance_orig == 0.0
-       - amount >= old_balance_orig * 0.95
-    2. check_large_transfer_amount:
+       - amount >= old_balance_orig * drain_ratio (default 0.90)
+    2. LARGE_TRANSFER_AMOUNT:
        - type in ['TRANSFER', 'CASH_OUT']
-       - amount >= 200,000.0
-    3. Union: drain >= 95% OR amount >= 200,000.0
+       - amount >= large_transfer_threshold (default 200,000.0)
+    3. DEST_BALANCE_INCONSISTENCY:
+       - type in ['TRANSFER', 'CASH_OUT']
+       - name_dest starts with 'C'
+       - abs((new_balance_dest - old_balance_dest) - amount) > 0.01
+    4. VERY_HIGH_AMOUNT_FOR_TYPE:
+       - per-type thresholds from settings.RULE_HIGH_AMOUNT_BY_TYPE
+    5. union_drain_or_amount (SRS FR-7 union: drain or amount)
+    6. union_all_rules (all 4 backend heuristic rules)
     """
-    y_true = df["is_fraud"].to_numpy(dtype=int)
+    ratio = drain_ratio if drain_ratio is not None else DEFAULT_DRAIN_RATIO
+    thresh = (
+        large_transfer_threshold
+        if large_transfer_threshold is not None
+        else DEFAULT_LARGE_TRANSFER_THRESHOLD
+    )
+    type_threshs = (
+        high_amount_by_type
+        if high_amount_by_type is not None
+        else DEFAULT_HIGH_AMOUNT_BY_TYPE
+    )
 
-    is_transfer_or_cashout = df["type"].isin(["TRANSFER", "CASH_OUT"]).to_numpy()
+    y_true = df["is_fraud"].to_numpy(dtype=int)
+    types = df["type"].to_numpy()
+    amounts = df["amount"].to_numpy(dtype=float)
     old_orig = df["old_balance_orig"].to_numpy(dtype=float)
     new_orig = df["new_balance_orig"].to_numpy(dtype=float)
-    amount = df["amount"].to_numpy(dtype=float)
+    old_dest = df["old_balance_dest"].to_numpy(dtype=float)
+    new_dest = df["new_balance_dest"].to_numpy(dtype=float)
 
-    # Backend rule 1: ORIGIN_ACCOUNT_DRAINED
-    # If old_balance_orig == 0, returns None (not drained). Requires new_balance_orig == 0.
-    drain_pred = (
-        is_transfer_or_cashout
+    is_tc = np.isin(types, ["TRANSFER", "CASH_OUT"])
+    is_c_dest = (
+        df["name_dest"].astype(str).str.startswith("C").to_numpy(dtype=bool)
+    )
+
+    # Rule 1: ORIGIN_ACCOUNT_DRAINED
+    r1 = (
+        is_tc
         & (old_orig > 0.0)
         & (new_orig == 0.0)
-        & (amount >= old_orig * 0.95)
-    ).astype(int)
+        & (amounts >= old_orig * ratio)
+    )
 
-    # Backend rule 2: LARGE_TRANSFER_AMOUNT
-    amount_pred = (is_transfer_or_cashout & (amount >= 200_000.0)).astype(int)
+    # Rule 2: LARGE_TRANSFER_AMOUNT
+    r2 = is_tc & (amounts >= thresh)
 
-    # Union rule: Drain OR Amount per SRS FR-7
-    union_pred = (drain_pred | amount_pred).astype(int)
+    # Rule 3: DEST_BALANCE_INCONSISTENCY
+    dest_delta = new_dest - old_dest
+    r3 = is_tc & is_c_dest & (np.abs(dest_delta - amounts) > 0.01)
 
-    def calc_metrics(y_pred: np.ndarray) -> dict[str, float]:
-        tn, fp, fn, tp = confusion_matrix(y_true, y_pred, labels=[0, 1]).ravel()
+    # Rule 4: VERY_HIGH_AMOUNT_FOR_TYPE
+    r4 = np.zeros(len(df), dtype=bool)
+    for t_name, t_limit in type_threshs.items():
+        r4 |= (types == t_name) & (amounts >= t_limit)
+
+    r_union_fr7 = r1 | r2
+    r_union_all = r1 | r2 | r3 | r4
+
+    rule_dict = {
+        "ORIGIN_ACCOUNT_DRAINED": r1,
+        "LARGE_TRANSFER_AMOUNT": r2,
+        "DEST_BALANCE_INCONSISTENCY": r3,
+        "VERY_HIGH_AMOUNT_FOR_TYPE": r4,
+        "union_drain_or_amount": r_union_fr7,
+        "union_all_rules": r_union_all,
+    }
+
+    all_types = ["TRANSFER", "CASH_OUT", "PAYMENT", "CASH_IN", "DEBIT"]
+    results = {}
+
+    for rule_name, mask in rule_dict.items():
+        y_pred = mask.astype(int)
+        tn, fp, fn, tp = confusion_matrix(
+            y_true, y_pred, labels=[0, 1]
+        ).ravel()
         p = float(precision_score(y_true, y_pred, zero_division=0))
         r = float(recall_score(y_true, y_pred, zero_division=0))
         f1 = float(f1_score(y_true, y_pred, zero_division=0))
         pr_auc = float(average_precision_score(y_true, y_pred))
         fpr = float(fp / max(fp + tn, 1))
-        return {
-            "precision": round(p, 4),
+        flag_rate = float((tp + fp) / max(len(df), 1))
+
+        type_breakdown = {}
+        for t in all_types:
+            t_mask = types == t
+            t_total = int(t_mask.sum())
+            t_pos = int(np.sum((y_true == 1) & t_mask))
+            t_neg = t_total - t_pos
+            t_pred = mask & t_mask
+            t_tp = int(np.sum(t_pred & (y_true == 1)))
+            t_fp = int(np.sum(t_pred & (y_true == 0)))
+            type_breakdown[t] = {
+                "total_rows": t_total,
+                "frauds": t_pos,
+                "triggers": t_tp + t_fp,
+                "flag_rate": round(float((t_tp + t_fp) / max(t_total, 1)), 6),
+                "recall": round(float(t_tp / max(t_pos, 1)), 6),
+                "precision": round(float(t_tp / max(t_tp + t_fp, 1)), 6),
+                "fpr": round(float(t_fp / max(t_neg, 1)), 6),
+                "true_positives": t_tp,
+                "false_positives": t_fp,
+            }
+
+        rule_summary = {
+            "flag_rate": round(flag_rate, 6),
             "recall": round(r, 4),
+            "precision": round(p, 4),
             "f1": round(f1, 4),
             "pr_auc": round(pr_auc, 4),
             "fpr": round(fpr, 4),
@@ -152,13 +249,15 @@ def evaluate_rules_baseline_vectorized(df: pd.DataFrame) -> dict[str, Any]:
             "false_positives": int(fp),
             "true_negatives": int(tn),
             "false_negatives": int(fn),
+            "total_triggers": int(tp + fp),
+            "by_type": type_breakdown,
         }
+        results[rule_name] = rule_summary
 
-    return {
-        "drain_ge_95pct_alone": calc_metrics(drain_pred),
-        "amount_gt_200k_alone": calc_metrics(amount_pred),
-        "union_drain_or_amount": calc_metrics(union_pred),
-    }
+    # Backward-compatible legacy aliases
+    results["drain_ge_95pct_alone"] = results["ORIGIN_ACCOUNT_DRAINED"]
+    results["amount_gt_200k_alone"] = results["LARGE_TRANSFER_AMOUNT"]
+    return results
 
 
 def compute_balance_and_drain_stats(df: pd.DataFrame) -> dict[str, Any]:
@@ -387,8 +486,13 @@ def generate_eda_report(
     # 4. Balance error and drain statistics (fraud vs legitimate)
     balance_and_drain_stats = compute_balance_and_drain_stats(df)
 
-    # 5. Rules baseline evaluated on the test set
-    rules_baseline_test = evaluate_rules_baseline_vectorized(test_df)
+    # 5. Rules performance evaluated strictly on TRAIN and VALIDATION splits (never on test)
+    rules_train = evaluate_rules_baseline_vectorized(train_df)
+    rules_val = evaluate_rules_baseline_vectorized(val_df)
+    rules_performance_train_val = {
+        "train": rules_train,
+        "validation": rules_val,
+    }
 
     # 6. Single-feature PR-AUC on TRAIN and VALIDATION (NOT test)
     single_feature_pr_auc_train = compute_single_feature_pr_auc_split(train_df)
@@ -416,7 +520,7 @@ def generate_eda_report(
         },
         "split_statistics": split_stats,
         "balance_error_and_drain_statistics": balance_and_drain_stats,
-        "rules_baseline_test_evaluation": rules_baseline_test,
+        "rules_performance_train_val": rules_performance_train_val,
         "single_feature_pr_auc": {
             "train": single_feature_pr_auc_train,
             "validation": single_feature_pr_auc_val,

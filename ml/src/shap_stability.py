@@ -60,9 +60,9 @@ def is_explanation_stable(
     bool
         True if overlap satisfies the stability requirement.
     """
-    overlap_count = round(overlap_ratio * k)
+    avg_overlap_count = overlap_ratio * k
     required_count = math.ceil(min_overlap * k - 1e-9)
-    return overlap_count >= required_count
+    return avg_overlap_count >= (required_count - 1e-9)
 
 
 def spearman_rank_correlation(ranks_a: list[float] | np.ndarray, ranks_b: list[float] | np.ndarray) -> float:

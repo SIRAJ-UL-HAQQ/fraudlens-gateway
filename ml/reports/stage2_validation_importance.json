@@ -1,0 +1,164 @@
+{
+  "variant": "Variant B (Reduced-Shortcut)",
+  "features": [
+    "amount",
+    "old_balance_orig",
+    "new_balance_orig",
+    "old_balance_dest",
+    "new_balance_dest",
+    "hour_of_day",
+    "type_TRANSFER",
+    "type_CASH_OUT",
+    "type_PAYMENT",
+    "type_CASH_IN",
+    "type_DEBIT"
+  ],
+  "validation_pr_auc": 0.9805894520789251,
+  "thresholds": {
+    "unrounded": {
+      "t_review": 0.9557417035102844,
+      "t_high": 0.9711773991584778,
+      "difference": 0.01543569564819336
+    },
+    "rounded_4dec": {
+      "t_review": 0.9557,
+      "t_high": 0.9712
+    },
+    "validation_routing": {
+      "total_rows": 162467,
+      "low_risk_count": 161579,
+      "low_risk_share": 0.9945342746526987,
+      "analyst_review_count": 70,
+      "analyst_review_share": 0.00043085672782780505,
+      "high_risk_count": 818,
+      "high_risk_share": 0.005034868619473493
+    },
+    "metrics_at_review": {
+      "recall": 0.950632911392405,
+      "precision": 0.8457207207207207,
+      "f1": 0.8951132300357568
+    },
+    "metrics_at_high": {
+      "recall": 0.9329113924050633,
+      "precision": 0.9009779951100244,
+      "f1": 0.9166666666666666,
+      "predicted_positives": 818,
+      "true_positives": 737,
+      "false_positives": 81
+    }
+  },
+  "gain_importance_ranked": [
+    {
+      "feature": "new_balance_orig",
+      "normalized_gain": 0.4712,
+      "raw_gain": 814.02
+    },
+    {
+      "feature": "type_PAYMENT",
+      "normalized_gain": 0.2553,
+      "raw_gain": 441.06
+    },
+    {
+      "feature": "type_CASH_IN",
+      "normalized_gain": 0.0781,
+      "raw_gain": 134.82
+    },
+    {
+      "feature": "old_balance_orig",
+      "normalized_gain": 0.0624,
+      "raw_gain": 107.71
+    },
+    {
+      "feature": "type_CASH_OUT",
+      "normalized_gain": 0.0398,
+      "raw_gain": 68.68
+    },
+    {
+      "feature": "type_TRANSFER",
+      "normalized_gain": 0.0396,
+      "raw_gain": 68.35
+    },
+    {
+      "feature": "amount",
+      "normalized_gain": 0.0198,
+      "raw_gain": 34.17
+    },
+    {
+      "feature": "hour_of_day",
+      "normalized_gain": 0.0129,
+      "raw_gain": 22.37
+    },
+    {
+      "feature": "new_balance_dest",
+      "normalized_gain": 0.0085,
+      "raw_gain": 14.68
+    },
+    {
+      "feature": "old_balance_dest",
+      "normalized_gain": 0.0067,
+      "raw_gain": 11.56
+    },
+    {
+      "feature": "type_DEBIT",
+      "normalized_gain": 0.0058,
+      "raw_gain": 9.95
+    }
+  ],
+  "permutation_importance_ranked": [
+    {
+      "feature": "old_balance_orig",
+      "mean_pr_auc_decrease": 0.858637,
+      "std_pr_auc_decrease": 0.011235
+    },
+    {
+      "feature": "new_balance_orig",
+      "mean_pr_auc_decrease": 0.475144,
+      "std_pr_auc_decrease": 0.009553
+    },
+    {
+      "feature": "amount",
+      "mean_pr_auc_decrease": 0.279567,
+      "std_pr_auc_decrease": 0.002857
+    },
+    {
+      "feature": "type_PAYMENT",
+      "mean_pr_auc_decrease": 0.092413,
+      "std_pr_auc_decrease": 0.004553
+    },
+    {
+      "feature": "new_balance_dest",
+      "mean_pr_auc_decrease": 0.071787,
+      "std_pr_auc_decrease": 0.002701
+    },
+    {
+      "feature": "type_CASH_OUT",
+      "mean_pr_auc_decrease": 0.027515,
+      "std_pr_auc_decrease": 0.001493
+    },
+    {
+      "feature": "old_balance_dest",
+      "mean_pr_auc_decrease": 0.023423,
+      "std_pr_auc_decrease": 0.001594
+    },
+    {
+      "feature": "hour_of_day",
+      "mean_pr_auc_decrease": 0.020936,
+      "std_pr_auc_decrease": 0.001633
+    },
+    {
+      "feature": "type_TRANSFER",
+      "mean_pr_auc_decrease": 0.016033,
+      "std_pr_auc_decrease": 0.000659
+    },
+    {
+      "feature": "type_CASH_IN",
+      "mean_pr_auc_decrease": 0.001287,
+      "std_pr_auc_decrease": 0.000455
+    },
+    {
+      "feature": "type_DEBIT",
+      "mean_pr_auc_decrease": 5e-06,
+      "std_pr_auc_decrease": 2.8e-05
+    }
+  ]
+}

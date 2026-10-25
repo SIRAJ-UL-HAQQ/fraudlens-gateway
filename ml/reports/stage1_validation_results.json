@@ -1,0 +1,124 @@
+{
+  "variant_B": {
+    "variant": "B (Without Balance Errors/Deltas)",
+    "n_features": 11,
+    "feature_names": [
+      "amount",
+      "old_balance_orig",
+      "new_balance_orig",
+      "old_balance_dest",
+      "new_balance_dest",
+      "hour_of_day",
+      "type_TRANSFER",
+      "type_CASH_OUT",
+      "type_PAYMENT",
+      "type_CASH_IN",
+      "type_DEBIT"
+    ],
+    "optuna_trials_completed": 40,
+    "best_hyperparameters": {
+      "max_depth": 6,
+      "learning_rate": 0.16552248735454136,
+      "n_estimators": 190,
+      "subsample": 0.7263892580562121,
+      "colsample_bytree": 0.8086684313220379,
+      "min_child_weight": 1,
+      "tree_method": "hist",
+      "eval_metric": "aucpr",
+      "scale_pos_weight": 10.0,
+      "n_jobs": 4,
+      "random_state": 42
+    },
+    "validation_pr_auc": 0.9806,
+    "threshold_calibration": {
+      "threshold_review": 0.9557,
+      "threshold_high": 0.9712,
+      "metrics_at_review": {
+        "recall": 0.9506,
+        "precision": 0.8457,
+        "f1": 0.8951,
+        "fpr": 0.0008
+      },
+      "metrics_at_high": {
+        "recall": 0.9329,
+        "precision": 0.901,
+        "f1": 0.9167,
+        "fpr": 0.0005,
+        "predicted_positives": 818,
+        "true_positives": 737,
+        "false_positives": 81
+      },
+      "validation_routing_shares": {
+        "low_risk_count": 161579,
+        "low_risk_share": 0.9945,
+        "analyst_review_count": 70,
+        "analyst_review_share": 0.0004,
+        "high_risk_count": 818,
+        "high_risk_share": 0.005
+      }
+    }
+  },
+  "variant_A": {
+    "variant": "A (With Balance Errors/Deltas)",
+    "n_features": 15,
+    "feature_names": [
+      "amount",
+      "old_balance_orig",
+      "new_balance_orig",
+      "old_balance_dest",
+      "new_balance_dest",
+      "hour_of_day",
+      "balance_error_orig",
+      "balance_error_dest",
+      "balance_delta_orig",
+      "balance_delta_dest",
+      "type_TRANSFER",
+      "type_CASH_OUT",
+      "type_PAYMENT",
+      "type_CASH_IN",
+      "type_DEBIT"
+    ],
+    "optuna_trials_completed": 40,
+    "best_hyperparameters": {
+      "max_depth": 5,
+      "learning_rate": 0.16707221510623524,
+      "n_estimators": 113,
+      "subsample": 0.6587948587257435,
+      "colsample_bytree": 0.6135681866731614,
+      "min_child_weight": 4,
+      "tree_method": "hist",
+      "eval_metric": "aucpr",
+      "scale_pos_weight": 10.0,
+      "n_jobs": 4,
+      "random_state": 42
+    },
+    "validation_pr_auc": 0.9998,
+    "threshold_calibration": {
+      "threshold_review": 0.9981,
+      "threshold_high": 0.9981,
+      "metrics_at_review": {
+        "recall": 0.9506,
+        "precision": 1.0,
+        "f1": 0.9747,
+        "fpr": 0.0
+      },
+      "metrics_at_high": {
+        "recall": 0.9494,
+        "precision": 1.0,
+        "f1": 0.974,
+        "fpr": 0.0,
+        "predicted_positives": 750,
+        "true_positives": 750,
+        "false_positives": 0
+      },
+      "validation_routing_shares": {
+        "low_risk_count": 161716,
+        "low_risk_share": 0.9954,
+        "analyst_review_count": 1,
+        "analyst_review_share": 0.0,
+        "high_risk_count": 750,
+        "high_risk_share": 0.0046
+      }
+    }
+  }
+}

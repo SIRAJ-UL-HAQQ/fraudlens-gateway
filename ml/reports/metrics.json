@@ -1,0 +1,1454 @@
+{
+  "strategy_comparison": {
+    "class_weight": {
+      "label": "class_weight (deployed)",
+      "validation_pr_auc": 0.9805894520789251,
+      "test_pr_auc": 0.9907,
+      "threshold_review": 0.9557417035102844,
+      "threshold_high": 0.9711773991584778,
+      "metrics_at_high": {
+        "precision": 0.9429,
+        "recall": 0.9446,
+        "f1": 0.9437,
+        "pr_auc": 0.9907,
+        "roc_auc": 0.9999,
+        "mcc": 0.9429,
+        "fpr": 0.0008,
+        "confusion_matrix": {
+          "true_negatives": 116410,
+          "false_positives": 94,
+          "false_negatives": 91,
+          "true_positives": 1551
+        },
+        "recall_ci_95": [
+          0.9341,
+          0.9558
+        ],
+        "fpr_ci_95": [
+          0.0006,
+          0.001
+        ]
+      },
+      "metrics_at_review": {
+        "precision": 0.927,
+        "recall": 0.9592,
+        "f1": 0.9428,
+        "pr_auc": 0.9907,
+        "roc_auc": 0.9999,
+        "mcc": 0.9422,
+        "fpr": 0.0011,
+        "confusion_matrix": {
+          "true_negatives": 116380,
+          "false_positives": 124,
+          "false_negatives": 67,
+          "true_positives": 1575
+        },
+        "recall_ci_95": [
+          0.9496,
+          0.9681
+        ],
+        "fpr_ci_95": [
+          0.0009,
+          0.0012
+        ]
+      },
+      "test_routing": {
+        "total_rows": 118146,
+        "low_risk_count": 116447,
+        "low_risk_share": 0.9856,
+        "analyst_review_count": 54,
+        "analyst_review_share": 0.0005,
+        "high_risk_count": 1645,
+        "high_risk_share": 0.0139
+      },
+      "pr_curve_sample": [
+        {
+          "recall": 1.0,
+          "precision": 0.0139,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0141,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0144,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0146,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0149,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0151,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0154,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.016,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0165,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.017,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0176,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0181,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0187,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0192,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0199,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0205,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0212,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.022,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0228,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0237,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0246,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0256,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0267,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0277,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0289,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0303,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0317,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0332,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0348,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0367,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0388,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.041,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0435,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0463,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0495,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.053,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.057,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0614,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0667,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0732,
+          "threshold": 0.0002
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0805,
+          "threshold": 0.0002
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0895,
+          "threshold": 0.0002
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1008,
+          "threshold": 0.0003
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.115,
+          "threshold": 0.0004
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1337,
+          "threshold": 0.0006
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1592,
+          "threshold": 0.0008
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1967,
+          "threshold": 0.0012
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.2569,
+          "threshold": 0.0022
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.3682,
+          "threshold": 0.0069
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.6432,
+          "threshold": 0.1238
+        },
+        {
+          "recall": 0.0974,
+          "precision": 1.0,
+          "threshold": 1.0
+        }
+      ],
+      "shap_stability": {
+        "fraud_cohort": {
+          "n_samples": 1642,
+          "n_replicates": 5,
+          "n_features_p": 11,
+          "sensitivity": {
+            "k_3": {
+              "k": 3,
+              "chance_baseline": 0.2727,
+              "min_overlap": 0.7,
+              "required_overlap_count": 3,
+              "mean_top_k_overlap": 0.8804,
+              "median_top_k_overlap": 0.9333,
+              "mean_spearman": 0.9442,
+              "stability_rate": 0.6516
+            },
+            "k_5": {
+              "k": 5,
+              "chance_baseline": 0.4545,
+              "min_overlap": 0.7,
+              "required_overlap_count": 4,
+              "mean_top_k_overlap": 0.8496,
+              "median_top_k_overlap": 0.84,
+              "mean_spearman": 0.9442,
+              "stability_rate": 0.9683
+            },
+            "k_10": {
+              "k": 10,
+              "chance_baseline": 0.9091,
+              "min_overlap": 0.7,
+              "required_overlap_count": 7,
+              "mean_top_k_overlap": 0.9956,
+              "median_top_k_overlap": 1.0,
+              "mean_spearman": 0.9442,
+              "stability_rate": 1.0
+            }
+          },
+          "primary_k5": {
+            "k": 5,
+            "chance_baseline": 0.4545,
+            "min_overlap": 0.7,
+            "required_overlap_count": 4,
+            "mean_top_k_overlap": 0.8496,
+            "median_top_k_overlap": 0.84,
+            "mean_spearman": 0.9442,
+            "stability_rate": 0.9683
+          }
+        },
+        "top_false_positives_cohort": {
+          "n_samples": 94,
+          "n_replicates": 5,
+          "n_features_p": 11,
+          "sensitivity": {
+            "k_3": {
+              "k": 3,
+              "chance_baseline": 0.2727,
+              "min_overlap": 0.7,
+              "required_overlap_count": 3,
+              "mean_top_k_overlap": 0.883,
+              "median_top_k_overlap": 0.9333,
+              "mean_spearman": 0.9052,
+              "stability_rate": 0.6596
+            },
+            "k_5": {
+              "k": 5,
+              "chance_baseline": 0.4545,
+              "min_overlap": 0.7,
+              "required_overlap_count": 4,
+              "mean_top_k_overlap": 0.843,
+              "median_top_k_overlap": 0.84,
+              "mean_spearman": 0.9052,
+              "stability_rate": 0.9574
+            },
+            "k_10": {
+              "k": 10,
+              "chance_baseline": 0.9091,
+              "min_overlap": 0.7,
+              "required_overlap_count": 7,
+              "mean_top_k_overlap": 0.9945,
+              "median_top_k_overlap": 1.0,
+              "mean_spearman": 0.9052,
+              "stability_rate": 1.0
+            }
+          },
+          "primary_k5": {
+            "k": 5,
+            "chance_baseline": 0.4545,
+            "min_overlap": 0.7,
+            "required_overlap_count": 4,
+            "mean_top_k_overlap": 0.843,
+            "median_top_k_overlap": 0.84,
+            "mean_spearman": 0.9052,
+            "stability_rate": 0.9574
+          }
+        }
+      }
+    },
+    "none": {
+      "label": "undersampled 10:1 baseline",
+      "validation_pr_auc": 0.9781058473017276,
+      "test_pr_auc": 0.99,
+      "threshold_review": 0.7866618633270264,
+      "threshold_high": 0.8688333630561829,
+      "metrics_at_high": {
+        "precision": 0.95,
+        "recall": 0.9367,
+        "f1": 0.9433,
+        "pr_auc": 0.99,
+        "roc_auc": 0.9998,
+        "mcc": 0.9425,
+        "fpr": 0.0007,
+        "confusion_matrix": {
+          "true_negatives": 116423,
+          "false_positives": 81,
+          "false_negatives": 104,
+          "true_positives": 1538
+        },
+        "recall_ci_95": [
+          0.9247,
+          0.948
+        ],
+        "fpr_ci_95": [
+          0.0005,
+          0.0008
+        ]
+      },
+      "metrics_at_review": {
+        "precision": 0.9216,
+        "recall": 0.9592,
+        "f1": 0.94,
+        "pr_auc": 0.99,
+        "roc_auc": 0.9998,
+        "mcc": 0.9393,
+        "fpr": 0.0012,
+        "confusion_matrix": {
+          "true_negatives": 116370,
+          "false_positives": 134,
+          "false_negatives": 67,
+          "true_positives": 1575
+        },
+        "recall_ci_95": [
+          0.9502,
+          0.9688
+        ],
+        "fpr_ci_95": [
+          0.001,
+          0.0013
+        ]
+      },
+      "test_routing": {
+        "total_rows": 118146,
+        "low_risk_count": 116437,
+        "low_risk_share": 0.9855,
+        "analyst_review_count": 90,
+        "analyst_review_share": 0.0008,
+        "high_risk_count": 1619,
+        "high_risk_share": 0.0137
+      },
+      "pr_curve_sample": [
+        {
+          "recall": 1.0,
+          "precision": 0.0139,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0141,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0144,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0146,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0149,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0151,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0154,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0158,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0163,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0169,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0177,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0184,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0192,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.02,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0206,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0213,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0222,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0231,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0239,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0248,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0258,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0269,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.028,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0291,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0304,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0317,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0332,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0348,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0365,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0384,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0405,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0427,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0452,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0479,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0511,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0545,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0584,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.063,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0682,
+          "threshold": 0.0002
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0744,
+          "threshold": 0.0002
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0817,
+          "threshold": 0.0002
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0908,
+          "threshold": 0.0003
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1021,
+          "threshold": 0.0004
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1165,
+          "threshold": 0.0005
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1361,
+          "threshold": 0.0007
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.163,
+          "threshold": 0.0009
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.2029,
+          "threshold": 0.0014
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.2673,
+          "threshold": 0.0024
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.3907,
+          "threshold": 0.0064
+        },
+        {
+          "recall": 0.9988,
+          "precision": 0.7177,
+          "threshold": 0.1547
+        },
+        {
+          "recall": 0.0384,
+          "precision": 1.0,
+          "threshold": 1.0
+        }
+      ],
+      "shap_stability": {
+        "fraud_cohort": {
+          "n_samples": 1642,
+          "n_replicates": 5,
+          "n_features_p": 11,
+          "sensitivity": {
+            "k_3": {
+              "k": 3,
+              "chance_baseline": 0.2727,
+              "min_overlap": 0.7,
+              "required_overlap_count": 3,
+              "mean_top_k_overlap": 0.8758,
+              "median_top_k_overlap": 0.9333,
+              "mean_spearman": 0.9171,
+              "stability_rate": 0.6657
+            },
+            "k_5": {
+              "k": 5,
+              "chance_baseline": 0.4545,
+              "min_overlap": 0.7,
+              "required_overlap_count": 4,
+              "mean_top_k_overlap": 0.8473,
+              "median_top_k_overlap": 0.84,
+              "mean_spearman": 0.9171,
+              "stability_rate": 0.958
+            },
+            "k_10": {
+              "k": 10,
+              "chance_baseline": 0.9091,
+              "min_overlap": 0.7,
+              "required_overlap_count": 7,
+              "mean_top_k_overlap": 0.9975,
+              "median_top_k_overlap": 1.0,
+              "mean_spearman": 0.9171,
+              "stability_rate": 1.0
+            }
+          },
+          "primary_k5": {
+            "k": 5,
+            "chance_baseline": 0.4545,
+            "min_overlap": 0.7,
+            "required_overlap_count": 4,
+            "mean_top_k_overlap": 0.8473,
+            "median_top_k_overlap": 0.84,
+            "mean_spearman": 0.9171,
+            "stability_rate": 0.958
+          }
+        },
+        "top_false_positives_cohort": {
+          "n_samples": 94,
+          "n_replicates": 5,
+          "n_features_p": 11,
+          "sensitivity": {
+            "k_3": {
+              "k": 3,
+              "chance_baseline": 0.2727,
+              "min_overlap": 0.7,
+              "required_overlap_count": 3,
+              "mean_top_k_overlap": 0.8979,
+              "median_top_k_overlap": 0.9333,
+              "mean_spearman": 0.8691,
+              "stability_rate": 0.7128
+            },
+            "k_5": {
+              "k": 5,
+              "chance_baseline": 0.4545,
+              "min_overlap": 0.7,
+              "required_overlap_count": 4,
+              "mean_top_k_overlap": 0.8128,
+              "median_top_k_overlap": 0.8,
+              "mean_spearman": 0.8691,
+              "stability_rate": 0.9255
+            },
+            "k_10": {
+              "k": 10,
+              "chance_baseline": 0.9091,
+              "min_overlap": 0.7,
+              "required_overlap_count": 7,
+              "mean_top_k_overlap": 0.9938,
+              "median_top_k_overlap": 1.0,
+              "mean_spearman": 0.8691,
+              "stability_rate": 1.0
+            }
+          },
+          "primary_k5": {
+            "k": 5,
+            "chance_baseline": 0.4545,
+            "min_overlap": 0.7,
+            "required_overlap_count": 4,
+            "mean_top_k_overlap": 0.8128,
+            "median_top_k_overlap": 0.8,
+            "mean_spearman": 0.8691,
+            "stability_rate": 0.9255
+          }
+        }
+      }
+    },
+    "smote_enn": {
+      "label": "smote_enn",
+      "validation_pr_auc": 0.9689595997609548,
+      "test_pr_auc": 0.9853,
+      "threshold_review": 0.9796899557113647,
+      "threshold_high": 0.9940186738967896,
+      "metrics_at_high": {
+        "precision": 0.9538,
+        "recall": 0.905,
+        "f1": 0.9287,
+        "pr_auc": 0.9853,
+        "roc_auc": 0.9998,
+        "mcc": 0.9281,
+        "fpr": 0.0006,
+        "confusion_matrix": {
+          "true_negatives": 116432,
+          "false_positives": 72,
+          "false_negatives": 156,
+          "true_positives": 1486
+        },
+        "recall_ci_95": [
+          0.8903,
+          0.9187
+        ],
+        "fpr_ci_95": [
+          0.0005,
+          0.0008
+        ]
+      },
+      "metrics_at_review": {
+        "precision": 0.8809,
+        "recall": 0.9592,
+        "f1": 0.9184,
+        "pr_auc": 0.9853,
+        "roc_auc": 0.9998,
+        "mcc": 0.918,
+        "fpr": 0.0018,
+        "confusion_matrix": {
+          "true_negatives": 116291,
+          "false_positives": 213,
+          "false_negatives": 67,
+          "true_positives": 1575
+        },
+        "recall_ci_95": [
+          0.9497,
+          0.9691
+        ],
+        "fpr_ci_95": [
+          0.0016,
+          0.0021
+        ]
+      },
+      "test_routing": {
+        "total_rows": 118146,
+        "low_risk_count": 116358,
+        "low_risk_share": 0.9849,
+        "analyst_review_count": 230,
+        "analyst_review_share": 0.0019,
+        "high_risk_count": 1558,
+        "high_risk_share": 0.0132
+      },
+      "pr_curve_sample": [
+        {
+          "recall": 1.0,
+          "precision": 0.0139,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0141,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0143,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0145,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0148,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0153,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0162,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0167,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0172,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0178,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0184,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0191,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0197,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0205,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0212,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.022,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0228,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0237,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0247,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0257,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0268,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0281,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0294,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0307,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0321,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0337,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0353,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0371,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.039,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0412,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0435,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0461,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0488,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0517,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.055,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0588,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0632,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0684,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0743,
+          "threshold": 0.0002
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0811,
+          "threshold": 0.0002
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.089,
+          "threshold": 0.0002
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0987,
+          "threshold": 0.0003
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1108,
+          "threshold": 0.0004
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1261,
+          "threshold": 0.0005
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1465,
+          "threshold": 0.0006
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1742,
+          "threshold": 0.0009
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.2146,
+          "threshold": 0.0015
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.2779,
+          "threshold": 0.0031
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.3926,
+          "threshold": 0.0119
+        },
+        {
+          "recall": 0.9963,
+          "precision": 0.6605,
+          "threshold": 0.4713
+        },
+        {
+          "recall": 0.1803,
+          "precision": 1.0,
+          "threshold": 1.0
+        }
+      ],
+      "shap_stability": {
+        "fraud_cohort": {
+          "n_samples": 1642,
+          "n_replicates": 5,
+          "n_features_p": 11,
+          "sensitivity": {
+            "k_3": {
+              "k": 3,
+              "chance_baseline": 0.2727,
+              "min_overlap": 0.7,
+              "required_overlap_count": 3,
+              "mean_top_k_overlap": 0.7997,
+              "median_top_k_overlap": 0.8,
+              "mean_spearman": 0.9056,
+              "stability_rate": 0.4141
+            },
+            "k_5": {
+              "k": 5,
+              "chance_baseline": 0.4545,
+              "min_overlap": 0.7,
+              "required_overlap_count": 4,
+              "mean_top_k_overlap": 0.8435,
+              "median_top_k_overlap": 0.84,
+              "mean_spearman": 0.9056,
+              "stability_rate": 0.9196
+            },
+            "k_10": {
+              "k": 10,
+              "chance_baseline": 0.9091,
+              "min_overlap": 0.7,
+              "required_overlap_count": 7,
+              "mean_top_k_overlap": 0.9994,
+              "median_top_k_overlap": 1.0,
+              "mean_spearman": 0.9056,
+              "stability_rate": 1.0
+            }
+          },
+          "primary_k5": {
+            "k": 5,
+            "chance_baseline": 0.4545,
+            "min_overlap": 0.7,
+            "required_overlap_count": 4,
+            "mean_top_k_overlap": 0.8435,
+            "median_top_k_overlap": 0.84,
+            "mean_spearman": 0.9056,
+            "stability_rate": 0.9196
+          }
+        },
+        "top_false_positives_cohort": {
+          "n_samples": 94,
+          "n_replicates": 5,
+          "n_features_p": 11,
+          "sensitivity": {
+            "k_3": {
+              "k": 3,
+              "chance_baseline": 0.2727,
+              "min_overlap": 0.7,
+              "required_overlap_count": 3,
+              "mean_top_k_overlap": 0.834,
+              "median_top_k_overlap": 0.8667,
+              "mean_spearman": 0.8616,
+              "stability_rate": 0.5106
+            },
+            "k_5": {
+              "k": 5,
+              "chance_baseline": 0.4545,
+              "min_overlap": 0.7,
+              "required_overlap_count": 4,
+              "mean_top_k_overlap": 0.8128,
+              "median_top_k_overlap": 0.84,
+              "mean_spearman": 0.8616,
+              "stability_rate": 0.8511
+            },
+            "k_10": {
+              "k": 10,
+              "chance_baseline": 0.9091,
+              "min_overlap": 0.7,
+              "required_overlap_count": 7,
+              "mean_top_k_overlap": 0.9989,
+              "median_top_k_overlap": 1.0,
+              "mean_spearman": 0.8616,
+              "stability_rate": 1.0
+            }
+          },
+          "primary_k5": {
+            "k": 5,
+            "chance_baseline": 0.4545,
+            "min_overlap": 0.7,
+            "required_overlap_count": 4,
+            "mean_top_k_overlap": 0.8128,
+            "median_top_k_overlap": 0.84,
+            "mean_spearman": 0.8616,
+            "stability_rate": 0.8511
+          }
+        }
+      }
+    },
+    "logistic_regression": {
+      "label": "Logistic Regression baseline",
+      "precision": 0.6749,
+      "recall": 0.8155,
+      "f1": 0.7386,
+      "pr_auc": 0.8505,
+      "roc_auc": 0.9892,
+      "mcc": 0.7379,
+      "fpr": 0.0055,
+      "confusion_matrix": {
+        "true_negatives": 115859,
+        "false_positives": 645,
+        "false_negatives": 303,
+        "true_positives": 1339
+      }
+    },
+    "random_forest": {
+      "label": "Random Forest baseline",
+      "precision": 0.8575,
+      "recall": 0.8721,
+      "f1": 0.8647,
+      "pr_auc": 0.9362,
+      "roc_auc": 0.998,
+      "mcc": 0.8628,
+      "fpr": 0.002,
+      "confusion_matrix": {
+        "true_negatives": 116266,
+        "false_positives": 238,
+        "false_negatives": 210,
+        "true_positives": 1432
+      }
+    },
+    "rules_baseline": {
+      "label": "Rules baseline (backend rule function)",
+      "drain_ge_95pct_alone": {
+        "precision": 0.0623,
+        "recall": 0.9622,
+        "f1": 0.117,
+        "pr_auc": 0.0605,
+        "fpr": 0.2041,
+        "true_positives": 1580,
+        "false_positives": 23781,
+        "true_negatives": 92723,
+        "false_negatives": 62
+      },
+      "amount_gt_200k_alone": {
+        "precision": 0.0533,
+        "recall": 0.6711,
+        "f1": 0.0988,
+        "pr_auc": 0.0403,
+        "fpr": 0.168,
+        "true_positives": 1102,
+        "false_positives": 19569,
+        "true_negatives": 96935,
+        "false_negatives": 540
+      },
+      "union_drain_or_amount": {
+        "precision": 0.0477,
+        "recall": 0.9951,
+        "f1": 0.091,
+        "pr_auc": 0.0475,
+        "fpr": 0.2802,
+        "true_positives": 1634,
+        "false_positives": 32640,
+        "true_negatives": 83864,
+        "false_negatives": 8
+      }
+    },
+    "full_train_none": {
+      "label": "Full-train reference (none, 6.08M rows)",
+      "precision": 0.9977,
+      "recall": 0.7789,
+      "f1": 0.8748,
+      "pr_auc": 0.9823,
+      "roc_auc": 0.9997,
+      "mcc": 0.8801,
+      "fpr": 0.0,
+      "confusion_matrix": {
+        "true_negatives": 116501,
+        "false_positives": 3,
+        "false_negatives": 363,
+        "true_positives": 1279
+      }
+    },
+    "full_train_class_weight": {
+      "label": "Full-train reference (class_weight, 6.08M rows)",
+      "precision": 0.5393,
+      "recall": 0.9994,
+      "f1": 0.7005,
+      "pr_auc": 0.9831,
+      "roc_auc": 0.9997,
+      "mcc": 0.7297,
+      "fpr": 0.012,
+      "confusion_matrix": {
+        "true_negatives": 115102,
+        "false_positives": 1402,
+        "false_negatives": 1,
+        "true_positives": 1641
+      }
+    },
+    "variant_A_reference": {
+      "label": "Variant A reference (15 features with balance errors/deltas)",
+      "precision": 0.9832,
+      "recall": 0.9994,
+      "f1": 0.9912,
+      "pr_auc": 0.9999,
+      "roc_auc": 1.0,
+      "mcc": 0.9912,
+      "fpr": 0.0002,
+      "confusion_matrix": {
+        "true_negatives": 116476,
+        "false_positives": 28,
+        "false_negatives": 1,
+        "true_positives": 1641
+      },
+      "shap_stability": {
+        "n_samples": 1642,
+        "n_replicates": 2,
+        "n_features_p": 15,
+        "sensitivity": {
+          "k_3": {
+            "k": 3,
+            "chance_baseline": 0.2,
+            "min_overlap": 0.7,
+            "required_overlap_count": 3,
+            "mean_top_k_overlap": 0.8471,
+            "median_top_k_overlap": 0.8333,
+            "mean_spearman": 0.8943,
+            "stability_rate": 0.3149
+          },
+          "k_5": {
+            "k": 5,
+            "chance_baseline": 0.3333,
+            "min_overlap": 0.7,
+            "required_overlap_count": 4,
+            "mean_top_k_overlap": 0.8292,
+            "median_top_k_overlap": 0.8,
+            "mean_spearman": 0.8943,
+            "stability_rate": 0.9622
+          },
+          "k_10": {
+            "k": 10,
+            "chance_baseline": 0.6667,
+            "min_overlap": 0.7,
+            "required_overlap_count": 7,
+            "mean_top_k_overlap": 0.8723,
+            "median_top_k_overlap": 0.85,
+            "mean_spearman": 0.8943,
+            "stability_rate": 1.0
+          }
+        },
+        "primary_k5": {
+          "k": 5,
+          "chance_baseline": 0.3333,
+          "min_overlap": 0.7,
+          "required_overlap_count": 4,
+          "mean_top_k_overlap": 0.8292,
+          "median_top_k_overlap": 0.8,
+          "mean_spearman": 0.8943,
+          "stability_rate": 0.9622
+        }
+      }
+    },
+    "cross_strategy_shap_agreement": {
+      "n_samples": 1642,
+      "k": 5,
+      "chance_baseline": 0.4545,
+      "pairwise_comparisons": {
+        "class_weight_vs_none": {
+          "strategy_1": "class_weight",
+          "strategy_2": "none",
+          "k": 5,
+          "chance_baseline": 0.4545,
+          "mean_top_k_overlap": 0.8269,
+          "median_top_k_overlap": 0.8,
+          "mean_spearman": 0.9321
+        },
+        "class_weight_vs_smote_enn": {
+          "strategy_1": "class_weight",
+          "strategy_2": "smote_enn",
+          "k": 5,
+          "chance_baseline": 0.4545,
+          "mean_top_k_overlap": 0.7933,
+          "median_top_k_overlap": 0.8,
+          "mean_spearman": 0.8931
+        },
+        "none_vs_smote_enn": {
+          "strategy_1": "none",
+          "strategy_2": "smote_enn",
+          "k": 5,
+          "chance_baseline": 0.4545,
+          "mean_top_k_overlap": 0.7993,
+          "median_top_k_overlap": 0.8,
+          "mean_spearman": 0.8967
+        }
+      }
+    }
+  },
+  "evaluation_metrics": {
+    "precision": 0.9429,
+    "recall": 0.9446,
+    "f1": 0.9437,
+    "pr_auc": 0.9907,
+    "roc_auc": 0.9999,
+    "mcc": 0.9429
+  }
+}

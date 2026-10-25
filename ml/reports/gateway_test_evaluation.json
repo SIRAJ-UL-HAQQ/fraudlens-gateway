@@ -1,0 +1,73 @@
+{
+  "dataset_summary": {
+    "total_test_transactions": 118146,
+    "test_frauds": 1642,
+    "test_legit": 116504,
+    "test_prevalence_pct": 1.3898,
+    "train_prevalence_pct": 0.0951
+  },
+  "thresholds": {
+    "review": 0.9557417035102844,
+    "high": 0.9711773991584778
+  },
+  "gateway_decision_distribution": {
+    "low_risk": {
+      "count": 81370,
+      "share": 0.6887,
+      "frauds": 4,
+      "legit": 81366
+    },
+    "analyst_review": {
+      "count": 35379,
+      "share": 0.2995,
+      "frauds": 335,
+      "legit": 35044
+    },
+    "high_risk": {
+      "count": 1397,
+      "share": 0.0118,
+      "frauds": 1303,
+      "legit": 94
+    }
+  },
+  "analyst_review_causes": {
+    "score_band_only": {
+      "count": 3,
+      "frauds": 0,
+      "legit": 3
+    },
+    "unstable_explanation_reroute": {
+      "count": 299,
+      "frauds": 272,
+      "legit": 27
+    },
+    "rule_flag_score_below_review": {
+      "count": 35077,
+      "frauds": 63,
+      "legit": 35014
+    }
+  },
+  "headline_metrics": {
+    "combined_fraud_recall_high_plus_review": 0.9976,
+    "combined_fraud_count_caught": 1638,
+    "missed_frauds_low_risk": 4,
+    "analyst_review_share_of_legitimate": 0.3008,
+    "analyst_review_legit_count": 35044
+  },
+  "stability_split_on_candidate_high_risk": {
+    "stable": {
+      "count": 1397,
+      "true_positives": 1303,
+      "false_positives": 94,
+      "precision": 0.9327,
+      "fpr": 0.000807
+    },
+    "unstable": {
+      "count": 299,
+      "true_positives": 272,
+      "false_positives": 27,
+      "precision": 0.9097,
+      "fpr": 0.000232
+    }
+  }
+}

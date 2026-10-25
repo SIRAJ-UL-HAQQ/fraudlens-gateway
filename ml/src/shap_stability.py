@@ -5,6 +5,7 @@ strategies. Provides arithmetic for decision routing (stable vs unstable)
 per SRS requirements:
 - Formula: |top_k(main) ∩ top_k(replicate)| / k
 - Stable iff overlap_count >= ceil(min_overlap * k - 1e-9)
+- Includes theoretical chance baseline (k / p) and sensitivity at k=3, 5, 10
 """
 
 import math
@@ -141,14 +142,17 @@ def evaluate_replicate_stability(
 
     n_samples = main_shap.shape[0]
     n_replicates = len(replicate_shaps)
+    p = len(feature_names)
 
     results: dict[str, Any] = {
         "n_samples": n_samples,
         "n_replicates": n_replicates,
+        "n_features_p": p,
         "sensitivity": {},
     }
 
     for k in k_values:
+        chance_baseline = round(float(k / p), 4)
         sample_overlaps = []
         sample_spearmans = []
         sample_stable_flags = []
@@ -178,6 +182,7 @@ def evaluate_replicate_stability(
 
         results["sensitivity"][f"k_{k}"] = {
             "k": k,
+            "chance_baseline": chance_baseline,
             "min_overlap": min_overlap,
             "required_overlap_count": math.ceil(min_overlap * k - 1e-9),
             "mean_top_k_overlap": round(float(np.mean(sample_overlaps)), 4),
@@ -189,3 +194,67 @@ def evaluate_replicate_stability(
     # Record primary summary at default k=5
     results["primary_k5"] = results["sensitivity"]["k_5"]
     return results
+
+
+def evaluate_cross_strategy_agreement(
+    strategy_shaps: dict[str, np.ndarray],
+    feature_names: list[str],
+    k: int = 5,
+) -> dict[str, Any]:
+    """Evaluate pairwise SHAP agreement between main models of different strategies on the same rows.
+
+    Parameters
+    ----------
+    strategy_shaps : dict[str, np.ndarray]
+        Mapping from strategy name to (N, P) SHAP matrix.
+    feature_names : list[str]
+        Names of the P features.
+    k : int, default=5
+        Number of top features evaluated.
+
+    Returns
+    -------
+    dict[str, Any]
+        Pairwise overlap and Spearman correlation summary.
+    """
+    strat_names = list(strategy_shaps.keys())
+    p = len(feature_names)
+    chance_baseline = round(float(k / p), 4)
+
+    pairwise: dict[str, Any] = {}
+    n_samples = next(iter(strategy_shaps.values())).shape[0]
+
+    for i in range(len(strat_names)):
+        for j in range(i + 1, len(strat_names)):
+            s1 = strat_names[i]
+            s2 = strat_names[j]
+            pair_key = f"{s1}_vs_{s2}"
+
+            m1 = strategy_shaps[s1]
+            m2 = strategy_shaps[s2]
+
+            overlaps = []
+            spearmans = []
+
+            for idx in range(n_samples):
+                top1 = extract_top_features(m1[idx], feature_names, k)
+                top2 = extract_top_features(m2[idx], feature_names, k)
+                overlaps.append(top_k_overlap(top1, top2))
+                spearmans.append(spearman_rank_correlation(m1[idx], m2[idx]))
+
+            pairwise[pair_key] = {
+                "strategy_1": s1,
+                "strategy_2": s2,
+                "k": k,
+                "chance_baseline": chance_baseline,
+                "mean_top_k_overlap": round(float(np.mean(overlaps)), 4),
+                "median_top_k_overlap": round(float(np.median(overlaps)), 4),
+                "mean_spearman": round(float(np.mean(spearmans)), 4),
+            }
+
+    return {
+        "n_samples": n_samples,
+        "k": k,
+        "chance_baseline": chance_baseline,
+        "pairwise_comparisons": pairwise,
+    }

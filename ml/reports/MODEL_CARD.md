@@ -108,6 +108,68 @@ Evaluating the complete backend decision pipeline (`route_decision` with ML scor
   $$\text{Precision}(\pi_{\text{train}}) = \frac{\text{TPR} \cdot \pi_{\text{train}}}{\text{TPR} \cdot \pi_{\text{train}} + \text{FPR} \cdot (1 - \pi_{\text{train}})}$$
   where $\pi_{\text{train}} = 0.0951\%$ ($5,781 / 6,082,007$) and $\pi_{\text{test}} = 1.3898\%$ ($1,642 / 118,146$). Test prevalence is $\approx 14.6\times$ higher than the chronological training base rate.
 
+## Heuristic Safety Rules Performance (Train & Validation Splits)
+
+Evaluated strictly on **TRAIN** (steps 1..520) and **VALIDATION** (steps 521..595) splits; test numbers are excluded from heuristic calibration. All rules implement the exact logic in `backend.app.services.rules`.
+
+### Train Split: Heuristic Rules Evaluation
+
+| Rule Name | Flag Rate | Fraud Recall | Precision | FPR | Total Triggers | TP | FP |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| Origin Account Drained (>= 90%) | 18.586% | 97.80% | 0.50% | 18.510% | 1,130,386 | 5,654 | 1,124,732 |
+| Large Transfer Amount (>= 200k) | 18.890% | 66.65% | 0.34% | 18.850% | 1,148,920 | 3,853 | 1,145,067 |
+| Destination Balance Inconsistency | 9.014% | 56.86% | 0.60% | 8.970% | 548,236 | 3,287 | 544,949 |
+| Very High Amount for Type | 11.034% | 52.98% | 0.46% | 10.990% | 671,116 | 3,063 | 668,053 |
+| **Union: Drain OR Large Transfer (SRS FR-7)** | 27.949% | 99.71% | 0.34% | 27.880% | 1,699,836 | 5,764 | 1,694,072 |
+| **Union: All 4 Backend Rules** | 32.310% | 99.79% | 0.29% | 32.250% | 1,965,098 | 5,769 | 1,959,329 |
+
+### Validation Split: Heuristic Rules Evaluation
+
+| Rule Name | Flag Rate | Fraud Recall | Precision | FPR | Total Triggers | TP | FP |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| Origin Account Drained (>= 90%) | 19.898% | 98.48% | 2.41% | 19.510% | 32,327 | 778 | 31,549 |
+| Large Transfer Amount (>= 200k) | 17.282% | 65.32% | 1.84% | 17.050% | 28,078 | 516 | 27,562 |
+| Destination Balance Inconsistency | 5.128% | 55.70% | 5.28% | 4.880% | 8,331 | 440 | 7,891 |
+| Very High Amount for Type | 9.727% | 51.39% | 2.57% | 9.520% | 15,803 | 406 | 15,397 |
+| **Union: Drain OR Large Transfer (SRS FR-7)** | 27.864% | 99.75% | 1.74% | 27.510% | 45,270 | 788 | 44,482 |
+| **Union: All 4 Backend Rules** | 30.892% | 99.75% | 1.57% | 30.560% | 50,190 | 788 | 49,402 |
+
+### Validation Split: Rule Performance Breakdown by Transaction Type
+
+| Rule Name | Type | Volume | Frauds | Triggers | Flag Rate | Recall | Precision | FPR |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| Origin Drained | TRANSFER | 14,771 | 395 | 6,170 | 41.771% | 97.47% | 6.24% | 40.241% |
+| Origin Drained | CASH_OUT | 53,167 | 395 | 26,157 | 49.198% | 99.49% | 1.50% | 48.821% |
+| Origin Drained | PAYMENT | 56,586 | 0 | 0 | 0.000% | - | - | 0.000% |
+| Origin Drained | CASH_IN | 36,591 | 0 | 0 | 0.000% | - | - | 0.000% |
+| Origin Drained | DEBIT | 1,352 | 0 | 0 | 0.000% | - | - | 0.000% |
+| Large Transfer | TRANSFER | 14,771 | 395 | 10,809 | 73.177% | 65.57% | 2.40% | 73.386% |
+| Large Transfer | CASH_OUT | 53,167 | 395 | 17,269 | 32.481% | 65.06% | 1.49% | 32.237% |
+| Large Transfer | PAYMENT | 56,586 | 0 | 0 | 0.000% | - | - | 0.000% |
+| Large Transfer | CASH_IN | 36,591 | 0 | 0 | 0.000% | - | - | 0.000% |
+| Large Transfer | DEBIT | 1,352 | 0 | 0 | 0.000% | - | - | 0.000% |
+| Dest Inconsistency | TRANSFER | 14,771 | 395 | 2,237 | 15.144% | 100.00% | 17.66% | 12.813% |
+| Dest Inconsistency | CASH_OUT | 53,167 | 395 | 6,094 | 11.462% | 11.39% | 0.74% | 11.463% |
+| Dest Inconsistency | PAYMENT | 56,586 | 0 | 0 | 0.000% | - | - | 0.000% |
+| Dest Inconsistency | CASH_IN | 36,591 | 0 | 0 | 0.000% | - | - | 0.000% |
+| Dest Inconsistency | DEBIT | 1,352 | 0 | 0 | 0.000% | - | - | 0.000% |
+| Very High Amount | TRANSFER | 14,771 | 395 | 6,394 | 43.288% | 45.82% | 2.83% | 43.218% |
+| Very High Amount | CASH_OUT | 53,167 | 395 | 7,209 | 13.559% | 56.96% | 3.12% | 13.234% |
+| Very High Amount | PAYMENT | 56,586 | 0 | 1,485 | 2.624% | - | 0.00% | 2.624% |
+| Very High Amount | CASH_IN | 36,591 | 0 | 640 | 1.749% | - | 0.00% | 1.749% |
+| Very High Amount | DEBIT | 1,352 | 0 | 75 | 5.547% | - | 0.00% | 5.547% |
+| Union (FR-7) | TRANSFER | 14,771 | 395 | 12,041 | 81.518% | 100.00% | 3.28% | 81.010% |
+| Union (FR-7) | CASH_OUT | 53,167 | 395 | 33,229 | 62.499% | 99.49% | 1.18% | 62.222% |
+| Union (FR-7) | PAYMENT | 56,586 | 0 | 0 | 0.000% | - | - | 0.000% |
+| Union (FR-7) | CASH_IN | 36,591 | 0 | 0 | 0.000% | - | - | 0.000% |
+| Union (FR-7) | DEBIT | 1,352 | 0 | 0 | 0.000% | - | - | 0.000% |
+| Union (All Rules) | TRANSFER | 14,771 | 395 | 12,384 | 83.840% | 100.00% | 3.19% | 83.396% |
+| Union (All Rules) | CASH_OUT | 53,167 | 395 | 35,606 | 66.970% | 99.49% | 1.10% | 66.727% |
+| Union (All Rules) | PAYMENT | 56,586 | 0 | 1,485 | 2.624% | - | 0.00% | 2.624% |
+| Union (All Rules) | CASH_IN | 36,591 | 0 | 640 | 1.749% | - | 0.00% | 1.749% |
+| Union (All Rules) | DEBIT | 1,352 | 0 | 75 | 5.547% | - | 0.00% | 5.547% |
+
+
 ## Limitations & Operational Constraints
 1. **Validation Re-use**: Both Optuna hyperparameter optimization and threshold calibration were determined on the same temporal validation split.
 2. **Uncalibrated Output**: Risk scores reflect ranking confidence; they must not be interpreted as empirical fraud probabilities.

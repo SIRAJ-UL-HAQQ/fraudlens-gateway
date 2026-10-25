@@ -3168,39 +3168,1130 @@
       }
     }
   },
-  "rules_baseline_test_evaluation": {
-    "drain_ge_95pct_alone": {
-      "precision": 0.0623,
-      "recall": 0.9622,
-      "f1": 0.117,
-      "pr_auc": 0.0605,
-      "fpr": 0.2041,
-      "true_positives": 1580,
-      "false_positives": 23781,
-      "true_negatives": 92723,
-      "false_negatives": 62
+  "rules_performance_train_val": {
+    "train": {
+      "ORIGIN_ACCOUNT_DRAINED": {
+        "flag_rate": 0.185857,
+        "recall": 0.978,
+        "precision": 0.005,
+        "f1": 0.01,
+        "pr_auc": 0.0049,
+        "fpr": 0.1851,
+        "true_positives": 5654,
+        "false_positives": 1124732,
+        "true_negatives": 4951494,
+        "false_negatives": 127,
+        "total_triggers": 1130386,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 506592,
+            "frauds": 2881,
+            "triggers": 217126,
+            "flag_rate": 0.428601,
+            "recall": 0.965637,
+            "precision": 0.012813,
+            "fpr": 0.42553,
+            "true_positives": 2782,
+            "false_positives": 214344
+          },
+          "CASH_OUT": {
+            "total_rows": 2147137,
+            "frauds": 2900,
+            "triggers": 913260,
+            "flag_rate": 0.425338,
+            "recall": 0.990345,
+            "precision": 0.003145,
+            "fpr": 0.424574,
+            "true_positives": 2872,
+            "false_positives": 910388
+          },
+          "PAYMENT": {
+            "total_rows": 2053690,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 1335450,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 39138,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "LARGE_TRANSFER_AMOUNT": {
+        "flag_rate": 0.188905,
+        "recall": 0.6665,
+        "precision": 0.0034,
+        "f1": 0.0067,
+        "pr_auc": 0.0026,
+        "fpr": 0.1885,
+        "true_positives": 3853,
+        "false_positives": 1145067,
+        "true_negatives": 4931159,
+        "false_negatives": 1928,
+        "total_triggers": 1148920,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 506592,
+            "frauds": 2881,
+            "triggers": 390215,
+            "flag_rate": 0.770275,
+            "recall": 0.668518,
+            "precision": 0.004936,
+            "fpr": 0.770857,
+            "true_positives": 1926,
+            "false_positives": 388289
+          },
+          "CASH_OUT": {
+            "total_rows": 2147137,
+            "frauds": 2900,
+            "triggers": 758705,
+            "flag_rate": 0.353357,
+            "recall": 0.664483,
+            "precision": 0.00254,
+            "fpr": 0.352936,
+            "true_positives": 1927,
+            "false_positives": 756778
+          },
+          "PAYMENT": {
+            "total_rows": 2053690,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 1335450,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 39138,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "DEST_BALANCE_INCONSISTENCY": {
+        "flag_rate": 0.090141,
+        "recall": 0.5686,
+        "precision": 0.006,
+        "f1": 0.0119,
+        "pr_auc": 0.0038,
+        "fpr": 0.0897,
+        "true_positives": 3287,
+        "false_positives": 544949,
+        "true_negatives": 5531277,
+        "false_negatives": 2494,
+        "total_triggers": 548236,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 506592,
+            "frauds": 2881,
+            "triggers": 115039,
+            "flag_rate": 0.227084,
+            "recall": 0.999306,
+            "precision": 0.025026,
+            "fpr": 0.222667,
+            "true_positives": 2879,
+            "false_positives": 112160
+          },
+          "CASH_OUT": {
+            "total_rows": 2147137,
+            "frauds": 2900,
+            "triggers": 433197,
+            "flag_rate": 0.201756,
+            "recall": 0.14069,
+            "precision": 0.000942,
+            "fpr": 0.201838,
+            "true_positives": 408,
+            "false_positives": 432789
+          },
+          "PAYMENT": {
+            "total_rows": 2053690,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 1335450,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 39138,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "VERY_HIGH_AMOUNT_FOR_TYPE": {
+        "flag_rate": 0.110344,
+        "recall": 0.5298,
+        "precision": 0.0046,
+        "f1": 0.0091,
+        "pr_auc": 0.0029,
+        "fpr": 0.1099,
+        "true_positives": 3063,
+        "false_positives": 668053,
+        "true_negatives": 5408173,
+        "false_negatives": 2718,
+        "total_triggers": 671116,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 506592,
+            "frauds": 2881,
+            "triggers": 250163,
+            "flag_rate": 0.493816,
+            "recall": 0.477612,
+            "precision": 0.0055,
+            "fpr": 0.493908,
+            "true_positives": 1376,
+            "false_positives": 248787
+          },
+          "CASH_OUT": {
+            "total_rows": 2147137,
+            "frauds": 2900,
+            "triggers": 350601,
+            "flag_rate": 0.163288,
+            "recall": 0.581724,
+            "precision": 0.004812,
+            "fpr": 0.162722,
+            "true_positives": 1687,
+            "false_positives": 348914
+          },
+          "PAYMENT": {
+            "total_rows": 2053690,
+            "frauds": 0,
+            "triggers": 41759,
+            "flag_rate": 0.020334,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.020334,
+            "true_positives": 0,
+            "false_positives": 41759
+          },
+          "CASH_IN": {
+            "total_rows": 1335450,
+            "frauds": 0,
+            "triggers": 24915,
+            "flag_rate": 0.018657,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.018657,
+            "true_positives": 0,
+            "false_positives": 24915
+          },
+          "DEBIT": {
+            "total_rows": 39138,
+            "frauds": 0,
+            "triggers": 3678,
+            "flag_rate": 0.093975,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.093975,
+            "true_positives": 0,
+            "false_positives": 3678
+          }
+        }
+      },
+      "union_drain_or_amount": {
+        "flag_rate": 0.279486,
+        "recall": 0.9971,
+        "precision": 0.0034,
+        "f1": 0.0068,
+        "pr_auc": 0.0034,
+        "fpr": 0.2788,
+        "true_positives": 5764,
+        "false_positives": 1694072,
+        "true_negatives": 4382154,
+        "false_negatives": 17,
+        "total_triggers": 1699836,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 506592,
+            "frauds": 2881,
+            "triggers": 426537,
+            "flag_rate": 0.841973,
+            "recall": 1.0,
+            "precision": 0.006754,
+            "fpr": 0.84107,
+            "true_positives": 2881,
+            "false_positives": 423656
+          },
+          "CASH_OUT": {
+            "total_rows": 2147137,
+            "frauds": 2900,
+            "triggers": 1273299,
+            "flag_rate": 0.593022,
+            "recall": 0.994138,
+            "precision": 0.002264,
+            "fpr": 0.592479,
+            "true_positives": 2883,
+            "false_positives": 1270416
+          },
+          "PAYMENT": {
+            "total_rows": 2053690,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 1335450,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 39138,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "union_all_rules": {
+        "flag_rate": 0.3231,
+        "recall": 0.9979,
+        "precision": 0.0029,
+        "f1": 0.0059,
+        "pr_auc": 0.0029,
+        "fpr": 0.3225,
+        "true_positives": 5769,
+        "false_positives": 1959329,
+        "true_negatives": 4116897,
+        "false_negatives": 12,
+        "total_triggers": 1965098,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 506592,
+            "frauds": 2881,
+            "triggers": 442940,
+            "flag_rate": 0.874353,
+            "recall": 1.0,
+            "precision": 0.006504,
+            "fpr": 0.873634,
+            "true_positives": 2881,
+            "false_positives": 440059
+          },
+          "CASH_OUT": {
+            "total_rows": 2147137,
+            "frauds": 2900,
+            "triggers": 1451806,
+            "flag_rate": 0.676159,
+            "recall": 0.995862,
+            "precision": 0.001989,
+            "fpr": 0.675727,
+            "true_positives": 2888,
+            "false_positives": 1448918
+          },
+          "PAYMENT": {
+            "total_rows": 2053690,
+            "frauds": 0,
+            "triggers": 41759,
+            "flag_rate": 0.020334,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.020334,
+            "true_positives": 0,
+            "false_positives": 41759
+          },
+          "CASH_IN": {
+            "total_rows": 1335450,
+            "frauds": 0,
+            "triggers": 24915,
+            "flag_rate": 0.018657,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.018657,
+            "true_positives": 0,
+            "false_positives": 24915
+          },
+          "DEBIT": {
+            "total_rows": 39138,
+            "frauds": 0,
+            "triggers": 3678,
+            "flag_rate": 0.093975,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.093975,
+            "true_positives": 0,
+            "false_positives": 3678
+          }
+        }
+      },
+      "drain_ge_95pct_alone": {
+        "flag_rate": 0.185857,
+        "recall": 0.978,
+        "precision": 0.005,
+        "f1": 0.01,
+        "pr_auc": 0.0049,
+        "fpr": 0.1851,
+        "true_positives": 5654,
+        "false_positives": 1124732,
+        "true_negatives": 4951494,
+        "false_negatives": 127,
+        "total_triggers": 1130386,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 506592,
+            "frauds": 2881,
+            "triggers": 217126,
+            "flag_rate": 0.428601,
+            "recall": 0.965637,
+            "precision": 0.012813,
+            "fpr": 0.42553,
+            "true_positives": 2782,
+            "false_positives": 214344
+          },
+          "CASH_OUT": {
+            "total_rows": 2147137,
+            "frauds": 2900,
+            "triggers": 913260,
+            "flag_rate": 0.425338,
+            "recall": 0.990345,
+            "precision": 0.003145,
+            "fpr": 0.424574,
+            "true_positives": 2872,
+            "false_positives": 910388
+          },
+          "PAYMENT": {
+            "total_rows": 2053690,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 1335450,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 39138,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "amount_gt_200k_alone": {
+        "flag_rate": 0.188905,
+        "recall": 0.6665,
+        "precision": 0.0034,
+        "f1": 0.0067,
+        "pr_auc": 0.0026,
+        "fpr": 0.1885,
+        "true_positives": 3853,
+        "false_positives": 1145067,
+        "true_negatives": 4931159,
+        "false_negatives": 1928,
+        "total_triggers": 1148920,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 506592,
+            "frauds": 2881,
+            "triggers": 390215,
+            "flag_rate": 0.770275,
+            "recall": 0.668518,
+            "precision": 0.004936,
+            "fpr": 0.770857,
+            "true_positives": 1926,
+            "false_positives": 388289
+          },
+          "CASH_OUT": {
+            "total_rows": 2147137,
+            "frauds": 2900,
+            "triggers": 758705,
+            "flag_rate": 0.353357,
+            "recall": 0.664483,
+            "precision": 0.00254,
+            "fpr": 0.352936,
+            "true_positives": 1927,
+            "false_positives": 756778
+          },
+          "PAYMENT": {
+            "total_rows": 2053690,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 1335450,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 39138,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      }
     },
-    "amount_gt_200k_alone": {
-      "precision": 0.0533,
-      "recall": 0.6711,
-      "f1": 0.0988,
-      "pr_auc": 0.0403,
-      "fpr": 0.168,
-      "true_positives": 1102,
-      "false_positives": 19569,
-      "true_negatives": 96935,
-      "false_negatives": 540
-    },
-    "union_drain_or_amount": {
-      "precision": 0.0477,
-      "recall": 0.9951,
-      "f1": 0.091,
-      "pr_auc": 0.0475,
-      "fpr": 0.2802,
-      "true_positives": 1634,
-      "false_positives": 32640,
-      "true_negatives": 83864,
-      "false_negatives": 8
+    "validation": {
+      "ORIGIN_ACCOUNT_DRAINED": {
+        "flag_rate": 0.198976,
+        "recall": 0.9848,
+        "precision": 0.0241,
+        "f1": 0.047,
+        "pr_auc": 0.0238,
+        "fpr": 0.1951,
+        "true_positives": 778,
+        "false_positives": 31549,
+        "true_negatives": 130128,
+        "false_negatives": 12,
+        "total_triggers": 32327,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 14771,
+            "frauds": 395,
+            "triggers": 6170,
+            "flag_rate": 0.41771,
+            "recall": 0.974684,
+            "precision": 0.062399,
+            "fpr": 0.402407,
+            "true_positives": 385,
+            "false_positives": 5785
+          },
+          "CASH_OUT": {
+            "total_rows": 53167,
+            "frauds": 395,
+            "triggers": 26157,
+            "flag_rate": 0.491978,
+            "recall": 0.994937,
+            "precision": 0.015025,
+            "fpr": 0.488213,
+            "true_positives": 393,
+            "false_positives": 25764
+          },
+          "PAYMENT": {
+            "total_rows": 56586,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 36591,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 1352,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "LARGE_TRANSFER_AMOUNT": {
+        "flag_rate": 0.172823,
+        "recall": 0.6532,
+        "precision": 0.0184,
+        "f1": 0.0357,
+        "pr_auc": 0.0137,
+        "fpr": 0.1705,
+        "true_positives": 516,
+        "false_positives": 27562,
+        "true_negatives": 134115,
+        "false_negatives": 274,
+        "total_triggers": 28078,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 14771,
+            "frauds": 395,
+            "triggers": 10809,
+            "flag_rate": 0.731772,
+            "recall": 0.655696,
+            "precision": 0.023962,
+            "fpr": 0.733862,
+            "true_positives": 259,
+            "false_positives": 10550
+          },
+          "CASH_OUT": {
+            "total_rows": 53167,
+            "frauds": 395,
+            "triggers": 17269,
+            "flag_rate": 0.324807,
+            "recall": 0.650633,
+            "precision": 0.014882,
+            "fpr": 0.322368,
+            "true_positives": 257,
+            "false_positives": 17012
+          },
+          "PAYMENT": {
+            "total_rows": 56586,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 36591,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 1352,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "DEST_BALANCE_INCONSISTENCY": {
+        "flag_rate": 0.051278,
+        "recall": 0.557,
+        "precision": 0.0528,
+        "f1": 0.0965,
+        "pr_auc": 0.0316,
+        "fpr": 0.0488,
+        "true_positives": 440,
+        "false_positives": 7891,
+        "true_negatives": 153786,
+        "false_negatives": 350,
+        "total_triggers": 8331,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 14771,
+            "frauds": 395,
+            "triggers": 2237,
+            "flag_rate": 0.151445,
+            "recall": 1.0,
+            "precision": 0.176576,
+            "fpr": 0.12813,
+            "true_positives": 395,
+            "false_positives": 1842
+          },
+          "CASH_OUT": {
+            "total_rows": 53167,
+            "frauds": 395,
+            "triggers": 6094,
+            "flag_rate": 0.11462,
+            "recall": 0.113924,
+            "precision": 0.007384,
+            "fpr": 0.114625,
+            "true_positives": 45,
+            "false_positives": 6049
+          },
+          "PAYMENT": {
+            "total_rows": 56586,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 36591,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 1352,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "VERY_HIGH_AMOUNT_FOR_TYPE": {
+        "flag_rate": 0.097269,
+        "recall": 0.5139,
+        "precision": 0.0257,
+        "f1": 0.0489,
+        "pr_auc": 0.0156,
+        "fpr": 0.0952,
+        "true_positives": 406,
+        "false_positives": 15397,
+        "true_negatives": 146280,
+        "false_negatives": 384,
+        "total_triggers": 15803,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 14771,
+            "frauds": 395,
+            "triggers": 6394,
+            "flag_rate": 0.432875,
+            "recall": 0.458228,
+            "precision": 0.028308,
+            "fpr": 0.432179,
+            "true_positives": 181,
+            "false_positives": 6213
+          },
+          "CASH_OUT": {
+            "total_rows": 53167,
+            "frauds": 395,
+            "triggers": 7209,
+            "flag_rate": 0.135592,
+            "recall": 0.56962,
+            "precision": 0.031211,
+            "fpr": 0.132343,
+            "true_positives": 225,
+            "false_positives": 6984
+          },
+          "PAYMENT": {
+            "total_rows": 56586,
+            "frauds": 0,
+            "triggers": 1485,
+            "flag_rate": 0.026243,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.026243,
+            "true_positives": 0,
+            "false_positives": 1485
+          },
+          "CASH_IN": {
+            "total_rows": 36591,
+            "frauds": 0,
+            "triggers": 640,
+            "flag_rate": 0.017491,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.017491,
+            "true_positives": 0,
+            "false_positives": 640
+          },
+          "DEBIT": {
+            "total_rows": 1352,
+            "frauds": 0,
+            "triggers": 75,
+            "flag_rate": 0.055473,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.055473,
+            "true_positives": 0,
+            "false_positives": 75
+          }
+        }
+      },
+      "union_drain_or_amount": {
+        "flag_rate": 0.278641,
+        "recall": 0.9975,
+        "precision": 0.0174,
+        "f1": 0.0342,
+        "pr_auc": 0.0174,
+        "fpr": 0.2751,
+        "true_positives": 788,
+        "false_positives": 44482,
+        "true_negatives": 117195,
+        "false_negatives": 2,
+        "total_triggers": 45270,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 14771,
+            "frauds": 395,
+            "triggers": 12041,
+            "flag_rate": 0.815178,
+            "recall": 1.0,
+            "precision": 0.032805,
+            "fpr": 0.8101,
+            "true_positives": 395,
+            "false_positives": 11646
+          },
+          "CASH_OUT": {
+            "total_rows": 53167,
+            "frauds": 395,
+            "triggers": 33229,
+            "flag_rate": 0.624993,
+            "recall": 0.994937,
+            "precision": 0.011827,
+            "fpr": 0.622224,
+            "true_positives": 393,
+            "false_positives": 32836
+          },
+          "PAYMENT": {
+            "total_rows": 56586,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 36591,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 1352,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "union_all_rules": {
+        "flag_rate": 0.308924,
+        "recall": 0.9975,
+        "precision": 0.0157,
+        "f1": 0.0309,
+        "pr_auc": 0.0157,
+        "fpr": 0.3056,
+        "true_positives": 788,
+        "false_positives": 49402,
+        "true_negatives": 112275,
+        "false_negatives": 2,
+        "total_triggers": 50190,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 14771,
+            "frauds": 395,
+            "triggers": 12384,
+            "flag_rate": 0.8384,
+            "recall": 1.0,
+            "precision": 0.031896,
+            "fpr": 0.833959,
+            "true_positives": 395,
+            "false_positives": 11989
+          },
+          "CASH_OUT": {
+            "total_rows": 53167,
+            "frauds": 395,
+            "triggers": 35606,
+            "flag_rate": 0.669701,
+            "recall": 0.994937,
+            "precision": 0.011037,
+            "fpr": 0.667267,
+            "true_positives": 393,
+            "false_positives": 35213
+          },
+          "PAYMENT": {
+            "total_rows": 56586,
+            "frauds": 0,
+            "triggers": 1485,
+            "flag_rate": 0.026243,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.026243,
+            "true_positives": 0,
+            "false_positives": 1485
+          },
+          "CASH_IN": {
+            "total_rows": 36591,
+            "frauds": 0,
+            "triggers": 640,
+            "flag_rate": 0.017491,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.017491,
+            "true_positives": 0,
+            "false_positives": 640
+          },
+          "DEBIT": {
+            "total_rows": 1352,
+            "frauds": 0,
+            "triggers": 75,
+            "flag_rate": 0.055473,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.055473,
+            "true_positives": 0,
+            "false_positives": 75
+          }
+        }
+      },
+      "drain_ge_95pct_alone": {
+        "flag_rate": 0.198976,
+        "recall": 0.9848,
+        "precision": 0.0241,
+        "f1": 0.047,
+        "pr_auc": 0.0238,
+        "fpr": 0.1951,
+        "true_positives": 778,
+        "false_positives": 31549,
+        "true_negatives": 130128,
+        "false_negatives": 12,
+        "total_triggers": 32327,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 14771,
+            "frauds": 395,
+            "triggers": 6170,
+            "flag_rate": 0.41771,
+            "recall": 0.974684,
+            "precision": 0.062399,
+            "fpr": 0.402407,
+            "true_positives": 385,
+            "false_positives": 5785
+          },
+          "CASH_OUT": {
+            "total_rows": 53167,
+            "frauds": 395,
+            "triggers": 26157,
+            "flag_rate": 0.491978,
+            "recall": 0.994937,
+            "precision": 0.015025,
+            "fpr": 0.488213,
+            "true_positives": 393,
+            "false_positives": 25764
+          },
+          "PAYMENT": {
+            "total_rows": 56586,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 36591,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 1352,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "amount_gt_200k_alone": {
+        "flag_rate": 0.172823,
+        "recall": 0.6532,
+        "precision": 0.0184,
+        "f1": 0.0357,
+        "pr_auc": 0.0137,
+        "fpr": 0.1705,
+        "true_positives": 516,
+        "false_positives": 27562,
+        "true_negatives": 134115,
+        "false_negatives": 274,
+        "total_triggers": 28078,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 14771,
+            "frauds": 395,
+            "triggers": 10809,
+            "flag_rate": 0.731772,
+            "recall": 0.655696,
+            "precision": 0.023962,
+            "fpr": 0.733862,
+            "true_positives": 259,
+            "false_positives": 10550
+          },
+          "CASH_OUT": {
+            "total_rows": 53167,
+            "frauds": 395,
+            "triggers": 17269,
+            "flag_rate": 0.324807,
+            "recall": 0.650633,
+            "precision": 0.014882,
+            "fpr": 0.322368,
+            "true_positives": 257,
+            "false_positives": 17012
+          },
+          "PAYMENT": {
+            "total_rows": 56586,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 36591,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 1352,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      }
     }
   },
   "single_feature_pr_auc": {

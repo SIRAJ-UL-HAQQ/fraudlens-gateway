@@ -47,6 +47,8 @@ ml/data/processed/*
 !ml/data/processed/.gitkeep
 ml/models/*
 !ml/models/.gitkeep
+ml/replicate_sets/*
+ml/reports/.training_progress.json
 *.pkl
 *.joblib
 *.onnx

@@ -2,7 +2,10 @@
 
 from pathlib import Path
 
-from scripts.generate_model_card_tables import generate_all_rules_markdown
+from scripts.generate_model_card_tables import (
+    generate_all_rules_markdown,
+    generate_strategy_comparison_table,
+)
 
 
 def test_model_card_rules_tables_match_json():
@@ -20,3 +23,13 @@ def test_model_card_rules_tables_match_json():
         "MODEL_CARD.md heuristic rules table has diverged from canonical JSON in eda.json. "
         "Run `python scripts/generate_model_card_tables.py --update` to resync."
     )
+
+
+def test_strategy_comparison_generator_runs():
+    """Assert strategy comparison table can be generated from metrics.json."""
+    metrics_path = Path("ml/reports/metrics.json")
+    assert metrics_path.exists(), f"Missing {metrics_path}"
+    table_md = generate_strategy_comparison_table(metrics_path)
+    assert "| Model / Strategy |" in table_md
+    assert "class_weight (deployed)" in table_md
+

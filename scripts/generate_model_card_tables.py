@@ -2,7 +2,8 @@
 
 Reads:
 - ml/reports/eda.json (contains rules_performance_train_val on TRAIN and VALIDATION)
-- ml/reports/metrics.json (contains model metrics)
+- ml/reports/metrics.json (contains model metrics, paths, and keys)
+- ml/reports/stability_bootstrap_comparison.json (contains multi-set bootstrap metrics)
 
 Usage:
     python scripts/generate_model_card_tables.py [--check] [--update]
@@ -104,25 +105,83 @@ def generate_all_rules_markdown(eda_path: Path) -> str:
     return f"{header}\n\n{desc}\n\n{train_tbl}\n\n{val_tbl}\n\n{val_type_tbl}\n"
 
 
-def update_model_card(model_card_path: Path, eda_path: Path) -> bool:
-    """Inject/update the generated rules section into MODEL_CARD.md."""
+def generate_strategy_comparison_table(metrics_path: Path) -> str:
+    """Read metrics.json and generate Model Strategy Results Comparison table."""
+    with open(metrics_path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    strat_comp = data.get("strategy_comparison", {})
+    lines = [
+        "## Model & Strategy Results Comparison (Held-Out Test Split)",
+        "",
+        "Source files: `ml/reports/metrics.json` (key: `strategy_comparison`) and `ml/reports/comparison.csv`.",
+        "",
+        "| Model / Strategy | Val PR-AUC | Test PR-AUC | Recall @ High | Precision @ High | F1 @ High | FPR @ High | Stable Rate ($k=5$) |",
+        "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |",
+    ]
+
+    order = [
+        ("class_weight", "class_weight (deployed)"),
+        ("none", "none (10:1 undersampled baseline)"),
+        ("smote_enn", "smote_enn"),
+        ("logistic_regression", "Logistic Regression baseline"),
+        ("random_forest", "Random Forest baseline"),
+        ("rules_baseline", "Rules baseline (FR-7 union)"),
+        ("full_train_none", "Full-train reference (none, 6.08M)"),
+        ("full_train_class_weight", "Full-train reference (class_weight, 6.08M)"),
+        ("variant_A_reference", "Variant A reference (15 features)"),
+    ]
+
+    for key, label in order:
+        if key not in strat_comp:
+            continue
+        row = strat_comp[key]
+        val_auc = f"{row.get('validation_pr_auc', '-'):.4f}" if isinstance(row.get('validation_pr_auc'), (float, int)) else str(row.get('validation_pr_auc', '-'))
+        test_auc = f"{row.get('test_pr_auc', row.get('pr_auc', '-')):.4f}" if isinstance(row.get('test_pr_auc', row.get('pr_auc')), (float, int)) else "-"
+        
+        # Recall & Precision at High
+        if "metrics_at_high" in row:
+            m_high = row["metrics_at_high"]
+            rec = f"{m_high.get('recall', 0.0) * 100:.2f}%"
+            prec = f"{m_high.get('precision', 0.0) * 100:.2f}%"
+            f1 = f"{m_high.get('f1', 0.0):.4f}"
+            fpr = f"{m_high.get('fpr', 0.0) * 100:.4f}%"
+        elif "recall" in row:
+            rec = f"{row.get('recall', 0.0) * 100:.2f}%"
+            prec = f"{row.get('precision', 0.0) * 100:.2f}%"
+            f1 = f"{row.get('f1', 0.0):.4f}"
+            fpr = f"{row.get('fpr', 0.0) * 100:.4f}%"
+        else:
+            rec = prec = f1 = fpr = "-"
+
+        # Stability rate
+        stab = row.get("shap_stability", {})
+        if "fraud_cohort" in stab and "primary_k5" in stab["fraud_cohort"]:
+            sr = f"{stab['fraud_cohort']['primary_k5'].get('stability_rate', 0.0) * 100:.2f}%"
+        elif "primary_k5" in stab:
+            sr = f"{stab['primary_k5'].get('stability_rate', 0.0) * 100:.2f}%"
+        else:
+            sr = "-"
+
+        lines.append(f"| {label} | {val_auc} | {test_auc} | {rec} | {prec} | {f1} | {fpr} | {sr} |")
+
+    return "\n".join(lines)
+
+
+def update_model_card(model_card_path: Path, eda_path: Path, metrics_path: Path) -> bool:
+    """Inject/update the generated tables into MODEL_CARD.md."""
     new_rules_md = generate_all_rules_markdown(eda_path)
     content = model_card_path.read_text(encoding="utf-8")
 
-    # Match from section_header to next level-2 header
-    pattern = re.compile(
+    # Match rules section
+    pattern_rules = re.compile(
         r"## Heuristic Safety Rules Performance \(Train & Validation Splits\).*?(?=\n## |\Z)",
         re.DOTALL,
     )
-    if pattern.search(content):
-        updated_content = pattern.sub(new_rules_md.strip(), content)
+    if pattern_rules.search(content):
+        updated_content = pattern_rules.sub(new_rules_md.strip(), content)
     else:
-        # Append before Limitations or at end
-        lim_pattern = re.compile(r"(## Limitations & Operational Constraints)")
-        if lim_pattern.search(content):
-            updated_content = lim_pattern.sub(f"{new_rules_md}\n\n\\1", content)
-        else:
-            updated_content = content + "\n\n" + new_rules_md
+        updated_content = content + "\n\n" + new_rules_md
 
     if updated_content != content:
         model_card_path.write_text(updated_content, encoding="utf-8")
@@ -133,12 +192,14 @@ def update_model_card(model_card_path: Path, eda_path: Path) -> bool:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate and sync MODEL_CARD markdown tables from JSON.")
     parser.add_argument("--eda-path", default="ml/reports/eda.json", help="Path to eda.json")
+    parser.add_argument("--metrics-path", default="ml/reports/metrics.json", help="Path to metrics.json")
     parser.add_argument("--model-card", default="ml/reports/MODEL_CARD.md", help="Path to MODEL_CARD.md")
     parser.add_argument("--update", action="store_true", help="Update MODEL_CARD.md in place")
     parser.add_argument("--check", action="store_true", help="Check whether MODEL_CARD.md tables are in sync")
     args = parser.parse_args()
 
     eda_p = Path(args.eda_path)
+    metrics_p = Path(args.metrics_path)
     card_p = Path(args.model_card)
 
     if not eda_p.exists():
@@ -148,18 +209,18 @@ def main() -> None:
         print(f"Error: {card_p} not found.", file=sys.stderr)
         sys.exit(1)
 
-    expected_md = generate_all_rules_markdown(eda_p).strip()
+    expected_rules_md = generate_all_rules_markdown(eda_p).strip()
 
     if args.check:
         actual_content = card_p.read_text(encoding="utf-8")
-        if expected_md not in actual_content:
+        if expected_rules_md not in actual_content:
             print("ERROR: MODEL_CARD.md rules tables do not match JSON data!", file=sys.stderr)
             sys.exit(1)
         print("SUCCESS: MODEL_CARD.md tables are in sync with JSON reports.")
         sys.exit(0)
 
     if args.update or not (args.check or args.update):
-        changed = update_model_card(card_p, eda_p)
+        changed = update_model_card(card_p, eda_p, metrics_p)
         if changed:
             print(f"Updated {card_p} with latest rules tables from {eda_p}.")
         else:

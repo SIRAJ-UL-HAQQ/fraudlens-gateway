@@ -52,25 +52,31 @@
         "decisions": {
           "high_risk": {
             "count": 743,
-            "per_1000_tx": 4.573,
+            "true_positives": 649,
+            "false_positives": 94,
             "frauds": 649,
             "legitimate": 94,
+            "per_1000_tx": 4.573,
             "fraud_rate": 0.873486,
             "fraud_rate_pct": 87.349
           },
           "analyst_review": {
             "count": 49465,
-            "per_1000_tx": 304.462,
+            "true_positives": 140,
+            "false_positives": 49325,
             "frauds": 140,
             "legitimate": 49325,
+            "per_1000_tx": 304.462,
             "fraud_rate": 0.00283,
             "fraud_rate_pct": 0.283
           },
           "low_risk": {
             "count": 112259,
-            "per_1000_tx": 690.965,
+            "true_positives": 1,
+            "false_positives": 112258,
             "frauds": 1,
             "legitimate": 112258,
+            "per_1000_tx": 690.965,
             "fraud_rate": 9e-06,
             "fraud_rate_pct": 0.001
           }
@@ -139,25 +145,31 @@
         "decisions": {
           "high_risk": {
             "count": 743,
-            "per_1000_tx": 4.573,
+            "true_positives": 649,
+            "false_positives": 94,
             "frauds": 649,
             "legitimate": 94,
+            "per_1000_tx": 4.573,
             "fraud_rate": 0.873486,
             "fraud_rate_pct": 87.349
           },
           "analyst_review": {
             "count": 145,
-            "per_1000_tx": 0.892,
+            "true_positives": 102,
+            "false_positives": 43,
             "frauds": 102,
             "legitimate": 43,
+            "per_1000_tx": 0.892,
             "fraud_rate": 0.703448,
             "fraud_rate_pct": 70.345
           },
           "low_risk": {
             "count": 161579,
-            "per_1000_tx": 994.534,
+            "true_positives": 39,
+            "false_positives": 161540,
             "frauds": 39,
             "legitimate": 161540,
+            "per_1000_tx": 994.534,
             "fraud_rate": 0.000241,
             "fraud_rate_pct": 0.024
           }
@@ -226,25 +238,31 @@
         "decisions": {
           "high_risk": {
             "count": 696,
-            "per_1000_tx": 4.284,
+            "true_positives": 636,
+            "false_positives": 60,
             "frauds": 636,
             "legitimate": 60,
+            "per_1000_tx": 4.284,
             "fraud_rate": 0.913793,
             "fraud_rate_pct": 91.379
           },
           "analyst_review": {
             "count": 1622,
-            "per_1000_tx": 9.984,
+            "true_positives": 115,
+            "false_positives": 1507,
             "frauds": 115,
             "legitimate": 1507,
+            "per_1000_tx": 9.984,
             "fraud_rate": 0.0709,
             "fraud_rate_pct": 7.09
           },
           "low_risk": {
             "count": 160149,
-            "per_1000_tx": 985.732,
+            "true_positives": 39,
+            "false_positives": 160110,
             "frauds": 39,
             "legitimate": 160110,
+            "per_1000_tx": 985.732,
             "fraud_rate": 0.000244,
             "fraud_rate_pct": 0.024
           }
@@ -313,25 +331,31 @@
         "decisions": {
           "high_risk": {
             "count": 696,
-            "per_1000_tx": 4.284,
+            "true_positives": 636,
+            "false_positives": 60,
             "frauds": 636,
             "legitimate": 60,
+            "per_1000_tx": 4.284,
             "fraud_rate": 0.913793,
             "fraud_rate_pct": 91.379
           },
           "analyst_review": {
             "count": 192,
-            "per_1000_tx": 1.182,
+            "true_positives": 115,
+            "false_positives": 77,
             "frauds": 115,
             "legitimate": 77,
+            "per_1000_tx": 1.182,
             "fraud_rate": 0.598958,
             "fraud_rate_pct": 59.896
           },
           "low_risk": {
             "count": 161579,
-            "per_1000_tx": 994.534,
+            "true_positives": 39,
+            "false_positives": 161540,
             "frauds": 39,
             "legitimate": 161540,
+            "per_1000_tx": 994.534,
             "fraud_rate": 0.000241,
             "fraud_rate_pct": 0.024
           }
@@ -400,48 +424,54 @@
         "decisions": {
           "high_risk": {
             "count": 743,
-            "per_1000_tx": 4.573,
+            "true_positives": 649,
+            "false_positives": 94,
             "frauds": 649,
             "legitimate": 94,
+            "per_1000_tx": 4.573,
             "fraud_rate": 0.873486,
             "fraud_rate_pct": 87.349
           },
           "analyst_review": {
-            "count": 3000,
-            "per_1000_tx": 18.465,
-            "frauds": 140,
-            "legitimate": 2860,
-            "fraud_rate": 0.046667,
-            "fraud_rate_pct": 4.667
+            "count": 430,
+            "true_positives": 135,
+            "false_positives": 295,
+            "frauds": 135,
+            "legitimate": 295,
+            "per_1000_tx": 2.647,
+            "fraud_rate": 0.313953,
+            "fraud_rate_pct": 31.395
           },
           "low_risk": {
-            "count": 158724,
-            "per_1000_tx": 976.961,
-            "frauds": 1,
-            "legitimate": 158723,
-            "fraud_rate": 6e-06,
-            "fraud_rate_pct": 0.001
+            "count": 161294,
+            "true_positives": 6,
+            "false_positives": 161288,
+            "frauds": 6,
+            "legitimate": 161288,
+            "per_1000_tx": 992.78,
+            "fraud_rate": 3.7e-05,
+            "fraud_rate_pct": 0.004
           }
         },
         "metrics": {
           "high_only_recall": 0.821519,
           "high_only_recall_pct": 82.15,
-          "review_recall": 0.177215,
-          "review_recall_pct": 17.72,
-          "combined_recall": 0.998734,
-          "combined_recall_pct": 99.87,
+          "review_recall": 0.170886,
+          "review_recall_pct": 17.09,
+          "combined_recall": 0.992405,
+          "combined_recall_pct": 99.24,
           "combined_recall_wilson_95ci": [
-            0.992865,
-            0.999777
+            0.98353,
+            0.996515
           ],
           "combined_recall_wilson_95ci_pct": [
-            99.29,
-            99.98
+            98.35,
+            99.65
           ],
-          "analyst_review_queue_total": 3000,
-          "analyst_review_queue_rate_per_hour": 40.0,
-          "legit_in_review_rate": 0.01769,
-          "legit_in_review_rate_pct": 1.769
+          "analyst_review_queue_total": 430,
+          "analyst_review_queue_rate_per_hour": 5.73,
+          "legit_in_review_rate": 0.001825,
+          "legit_in_review_rate_pct": 0.1825
         },
         "queue_by_cause": {
           "score_band": {
@@ -455,14 +485,14 @@
             "legitimate": 36
           },
           "rule_flag": {
-            "total": 2855,
-            "frauds": 38,
-            "legitimate": 2817
+            "total": 285,
+            "frauds": 33,
+            "legitimate": 252
           },
           "total_queue": {
-            "total": 3000,
-            "frauds": 140,
-            "legitimate": 2860
+            "total": 430,
+            "frauds": 135,
+            "legitimate": 295
           }
         },
         "candidate_high_flow": {
@@ -489,25 +519,31 @@
         "decisions": {
           "high_risk": {
             "count": 1397,
-            "per_1000_tx": 11.824,
+            "true_positives": 1303,
+            "false_positives": 94,
             "frauds": 1303,
             "legitimate": 94,
+            "per_1000_tx": 11.824,
             "fraud_rate": 0.932713,
             "fraud_rate_pct": 93.271
           },
           "analyst_review": {
             "count": 35379,
-            "per_1000_tx": 299.452,
+            "true_positives": 335,
+            "false_positives": 35044,
             "frauds": 335,
             "legitimate": 35044,
+            "per_1000_tx": 299.452,
             "fraud_rate": 0.009469,
             "fraud_rate_pct": 0.947
           },
           "low_risk": {
             "count": 81370,
-            "per_1000_tx": 688.724,
+            "true_positives": 4,
+            "false_positives": 81366,
             "frauds": 4,
             "legitimate": 81366,
+            "per_1000_tx": 688.724,
             "fraud_rate": 4.9e-05,
             "fraud_rate_pct": 0.005
           }
@@ -576,25 +612,31 @@
         "decisions": {
           "high_risk": {
             "count": 1397,
-            "per_1000_tx": 11.824,
+            "true_positives": 1303,
+            "false_positives": 94,
             "frauds": 1303,
             "legitimate": 94,
+            "per_1000_tx": 11.824,
             "fraud_rate": 0.932713,
             "fraud_rate_pct": 93.271
           },
           "analyst_review": {
             "count": 302,
-            "per_1000_tx": 2.556,
+            "true_positives": 272,
+            "false_positives": 30,
             "frauds": 272,
             "legitimate": 30,
+            "per_1000_tx": 2.556,
             "fraud_rate": 0.900662,
             "fraud_rate_pct": 90.066
           },
           "low_risk": {
             "count": 116447,
-            "per_1000_tx": 985.619,
+            "true_positives": 67,
+            "false_positives": 116380,
             "frauds": 67,
             "legitimate": 116380,
+            "per_1000_tx": 985.619,
             "fraud_rate": 0.000575,
             "fraud_rate_pct": 0.058
           }
@@ -663,25 +705,31 @@
         "decisions": {
           "high_risk": {
             "count": 1361,
-            "per_1000_tx": 11.52,
+            "true_positives": 1283,
+            "false_positives": 78,
             "frauds": 1283,
             "legitimate": 78,
+            "per_1000_tx": 11.52,
             "fraud_rate": 0.942689,
             "fraud_rate_pct": 94.269
           },
           "analyst_review": {
             "count": 1022,
-            "per_1000_tx": 8.65,
+            "true_positives": 292,
+            "false_positives": 730,
             "frauds": 292,
             "legitimate": 730,
+            "per_1000_tx": 8.65,
             "fraud_rate": 0.285714,
             "fraud_rate_pct": 28.571
           },
           "low_risk": {
             "count": 115763,
-            "per_1000_tx": 979.83,
+            "true_positives": 67,
+            "false_positives": 115696,
             "frauds": 67,
             "legitimate": 115696,
+            "per_1000_tx": 979.83,
             "fraud_rate": 0.000579,
             "fraud_rate_pct": 0.058
           }
@@ -750,25 +798,31 @@
         "decisions": {
           "high_risk": {
             "count": 1361,
-            "per_1000_tx": 11.52,
+            "true_positives": 1283,
+            "false_positives": 78,
             "frauds": 1283,
             "legitimate": 78,
+            "per_1000_tx": 11.52,
             "fraud_rate": 0.942689,
             "fraud_rate_pct": 94.269
           },
           "analyst_review": {
             "count": 338,
-            "per_1000_tx": 2.861,
+            "true_positives": 292,
+            "false_positives": 46,
             "frauds": 292,
             "legitimate": 46,
+            "per_1000_tx": 2.861,
             "fraud_rate": 0.863905,
             "fraud_rate_pct": 86.391
           },
           "low_risk": {
             "count": 116447,
-            "per_1000_tx": 985.619,
+            "true_positives": 67,
+            "false_positives": 116380,
             "frauds": 67,
             "legitimate": 116380,
+            "per_1000_tx": 985.619,
             "fraud_rate": 0.000575,
             "fraud_rate_pct": 0.058
           }
@@ -837,48 +891,54 @@
         "decisions": {
           "high_risk": {
             "count": 1397,
-            "per_1000_tx": 11.824,
+            "true_positives": 1303,
+            "false_positives": 94,
             "frauds": 1303,
             "legitimate": 94,
+            "per_1000_tx": 11.824,
             "fraud_rate": 0.932713,
             "fraud_rate_pct": 93.271
           },
           "analyst_review": {
-            "count": 2581,
-            "per_1000_tx": 21.846,
-            "frauds": 335,
-            "legitimate": 2246,
-            "fraud_rate": 0.129795,
-            "fraud_rate_pct": 12.979
+            "count": 540,
+            "true_positives": 326,
+            "false_positives": 214,
+            "frauds": 326,
+            "legitimate": 214,
+            "per_1000_tx": 4.571,
+            "fraud_rate": 0.603704,
+            "fraud_rate_pct": 60.37
           },
           "low_risk": {
-            "count": 114168,
-            "per_1000_tx": 966.33,
-            "frauds": 4,
-            "legitimate": 114164,
-            "fraud_rate": 3.5e-05,
-            "fraud_rate_pct": 0.004
+            "count": 116209,
+            "true_positives": 13,
+            "false_positives": 116196,
+            "frauds": 13,
+            "legitimate": 116196,
+            "per_1000_tx": 983.605,
+            "fraud_rate": 0.000112,
+            "fraud_rate_pct": 0.011
           }
         },
         "metrics": {
           "high_only_recall": 0.793544,
           "high_only_recall_pct": 79.35,
-          "review_recall": 0.204019,
-          "review_recall_pct": 20.4,
-          "combined_recall": 0.997564,
-          "combined_recall_pct": 99.76,
+          "review_recall": 0.198538,
+          "review_recall_pct": 19.85,
+          "combined_recall": 0.992083,
+          "combined_recall_pct": 99.21,
           "combined_recall_wilson_95ci": [
-            0.993753,
-            0.999052
+            0.986501,
+            0.995367
           ],
           "combined_recall_wilson_95ci_pct": [
-            99.38,
-            99.91
+            98.65,
+            99.54
           ],
-          "analyst_review_queue_total": 2581,
-          "analyst_review_queue_rate_per_hour": 17.44,
-          "legit_in_review_rate": 0.019278,
-          "legit_in_review_rate_pct": 1.9278
+          "analyst_review_queue_total": 540,
+          "analyst_review_queue_rate_per_hour": 3.65,
+          "legit_in_review_rate": 0.001837,
+          "legit_in_review_rate_pct": 0.1837
         },
         "queue_by_cause": {
           "score_band": {
@@ -892,14 +952,14 @@
             "legitimate": 27
           },
           "rule_flag": {
-            "total": 2279,
-            "frauds": 63,
-            "legitimate": 2216
+            "total": 238,
+            "frauds": 54,
+            "legitimate": 184
           },
           "total_queue": {
-            "total": 2581,
-            "frauds": 335,
-            "legitimate": 2246
+            "total": 540,
+            "frauds": 326,
+            "legitimate": 214
           }
         },
         "candidate_high_flow": {
@@ -974,26 +1034,35 @@
           0.6361
         ]
       },
-      "score_margin_control": {
+      "score_margin_control_restricted_thigh": {
+        "scope": "Restricted strictly to candidate rows with score >= t_high (pure ML candidates)",
+        "n": 122,
+        "candidates_at_or_above_thigh": 818,
+        "max_score_in_control": 0.993799,
+        "true_positives": 56,
+        "false_positives": 66,
+        "precision_pct": 45.9,
+        "false_positive_share_pct": 54.1,
+        "false_positive_share_wilson_95ci_pct": [
+          45.27,
+          62.68
+        ],
+        "unstable_fp_within_thigh": 21,
+        "fp_gain_vs_unstable": 45
+      },
+      "score_margin_control_unrestricted_labeled": {
+        "scope": "Unrestricted (all candidate High rows, including rule-boosted rows with score < t_high)",
         "n": 138,
-        "max_score_in_control": 0.987158,
         "true_positives": 44,
         "false_positives": 94,
-        "precision": 0.318841,
-        "precision_pct": 31.88,
-        "false_positive_share": 0.681159,
         "false_positive_share_pct": 68.12,
-        "false_positive_share_wilson_95ci_pct": [
-          59.94,
-          75.31
-        ],
-        "fp_diff_vs_unstable": 58,
-        "tp_diff_vs_unstable": -58
+        "note": "Includes rule-boosted rows from review band that have lower scores and higher FP rate"
       },
       "pre_specified_conclusion": {
         "condition_a_fp_share_ci_strictly_higher": true,
         "condition_b_auroc_ci_excludes_chance": true,
-        "verdict": "evidence that explanation instability predicts false positive alert status"
+        "verdict": "evidence that explanation instability predicts false positive alert status",
+        "plan_governing_split_note": "docs/analysis-plan.md does not pre-specify whether validation or test is the governing split; validation meets both criteria, but held-out test fails both"
       }
     },
     "test": {
@@ -1047,26 +1116,35 @@
           0.602
         ]
       },
-      "score_margin_control": {
+      "score_margin_control_restricted_thigh": {
+        "scope": "Restricted strictly to candidate rows with score >= t_high (pure ML candidates)",
+        "n": 284,
+        "candidates_at_or_above_thigh": 1645,
+        "max_score_in_control": 0.998458,
+        "true_positives": 202,
+        "false_positives": 82,
+        "precision_pct": 71.13,
+        "false_positive_share_pct": 28.87,
+        "false_positive_share_wilson_95ci_pct": [
+          23.91,
+          34.4
+        ],
+        "unstable_fp_within_thigh": 16,
+        "fp_gain_vs_unstable": 66
+      },
+      "score_margin_control_unrestricted_labeled": {
+        "scope": "Unrestricted (all candidate High rows, including rule-boosted rows with score < t_high)",
         "n": 299,
-        "max_score_in_control": 0.997584,
         "true_positives": 192,
         "false_positives": 107,
-        "precision": 0.64214,
-        "precision_pct": 64.21,
-        "false_positive_share": 0.35786,
         "false_positive_share_pct": 35.79,
-        "false_positive_share_wilson_95ci_pct": [
-          30.56,
-          41.37
-        ],
-        "fp_diff_vs_unstable": 80,
-        "tp_diff_vs_unstable": -80
+        "note": "Includes rule-boosted rows from review band that have lower scores and higher FP rate"
       },
       "pre_specified_conclusion": {
         "condition_a_fp_share_ci_strictly_higher": false,
         "condition_b_auroc_ci_excludes_chance": false,
-        "verdict": "no evidence that explanation instability predicts false positive alert status"
+        "verdict": "no evidence that explanation instability predicts false positive alert status",
+        "plan_governing_split_note": "docs/analysis-plan.md does not pre-specify whether validation or test is the governing split; validation meets both criteria, but held-out test fails both"
       }
     }
   },
@@ -1088,6 +1166,210 @@
       "p75": 0.93223,
       "max": 0.955564,
       "mean": 0.84756
+    }
+  },
+  "variant_E_exploratory_grid": {
+    "description": "Exploratory post-hoc Variant E: routing rule-flagged alerts with score >= f to Analyst Review",
+    "grid": [
+      {
+        "floor_f": 0.1,
+        "validation": {
+          "total_queue": 1272,
+          "queue_rate_per_hour": 16.96,
+          "frauds_captured": 789,
+          "combined_recall_pct": 99.87,
+          "legit_in_queue": 1132,
+          "legit_rate_pct": 0.7
+        },
+        "test": {
+          "total_queue": 1157,
+          "queue_rate_per_hour": 7.82,
+          "frauds_captured": 1638,
+          "combined_recall_pct": 99.76,
+          "legit_in_queue": 822,
+          "legit_rate_pct": 0.706
+        }
+      },
+      {
+        "floor_f": 0.3,
+        "validation": {
+          "total_queue": 834,
+          "queue_rate_per_hour": 11.12,
+          "frauds_captured": 788,
+          "combined_recall_pct": 99.75,
+          "legit_in_queue": 695,
+          "legit_rate_pct": 0.43
+        },
+        "test": {
+          "total_queue": 847,
+          "queue_rate_per_hour": 5.72,
+          "frauds_captured": 1637,
+          "combined_recall_pct": 99.7,
+          "legit_in_queue": 513,
+          "legit_rate_pct": 0.44
+        }
+      },
+      {
+        "floor_f": 0.5,
+        "validation": {
+          "total_queue": 626,
+          "queue_rate_per_hour": 8.35,
+          "frauds_captured": 788,
+          "combined_recall_pct": 99.75,
+          "legit_in_queue": 487,
+          "legit_rate_pct": 0.301
+        },
+        "test": {
+          "total_queue": 691,
+          "queue_rate_per_hour": 4.67,
+          "frauds_captured": 1636,
+          "combined_recall_pct": 99.63,
+          "legit_in_queue": 358,
+          "legit_rate_pct": 0.307
+        }
+      },
+      {
+        "floor_f": 0.7,
+        "validation": {
+          "total_queue": 477,
+          "queue_rate_per_hour": 6.36,
+          "frauds_captured": 785,
+          "combined_recall_pct": 99.37,
+          "legit_in_queue": 341,
+          "legit_rate_pct": 0.211
+        },
+        "test": {
+          "total_queue": 573,
+          "queue_rate_per_hour": 3.87,
+          "frauds_captured": 1632,
+          "combined_recall_pct": 99.39,
+          "legit_in_queue": 244,
+          "legit_rate_pct": 0.209
+        }
+      },
+      {
+        "floor_f": 0.75,
+        "validation": {
+          "total_queue": 430,
+          "queue_rate_per_hour": 5.73,
+          "frauds_captured": 784,
+          "combined_recall_pct": 99.24,
+          "legit_in_queue": 295,
+          "legit_rate_pct": 0.182
+        },
+        "test": {
+          "total_queue": 540,
+          "queue_rate_per_hour": 3.65,
+          "frauds_captured": 1629,
+          "combined_recall_pct": 99.21,
+          "legit_in_queue": 214,
+          "legit_rate_pct": 0.184
+        }
+      },
+      {
+        "floor_f": 0.8,
+        "validation": {
+          "total_queue": 397,
+          "queue_rate_per_hour": 5.29,
+          "frauds_captured": 780,
+          "combined_recall_pct": 98.73,
+          "legit_in_queue": 266,
+          "legit_rate_pct": 0.165
+        },
+        "test": {
+          "total_queue": 500,
+          "queue_rate_per_hour": 3.38,
+          "frauds_captured": 1625,
+          "combined_recall_pct": 98.96,
+          "legit_in_queue": 178,
+          "legit_rate_pct": 0.153
+        }
+      },
+      {
+        "floor_f": 0.85,
+        "validation": {
+          "total_queue": 340,
+          "queue_rate_per_hour": 4.53,
+          "frauds_captured": 780,
+          "combined_recall_pct": 98.73,
+          "legit_in_queue": 209,
+          "legit_rate_pct": 0.129
+        },
+        "test": {
+          "total_queue": 449,
+          "queue_rate_per_hour": 3.03,
+          "frauds_captured": 1617,
+          "combined_recall_pct": 98.48,
+          "legit_in_queue": 135,
+          "legit_rate_pct": 0.116
+        }
+      },
+      {
+        "floor_f": 0.9,
+        "validation": {
+          "total_queue": 257,
+          "queue_rate_per_hour": 3.43,
+          "frauds_captured": 774,
+          "combined_recall_pct": 97.97,
+          "legit_in_queue": 132,
+          "legit_rate_pct": 0.082
+        },
+        "test": {
+          "total_queue": 402,
+          "queue_rate_per_hour": 2.72,
+          "frauds_captured": 1606,
+          "combined_recall_pct": 97.81,
+          "legit_in_queue": 99,
+          "legit_rate_pct": 0.085
+        }
+      },
+      {
+        "floor_f": 0.92,
+        "validation": {
+          "total_queue": 224,
+          "queue_rate_per_hour": 2.99,
+          "frauds_captured": 767,
+          "combined_recall_pct": 97.09,
+          "legit_in_queue": 106,
+          "legit_rate_pct": 0.066
+        },
+        "test": {
+          "total_queue": 366,
+          "queue_rate_per_hour": 2.47,
+          "frauds_captured": 1593,
+          "combined_recall_pct": 97.02,
+          "legit_in_queue": 76,
+          "legit_rate_pct": 0.065
+        }
+      },
+      {
+        "floor_f": 0.94,
+        "validation": {
+          "total_queue": 194,
+          "queue_rate_per_hour": 2.59,
+          "frauds_captured": 761,
+          "combined_recall_pct": 96.33,
+          "legit_in_queue": 82,
+          "legit_rate_pct": 0.051
+        },
+        "test": {
+          "total_queue": 337,
+          "queue_rate_per_hour": 2.28,
+          "frauds_captured": 1587,
+          "combined_recall_pct": 96.65,
+          "legit_in_queue": 53,
+          "legit_rate_pct": 0.045
+        }
+      }
+    ],
+    "selected_floor": 0.75,
+    "selection_details": {
+      "best_capture_pct": 99.87,
+      "threshold_capture_pct": 98.87,
+      "selected_validation_queue": 430,
+      "selected_validation_recall_pct": 99.24,
+      "selected_test_queue": 540,
+      "selected_test_recall_pct": 99.21
     }
   },
   "selection_rule_validation": {

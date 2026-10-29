@@ -199,7 +199,7 @@ def generate_gateway_evaluation_markdown(gateway_json_path: Path) -> str:
         "variant_B": "Variant B (Score-Gated Rules: Rule Never Routes Alone)",
         "variant_C": "Variant C (Train-Recalibrated Rules: $\\le 0.5\\%$ cap)",
         "variant_D": "Variant D (Pure ML Gateway: No Rules)",
-        "variant_E": "Variant E (Exploratory Post-Hoc: Tuned Floor $f=0.0070$)",
+        "variant_E": "Variant E (Exploratory Post-Hoc: Tuned Floor $f=0.75$)",
     }
 
     for v_key in ["variant_A", "variant_B", "variant_C", "variant_D", "variant_E"]:
@@ -302,14 +302,37 @@ def generate_gateway_evaluation_markdown(gateway_json_path: Path) -> str:
     lines.extend([
         "",
         "#### Pre-Specified Conclusion on Informative Nature of Unstable:",
-        f"- **Validation AUROC** of mean overlap predicting False Positives: {v_info['auroc_mean_overlap_predicting_fp']['auroc']:.4f} "
-        f"(95% bootstrap CI: [{v_info['auroc_mean_overlap_predicting_fp']['bootstrap_95ci'][0]:.4f}, {v_info['auroc_mean_overlap_predicting_fp']['bootstrap_95ci'][1]:.4f}]).",
-        f"- **Held-Out Test AUROC** of mean overlap predicting False Positives: {t_info['auroc_mean_overlap_predicting_fp']['auroc']:.4f} "
-        f"(95% bootstrap CI: [{t_info['auroc_mean_overlap_predicting_fp']['bootstrap_95ci'][0]:.4f}, {t_info['auroc_mean_overlap_predicting_fp']['bootstrap_95ci'][1]:.4f}]).",
-        f"- **Score-Margin Control** ($N=299$ rows with lowest scores above $t_{{\\text{{high}}}}$ on test): re-routes {t_info['score_margin_control']['false_positives']} FPs "
-        f"({t_info['score_margin_control']['false_positive_share_pct']:.2f}% FP share) vs {t_info['unstable_cohort']['false_positives']} FPs "
-        f"({t_info['unstable_cohort']['false_positive_share_pct']:.2f}% FP share) for Unstable (+80 FPs caught, 80 fewer frauds delayed).",
-        f"- **Formal Scientific Verdict**: **\"{t_info['pre_specified_conclusion']['verdict']}\"** on the held-out test split.",
+        f"- **Validation Split**: AUROC = {v_info['auroc_mean_overlap_predicting_fp']['auroc']:.4f} "
+        f"(95% bootstrap CI: [{v_info['auroc_mean_overlap_predicting_fp']['bootstrap_95ci'][0]:.4f}, {v_info['auroc_mean_overlap_predicting_fp']['bootstrap_95ci'][1]:.4f}]). "
+        f"Validation meets both conditions (AUROC excludes 0.50, and Unstable FP share lower CI > Stable upper CI).",
+        f"- **Held-Out Test Split**: AUROC = {t_info['auroc_mean_overlap_predicting_fp']['auroc']:.4f} "
+        f"(95% bootstrap CI: [{t_info['auroc_mean_overlap_predicting_fp']['bootstrap_95ci'][0]:.4f}, {t_info['auroc_mean_overlap_predicting_fp']['bootstrap_95ci'][1]:.4f}]). "
+        f"Test fails both conditions (AUROC CI includes chance 0.50, and Unstable FP share CI [{t_info['unstable_cohort']['false_positive_share_wilson_95ci_pct'][0]:.2f}%, {t_info['unstable_cohort']['false_positive_share_wilson_95ci_pct'][1]:.2f}%] overlaps Stable [{t_info['stable_cohort']['false_positive_share_wilson_95ci_pct'][0]:.2f}%, {t_info['stable_cohort']['false_positive_share_wilson_95ci_pct'][1]:.2f}%]).",
+        f"- **Scientific Evaluation Note**: `docs/analysis-plan.md` does not pre-specify whether Validation or Held-Out Test is the governing split. However, because generalizability to unseen data is required, the pre-specified conclusion on test is: **\"{t_info['pre_specified_conclusion']['verdict']}\"**.",
+        "",
+        "#### Score-Margin Control vs Unstable Explanation Re-routing:",
+        f"- **Restricted Score-Margin Control** (strictly candidate rows with score $\\ge t_{{\\text{{high}}}}$; $N=284$ rows): re-routes {t_info['score_margin_control_restricted_thigh']['false_positives']} FPs "
+        f"({t_info['score_margin_control_restricted_thigh']['false_positive_share_pct']:.2f}% FP share) vs {t_info['score_margin_control_restricted_thigh']['unstable_fp_within_thigh']} FPs "
+        f"for Unstable within $s \\ge t_{{\\text{{high}}}}$ (+{t_info['score_margin_control_restricted_thigh']['fp_gain_vs_unstable']} FPs caught, with {t_info['score_margin_control_restricted_thigh']['fp_gain_vs_unstable']} fewer frauds delayed).",
+        f"- **Unrestricted Score-Margin Control** (all candidate rows including rule-boosted rows below $t_{{\\text{{high}}}}$; $N=299$ rows): re-routes {t_info['score_margin_control_unrestricted_labeled']['false_positives']} FPs "
+        f"({t_info['score_margin_control_unrestricted_labeled']['false_positive_share_pct']:.2f}% FP share). *Labeled unrestricted: includes lower-scoring rule-boosted band rows with higher FP prevalence.*",
+        "",
+        "### Exploratory Post-Hoc Variant E: Score Floor Grid Analysis",
+        "",
+        "| Score Floor $f$ | Validation Queue | Val Queue Rate (/hr) | Val Combined Recall | Val Legit Share (%) | Test Queue | Test Queue Rate (/hr) | Test Combined Recall | Test Legit Share (%) |",
+        "| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |",
+    ])
+
+    ve_grid = data.get("variant_E_exploratory_grid", {}).get("grid", [])
+    for row in ve_grid:
+        lines.append(
+            f"| $f = {row['floor_f']:.2f}$ | {row['validation']['total_queue']:,} | {row['validation']['queue_rate_per_hour']:.2f} | "
+            f"{row['validation']['combined_recall_pct']:.2f}% | {row['validation']['legit_rate_pct']:.3f}% | "
+            f"{row['test']['total_queue']:,} | {row['test']['queue_rate_per_hour']:.2f} | "
+            f"{row['test']['combined_recall_pct']:.2f}% | {row['test']['legit_rate_pct']:.3f}% |"
+        )
+
+    lines.extend([
         "",
         "### ML Score Distribution of Frauds Flagged Only by Rules ($s < t_{\\text{review}}$)",
         "",

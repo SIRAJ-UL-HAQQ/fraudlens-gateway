@@ -126,3 +126,58 @@ def test_variant_d_pure_ml_invariance_to_rules(dummy_scoring_service):
         dec_with_rules = route_variant_d(service, score, rules, status)
         assert dec_no_rules == expected
         assert dec_with_rules == expected
+
+
+def test_gateway_evaluation_accounting_integrity():
+    """Verify accounting identities across all variants and splits in gateway_evaluation.json."""
+    import json
+    report_path = Path("ml/reports/gateway_evaluation.json")
+    assert report_path.exists(), "gateway_evaluation.json must exist"
+
+    with open(report_path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    splits_summary = data["splits_summary"]
+
+    for split in ["validation", "test"]:
+        tot_legit = splits_summary[split]["legitimate"]
+        split_evals = data["variant_evaluations"][split]
+
+        for v_name, v_data in split_evals.items():
+            # 1. queue = frauds_in_queue + legit_in_queue
+            q_cnt = v_data["decisions"]["analyst_review"]["count"]
+            q_frauds = v_data["decisions"]["analyst_review"]["frauds"]
+            q_legit = v_data["decisions"]["analyst_review"]["legitimate"]
+            assert q_cnt == q_frauds + q_legit, (
+                f"Queue mismatch for {v_name} on {split}: {q_cnt} != {q_frauds} + {q_legit}"
+            )
+            assert q_cnt == v_data["metrics"]["analyst_review_queue_total"]
+
+            # 2. legit share = FP / negatives
+            expected_legit_share = q_legit / tot_legit
+            actual_legit_share = v_data["metrics"]["legit_in_review_rate"]
+            assert abs(actual_legit_share - expected_legit_share) < 1e-6, (
+                f"Legit share mismatch for {v_name} on {split}: {actual_legit_share} vs {expected_legit_share}"
+            )
+
+        # 3. D candidates are a strict subset of B candidates
+        # D candidates: score >= t_high
+        # B candidates: (score >= t_high) | (has_rules & score >= t_rev)
+        cand_b_tot = split_evals["variant_B"]["candidate_high_flow"]["candidate_high_total"]["total"]
+        cand_d_tot = split_evals["variant_D"]["candidate_high_flow"]["candidate_high_total"]["total"]
+        assert cand_d_tot <= cand_b_tot, (
+            f"D candidate count ({cand_d_tot}) must be <= B candidate count ({cand_b_tot}) on {split}"
+        )
+
+        # 4. stable-TP(B) - stable-TP(D) <= TP in rule-boosted rows
+        # Rule-boosted rows are band rows (t_rev <= s < t_high) that have rule flags
+        # On validation: 14 frauds in band rows with rules; on test: 24 frauds in band rows with rules
+        tp_b = split_evals["variant_B"]["decisions"]["high_risk"]["frauds"]
+        tp_d = split_evals["variant_D"]["decisions"]["high_risk"]["frauds"]
+        tp_band_frauds = split_evals["variant_D"]["queue_by_cause"]["score_band"]["frauds"]
+        tp_diff = tp_b - tp_d
+        assert tp_diff >= 0, f"B high TP ({tp_b}) must be >= D high TP ({tp_d}) on {split}"
+        assert tp_diff <= tp_band_frauds, (
+            f"stable-TP(B) - stable-TP(D) ({tp_diff}) must be <= TP in rule-boosted rows ({tp_band_frauds}) on {split}"
+        )
+

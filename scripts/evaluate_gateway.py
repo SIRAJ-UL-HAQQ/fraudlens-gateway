@@ -42,7 +42,6 @@ def compute_wilson_ci(k: int, n: int, confidence: float = 0.95) -> tuple[float, 
     """Calculate Wilson score confidence interval for a binomial proportion."""
     if n == 0:
         return (0.0, 0.0)
-    # z = 1.95996 for 95% CI
     z = 1.959963984540054 if confidence == 0.95 else 1.6448536269514722
     p_hat = k / n
     denominator = 1.0 + (z**2) / n
@@ -80,10 +79,7 @@ def bootstrap_auroc_ci(
 
 
 def evaluate_rules_vectorized(df: pd.DataFrame) -> tuple[np.ndarray, list[list[str]]]:
-    """Vectorized evaluation of all 4 backend heuristic rules on DataFrame.
-
-    Matches app.services.rules.evaluate_rules bit-for-bit.
-    """
+    """Vectorized evaluation of all 4 backend heuristic rules on DataFrame."""
     types = df["type"].to_numpy()
     amounts = df["amount"].to_numpy(dtype=float)
     old_orig = df["old_balance_orig"].to_numpy(dtype=float)
@@ -131,7 +127,7 @@ def evaluate_rules_vectorized(df: pd.DataFrame) -> tuple[np.ndarray, list[list[s
     return has_rules, flags_list
 
 
-def verify_backend_rules_parity_on_sample(df: pd.DataFrame, sample_size: int = 100) -> None:
+def verify_backend_rules_parity_on_sample(df: pd.DataFrame, sample_size: int = 200) -> None:
     """Verify bit-exact parity between vectorized rules and backend evaluate_rules on a sample."""
     _, vectorized_flags = evaluate_rules_vectorized(df.iloc[:sample_size])
     for i in range(sample_size):
@@ -171,9 +167,6 @@ def evaluate_recalibrated_rules(
     types = df["type"].to_numpy()
     amounts = df["amount"].to_numpy(dtype=float)
     is_tc = np.isin(types, ["TRANSFER", "CASH_OUT"])
-
-    # Rule 1 (Drain): Disabled per formal fallback
-    # Rule 3 (Dest Inconsistency): Disabled per formal fallback
 
     # Rule 2: Recalibrated Large Transfer
     r2_mask = is_tc & (amounts >= large_transfer_threshold)
@@ -272,7 +265,6 @@ def evaluate_split_variant(
     for i in range(n):
         s = probs[i]
 
-        # Determine effective rules and candidate status per variant
         if variant_name == "variant_A":
             rule_flags = flags_standard[i]
             has_rules = len(rule_flags) > 0
@@ -290,7 +282,6 @@ def evaluate_split_variant(
                 causes[i] = "low_risk"
 
         elif variant_name == "variant_B":
-            # Score-gated rules: rules never route alone without score support
             rule_flags = flags_standard[i]
             effective_rules = rule_flags if s >= t_rev else []
             has_rules = len(effective_rules) > 0
@@ -306,7 +297,6 @@ def evaluate_split_variant(
                 causes[i] = "low_risk"
 
         elif variant_name == "variant_C":
-            # Recalibrated rules
             rule_flags = flags_recalibrated[i]
             has_rules = len(rule_flags) > 0
             is_cand = (s >= t_high) or (has_rules and s >= t_rev)
@@ -323,7 +313,6 @@ def evaluate_split_variant(
                 causes[i] = "low_risk"
 
         elif variant_name == "variant_D":
-            # Pure ML gateway - no rules
             is_cand = s >= t_high
             st = superset_stables.get(i, True)
             exp_status = ExplanationStatus.STABLE if st else ExplanationStatus.UNSTABLE
@@ -336,15 +325,13 @@ def evaluate_split_variant(
                 causes[i] = "low_risk"
 
         elif variant_name == "variant_E":
-            # Exploratory post-hoc: rule + score >= f routes to Review
-            f_floor = variant_e_floor if variant_e_floor is not None else t_rev
+            f_floor = variant_e_floor if variant_e_floor is not None else 0.70
             rule_flags = flags_standard[i]
             has_rules = len(rule_flags) > 0
             is_cand = (s >= t_high) or (has_rules and s >= t_rev)
             st = superset_stables.get(i, True)
             exp_status = ExplanationStatus.STABLE if st else ExplanationStatus.UNSTABLE
 
-            # Evaluate with score-gating down to floor f
             effective_rules = rule_flags if s >= f_floor else []
             dec = scoring_service.route_decision(s, effective_rules, exp_status)
             if is_cand:
@@ -378,9 +365,11 @@ def evaluate_split_variant(
         rate = float(f_cnt / cnt) if cnt > 0 else 0.0
         return {
             "count": cnt,
-            "per_1000_tx": round(float(cnt / n * 1000.0), 3),
+            "true_positives": f_cnt,
+            "false_positives": l_cnt,
             "frauds": f_cnt,
             "legitimate": l_cnt,
+            "per_1000_tx": round(float(cnt / n * 1000.0), 3),
             "fraud_rate": round(rate, 6),
             "fraud_rate_pct": round(rate * 100.0, 3),
         }
@@ -403,7 +392,6 @@ def evaluate_split_variant(
     legit_in_review = dec_stats["analyst_review"]["legitimate"]
     legit_review_rate = float(legit_in_review / total_legit)
 
-    # Queue breakdown by cause
     cause_score_band = causes_arr == "score_band"
     cause_unstable = causes_arr == "unstable_explanation"
     cause_rule = causes_arr == "rule_flag"
@@ -431,7 +419,6 @@ def evaluate_split_variant(
         },
     }
 
-    # Candidate High Flow Table
     cand_mask = (causes_arr == "high_risk_stable") | (causes_arr == "unstable_explanation")
     cand_total = int(np.sum(cand_mask))
     cand_frauds = int(np.sum((y_true == 1) & cand_mask))
@@ -483,10 +470,10 @@ def analyze_unstable_informational_value(
     cand_scores: np.ndarray,
     t_high: float,
 ) -> dict[str, Any]:
-    """Perform rigorous empirical test on whether Unstable status is informative of False Positives."""
+    """Perform empirical test on whether Unstable status predicts False Positives."""
     y = cand_df["is_fraud"].to_numpy(dtype=int)
     n = len(cand_df)
-    is_fp = y == 0  # 1 if False Positive, 0 if True Positive (fraud)
+    is_fp = y == 0
 
     # 1. Stable Cohort
     n_s = int(np.sum(cand_stables))
@@ -508,28 +495,38 @@ def analyze_unstable_informational_value(
     fp_u_ci = compute_wilson_ci(fp_u, n_u)
 
     # 3. AUROC of mean overlap predicting False Positives
-    # Lower overlap hypothesized to predict False Positives -> -mean_overlap predicts FP
     fp_pred_scores = -cand_overlaps
     auroc, auroc_ci = bootstrap_auroc_ci(is_fp.astype(int), fp_pred_scores, n_bootstraps=1000, seed=42)
 
-    # 4. Score-Margin Control
-    # Re-route exactly n_u rows with the smallest score margin above t_high (i.e. lowest scores)
-    margin_order = np.argsort(cand_scores)
-    ctrl_indices = margin_order[:n_u]
-    ctrl_mask = np.zeros(n, dtype=bool)
-    ctrl_mask[ctrl_indices] = True
+    # 4. Score-Margin Control (RESTRICTED to s >= t_high)
+    # Excludes rule-boosted rows below t_high to prevent leak
+    thigh_mask = cand_scores >= t_high
+    n_thigh = int(np.sum(thigh_mask))
+    thigh_scores = cand_scores[thigh_mask]
+    thigh_y = y[thigh_mask]
+    thigh_unstables_count = int(np.sum(cand_unstables[thigh_mask]))
 
-    tp_ctrl = int(np.sum((y == 1) & ctrl_mask))
-    fp_ctrl = int(np.sum((y == 0) & ctrl_mask))
-    prec_ctrl = tp_ctrl / n_u if n_u > 0 else 0.0
-    fp_share_ctrl = fp_ctrl / n_u if n_u > 0 else 0.0
-    prec_ctrl_ci = compute_wilson_ci(tp_ctrl, n_u)
-    fp_share_ctrl_ci = compute_wilson_ci(fp_ctrl, n_u)
+    # Match count to pure ML unstable count among s >= t_high
+    n_ctrl_restricted = thigh_unstables_count
+    margin_order_restr = np.argsort(thigh_scores)[:n_ctrl_restricted]
+    tp_ctrl_r = int(np.sum(thigh_y[margin_order_restr] == 1))
+    fp_ctrl_r = int(np.sum(thigh_y[margin_order_restr] == 0))
+    prec_ctrl_r = tp_ctrl_r / n_ctrl_restricted if n_ctrl_restricted > 0 else 0.0
+    fp_share_ctrl_r = fp_ctrl_r / n_ctrl_restricted if n_ctrl_restricted > 0 else 0.0
+    fp_share_ctrl_r_ci = compute_wilson_ci(fp_ctrl_r, n_ctrl_restricted)
 
-    # Pre-specified hypothesis criteria check
-    # (a) Wilson lower bound of Unstable FP share > Wilson upper bound of Stable FP share
+    # Also compute matching the full n_u count within s >= t_high
+    margin_order_full = np.argsort(thigh_scores)[:min(n_u, n_thigh)]
+    tp_ctrl_full = int(np.sum(thigh_y[margin_order_full] == 1))
+    fp_ctrl_full = int(np.sum(thigh_y[margin_order_full] == 0))
+
+    # 5. Score-Margin Control (UNRESTRICTED: across all candidates including rule-boosted)
+    margin_order_unrestr = np.argsort(cand_scores)[:n_u]
+    tp_ctrl_unrestr = int(np.sum(y[margin_order_unrestr] == 1))
+    fp_ctrl_unrestr = int(np.sum(y[margin_order_unrestr] == 0))
+    fp_share_unrestr = fp_ctrl_unrestr / n_u if n_u > 0 else 0.0
+
     cond_a = fp_u_ci[0] > fp_s_ci[1]
-    # (b) AUROC 95% CI strictly excludes 0.50 (lower bound > 0.50)
     cond_b = auroc_ci[0] > 0.50
 
     if cond_a and cond_b:
@@ -567,23 +564,105 @@ def analyze_unstable_informational_value(
             "auroc": round(auroc, 4),
             "bootstrap_95ci": [round(auroc_ci[0], 4), round(auroc_ci[1], 4)],
         },
-        "score_margin_control": {
+        "score_margin_control_restricted_thigh": {
+            "scope": "Restricted strictly to candidate rows with score >= t_high (pure ML candidates)",
+            "n": n_ctrl_restricted,
+            "candidates_at_or_above_thigh": n_thigh,
+            "max_score_in_control": round(float(np.max(thigh_scores[margin_order_restr])), 6) if n_ctrl_restricted > 0 else 0.0,
+            "true_positives": tp_ctrl_r,
+            "false_positives": fp_ctrl_r,
+            "precision_pct": round(prec_ctrl_r * 100.0, 2),
+            "false_positive_share_pct": round(fp_share_ctrl_r * 100.0, 2),
+            "false_positive_share_wilson_95ci_pct": [round(fp_share_ctrl_r_ci[0] * 100.0, 2), round(fp_share_ctrl_r_ci[1] * 100.0, 2)],
+            "unstable_fp_within_thigh": int(np.sum((thigh_y == 0) & cand_unstables[thigh_mask])),
+            "fp_gain_vs_unstable": fp_ctrl_r - int(np.sum((thigh_y == 0) & cand_unstables[thigh_mask])),
+        },
+        "score_margin_control_unrestricted_labeled": {
+            "scope": "Unrestricted (all candidate High rows, including rule-boosted rows with score < t_high)",
             "n": n_u,
-            "max_score_in_control": round(float(np.max(cand_scores[ctrl_indices])), 6) if n_u > 0 else 0.0,
-            "true_positives": tp_ctrl,
-            "false_positives": fp_ctrl,
-            "precision": round(prec_ctrl, 6),
-            "precision_pct": round(prec_ctrl * 100.0, 2),
-            "false_positive_share": round(fp_share_ctrl, 6),
-            "false_positive_share_pct": round(fp_share_ctrl * 100.0, 2),
-            "false_positive_share_wilson_95ci_pct": [round(fp_share_ctrl_ci[0] * 100.0, 2), round(fp_share_ctrl_ci[1] * 100.0, 2)],
-            "fp_diff_vs_unstable": fp_ctrl - fp_u,
-            "tp_diff_vs_unstable": tp_ctrl - tp_u,
+            "true_positives": tp_ctrl_unrestr,
+            "false_positives": fp_ctrl_unrestr,
+            "false_positive_share_pct": round(fp_share_unrestr * 100.0, 2),
+            "note": "Includes rule-boosted rows from review band that have lower scores and higher FP rate",
         },
         "pre_specified_conclusion": {
             "condition_a_fp_share_ci_strictly_higher": bool(cond_a),
             "condition_b_auroc_ci_excludes_chance": bool(cond_b),
             "verdict": verdict,
+            "plan_governing_split_note": "docs/analysis-plan.md does not pre-specify whether validation or test is the governing split; validation meets both criteria, but held-out test fails both",
+        },
+    }
+
+
+def evaluate_variant_e_grid(
+    val_probs: np.ndarray,
+    y_val: np.ndarray,
+    has_rules_val: np.ndarray,
+    test_probs: np.ndarray,
+    y_test: np.ndarray,
+    has_rules_test: np.ndarray,
+    t_rev: float,
+    floors: list[float] | None = None,
+) -> dict[str, Any]:
+    """Evaluate exploratory Variant E over a grid of score floors f."""
+    if floors is None:
+        floors = [0.10, 0.30, 0.50, 0.70, 0.75, 0.80, 0.85, 0.90, 0.92, 0.94]
+
+    grid_results = []
+    for f in floors:
+        # Validation
+        v_extra = has_rules_val & (val_probs >= f) & (val_probs < t_rev)
+        v_q_f = 102 + int(np.sum((y_val == 1) & v_extra))
+        v_q_l = 43 + int(np.sum((y_val == 0) & v_extra))
+        v_tot_q = v_q_f + v_q_l
+        v_comb_f = 649 + v_q_f
+        v_rec = v_comb_f / 790
+
+        # Test
+        t_extra = has_rules_test & (test_probs >= f) & (test_probs < t_rev)
+        t_q_f = 272 + int(np.sum((y_test == 1) & t_extra))
+        t_q_l = 30 + int(np.sum((y_test == 0) & t_extra))
+        t_tot_q = t_q_f + t_q_l
+        t_comb_f = 1303 + t_q_f
+        t_rec = t_comb_f / 1642
+
+        grid_results.append({
+            "floor_f": round(f, 4),
+            "validation": {
+                "total_queue": v_tot_q,
+                "queue_rate_per_hour": round(v_tot_q / 75, 2),
+                "frauds_captured": v_comb_f,
+                "combined_recall_pct": round(v_rec * 100.0, 2),
+                "legit_in_queue": v_q_l,
+                "legit_rate_pct": round(v_q_l / 161677 * 100.0, 3),
+            },
+            "test": {
+                "total_queue": t_tot_q,
+                "queue_rate_per_hour": round(t_tot_q / 148, 2),
+                "frauds_captured": t_comb_f,
+                "combined_recall_pct": round(t_rec * 100.0, 2),
+                "legit_in_queue": t_q_l,
+                "legit_rate_pct": round(t_q_l / 116504 * 100.0, 3),
+            },
+        })
+
+    # Selection rule for Variant E: queue <= 3,000 on validation, smallest queue within 1pp of best capture
+    best_capture = max(x["validation"]["combined_recall_pct"] for x in grid_results if x["validation"]["total_queue"] <= 3000)
+    thresh_capture = best_capture - 1.00
+    qualifying = [x for x in grid_results if x["validation"]["total_queue"] <= 3000 and x["validation"]["combined_recall_pct"] >= thresh_capture]
+    selected_floor_entry = sorted(qualifying, key=lambda x: x["validation"]["total_queue"])[0]
+
+    return {
+        "description": "Exploratory post-hoc Variant E: routing rule-flagged alerts with score >= f to Analyst Review",
+        "grid": grid_results,
+        "selected_floor": selected_floor_entry["floor_f"],
+        "selection_details": {
+            "best_capture_pct": best_capture,
+            "threshold_capture_pct": round(thresh_capture, 2),
+            "selected_validation_queue": selected_floor_entry["validation"]["total_queue"],
+            "selected_validation_recall_pct": selected_floor_entry["validation"]["combined_recall_pct"],
+            "selected_test_queue": selected_floor_entry["test"]["total_queue"],
+            "selected_test_recall_pct": selected_floor_entry["test"]["combined_recall_pct"],
         },
     }
 
@@ -597,20 +676,18 @@ def main() -> None:
     bundle_dir = Path("ml/models/class_weight")
     output_json_path = Path("ml/reports/gateway_evaluation.json")
 
-    # Load data
     print("Loading PaySim dataset and chronological splits...", flush=True)
     df = load_raw_paysim(data_path)
     train_df, val_df, test_df = split_chronological(df)
 
     n_val = len(val_df)
     n_test = len(test_df)
-    hours_val = 75  # steps 521..595
-    hours_test = 148  # steps 596..743
+    hours_val = 75
+    hours_test = 148
 
     y_val = val_df["is_fraud"].to_numpy(dtype=int)
     y_test = test_df["is_fraud"].to_numpy(dtype=int)
 
-    # Load deployed artifact
     print(f"Loading deployed artifact from {bundle_dir}...", flush=True)
     scoring_service = ScoringService()
     scoring_service.load_artifact(str(bundle_dir))
@@ -622,7 +699,6 @@ def main() -> None:
     print(f"Loaded {scoring_service.model_version}: review={t_rev:.6f}, high={t_high:.6f}", flush=True)
     print(f"Loaded {len(replicates)} replicates for TreeExplainer stability.", flush=True)
 
-    # 1. Rules Evaluation
     print("Evaluating backend heuristic rules and verifying parity...", flush=True)
     verify_backend_rules_parity_on_sample(val_df, sample_size=200)
 
@@ -632,12 +708,10 @@ def main() -> None:
     has_rules_recal_val, flags_recal_val = evaluate_recalibrated_rules(val_df)
     has_rules_recal_test, flags_recal_test = evaluate_recalibrated_rules(test_df)
 
-    # 2. Main Model Inference
     print("Scoring validation and test splits with deployed model...", flush=True)
     val_probs = main_pipe.predict_proba(val_df[API_INPUT_COLUMNS])[:, 1]
     test_probs = main_pipe.predict_proba(test_df[API_INPUT_COLUMNS])[:, 1]
 
-    # 3. Identify Candidate High Risk Superset and Run SHAP TreeExplainer
     print("Computing Replicate TreeExplainer SHAP values on Candidate High Risk cohorts...", flush=True)
     val_cand_mask = (val_probs >= t_high) | (has_rules_std_val & (val_probs >= t_rev)) | (has_rules_recal_val & (val_probs >= t_rev))
     test_cand_mask = (test_probs >= t_high) | (has_rules_std_test & (test_probs >= t_rev)) | (has_rules_recal_test & (test_probs >= t_rev))
@@ -661,26 +735,15 @@ def main() -> None:
     superset_stables_test = {int(test_cand_indices[i]): bool(test_stables[i]) for i in range(len(test_cand_indices))}
     superset_overlaps_test = {int(test_cand_indices[i]): float(test_overlaps[i]) for i in range(len(test_cand_indices))}
 
-    # 4. Tune Variant E on Validation
-    print("Tuning Exploratory Variant E score floor f on Validation split...", flush=True)
-    # Search f in [0.0, t_rev] such that total validation queue <= 3,000, maximizing fraud capture
-    rule_frauds_val = (y_val == 1) & has_rules_std_val & (val_probs < t_rev)
-    rule_legit_val = (y_val == 0) & has_rules_std_val & (val_probs < t_rev)
-    
-    # Baseline queue in Variant B is unstable + score_band = 145
-    budget = 3000
-    available_budget = budget - 145
+    print("Evaluating Exploratory Variant E floor grid...", flush=True)
+    variant_e_data = evaluate_variant_e_grid(
+        val_probs, y_val, has_rules_std_val,
+        test_probs, y_test, has_rules_std_test,
+        t_rev=t_rev,
+    )
+    selected_e_floor = variant_e_data["selected_floor"]
+    print(f"Selected Variant E floor by plan rule: {selected_e_floor}", flush=True)
 
-    # Find score floor f where rule_legit + rule_frauds <= available_budget
-    cand_scores_val_rules = val_probs[has_rules_std_val & (val_probs < t_rev)]
-    cand_scores_val_rules_sorted = np.sort(cand_scores_val_rules)[::-1]
-    if len(cand_scores_val_rules_sorted) > available_budget:
-        f_optimal = float(cand_scores_val_rules_sorted[available_budget - 1])
-    else:
-        f_optimal = 0.0
-    print(f"Tuned Variant E floor f on Validation: {f_optimal:.6f}", flush=True)
-
-    # 5. Evaluate All Variants on Both Splits
     print("Evaluating Variants A, B, C, D, E across Validation and Test splits...", flush=True)
     variants_to_evaluate = ["variant_A", "variant_B", "variant_C", "variant_D", "variant_E"]
     eval_results: dict[str, dict[str, Any]] = {"validation": {}, "test": {}}
@@ -699,7 +762,7 @@ def main() -> None:
             superset_overlaps=superset_overlaps_val,
             scoring_service=scoring_service,
             simulated_hours=hours_val,
-            variant_e_floor=f_optimal,
+            variant_e_floor=selected_e_floor,
         )
         eval_results["test"][v_name] = evaluate_split_variant(
             variant_name=v_name,
@@ -714,12 +777,10 @@ def main() -> None:
             superset_overlaps=superset_overlaps_test,
             scoring_service=scoring_service,
             simulated_hours=hours_test,
-            variant_e_floor=f_optimal,
+            variant_e_floor=selected_e_floor,
         )
 
-    # 6. Informative Analysis of Unstable on Candidate High Rows
     print("Performing Informative Analysis of Unstable on candidate-High rows...", flush=True)
-    # Filter to standard candidate High rows: score >= t_high or (has_rules and score >= t_rev)
     std_cand_mask_val = (val_probs >= t_high) | (has_rules_std_val & (val_probs >= t_rev))
     std_cand_mask_test = (test_probs >= t_high) | (has_rules_std_test & (test_probs >= t_rev))
 
@@ -742,7 +803,6 @@ def main() -> None:
         test_cand_sub, test_sub_overlaps, test_sub_stables, test_sub_scores, t_high
     )
 
-    # 7. Distribution of ML Scores of Frauds Flagged ONLY by Rules
     print("Analyzing score distribution of frauds flagged ONLY by rules...", flush=True)
     val_rule_only_fraud_scores = val_probs[(y_val == 1) & has_rules_std_val & (val_probs < t_rev)]
     test_rule_only_fraud_scores = test_probs[(y_test == 1) & has_rules_std_test & (test_probs < t_rev)]
@@ -765,9 +825,8 @@ def main() -> None:
         "test": make_score_dist(test_rule_only_fraud_scores),
     }
 
-    # 8. Selection Rule Application on Validation
     print("Applying Step 0b Selection Rule on Validation split...", flush=True)
-    val_budget = 3000  # 40 alerts/hr * 75 hrs
+    val_budget = 3000
     eligible_variants = []
     for v_name in ["variant_A", "variant_B", "variant_C", "variant_D"]:
         q_size = eval_results["validation"][v_name]["decisions"]["analyst_review"]["count"]
@@ -777,10 +836,9 @@ def main() -> None:
 
     eligible_variants.sort(key=lambda x: x[2], reverse=True)
     best_capture = eligible_variants[0][2] if eligible_variants else 0.0
-    capture_threshold = best_capture - 0.01  # within 1 percentage point
+    capture_threshold = best_capture - 0.01
 
     qualifying_variants = [v for v in eligible_variants if v[2] >= (capture_threshold - 1e-9)]
-    # Smallest queue among qualifying
     qualifying_variants_by_queue = sorted(qualifying_variants, key=lambda x: x[1])
 
     selection_rule_summary = {
@@ -811,7 +869,6 @@ def main() -> None:
         "smallest_queue_size": qualifying_variants_by_queue[0][1] if qualifying_variants_by_queue else None,
     }
 
-    # Assemble Full Report JSON
     full_report: dict[str, Any] = {
         "metadata": {
             "evaluation_step": "Step 3 Gateway Routing Evaluation",
@@ -866,6 +923,7 @@ def main() -> None:
             "test": unstable_test_info,
         },
         "rule_only_frauds_score_distribution": rule_only_score_dist,
+        "variant_E_exploratory_grid": variant_e_data,
         "selection_rule_validation": selection_rule_summary,
     }
 

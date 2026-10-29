@@ -91,7 +91,7 @@ Source file: `ml/reports/gateway_evaluation.json`. Evaluates the deployed `v1.0.
 | Variant B (Score-Gated Rules: Rule Never Routes Alone) | 145 | 1.93 | 82.15% | 95.06% | [93.32%, 96.37%] | 0.027% | **Selected (Smallest Queue within 1pp)** |
 | Variant C (Train-Recalibrated Rules: $\le 0.5\%$ cap) | 1,622 | 21.63 | 80.51% | 95.06% | [93.32%, 96.37%] | 0.932% | Eligible (Qualifying within 1pp) |
 | Variant D (Pure ML Gateway: No Rules) | 192 | 2.56 | 80.51% | 95.06% | [93.32%, 96.37%] | 0.048% | Eligible (Qualifying within 1pp) |
-| Variant E (Exploratory Post-Hoc: Tuned Floor $f=0.0070$) | 3,000 | 40.00 | 82.15% | 99.87% | [99.29%, 99.98%] | 1.769% | Exploratory (Post-hoc tuned) |
+| Variant E (Exploratory Post-Hoc: Tuned Floor $f=0.75$) | 430 | 5.73 | 82.15% | 99.24% | [98.35%, 99.65%] | 0.182% | Exploratory (Post-hoc tuned) |
 
 ### Held-Out Test Split: Full Routing Variant Comparison (148 Simulated Hours, 118,146 Rows, 1,642 Frauds)
 
@@ -101,7 +101,7 @@ Source file: `ml/reports/gateway_evaluation.json`. Evaluates the deployed `v1.0.
 | Variant B (Score-Gated Rules: Rule Never Routes Alone) | 1,397 | 79.35% | 302 | 2.04 | 95.92% | [94.85%, 96.77%] | 0.026% |
 | Variant C (Train-Recalibrated Rules: $\le 0.5\%$ cap) | 1,361 | 78.14% | 1,022 | 6.91 | 95.92% | [94.85%, 96.77%] | 0.627% |
 | Variant D (Pure ML Gateway: No Rules) | 1,361 | 78.14% | 338 | 2.28 | 95.92% | [94.85%, 96.77%] | 0.040% |
-| Variant E (Exploratory Post-Hoc: Tuned Floor $f=0.0070$) | 1,397 | 79.35% | 2,581 | 17.44 | 99.76% | [99.38%, 99.91%] | 1.928% |
+| Variant E (Exploratory Post-Hoc: Tuned Floor $f=0.75$) | 1,397 | 79.35% | 540 | 3.65 | 99.21% | [98.65%, 99.54%] | 0.184% |
 
 ### Held-Out Test Split: Analyst Review Queue Breakdown by Cause
 
@@ -111,7 +111,7 @@ Source file: `ml/reports/gateway_evaluation.json`. Evaluates the deployed `v1.0.
 | Variant B (Score-Gated Rules: Rule Never Routes Alone) | 3 (0/3) | 299 (272/27) | 0 (0/0) | 302 | 272 | 30 |
 | Variant C (Train-Recalibrated Rules: $\le 0.5\%$ cap) | 54 (24/30) | 284 (268/16) | 684 (0/684) | 1,022 | 292 | 730 |
 | Variant D (Pure ML Gateway: No Rules) | 54 (24/30) | 284 (268/16) | 0 (0/0) | 338 | 292 | 46 |
-| Variant E (Exploratory Post-Hoc: Tuned Floor $f=0.0070$) | 3 (0/3) | 299 (272/27) | 2,279 (63/2216) | 2,581 | 335 | 2,246 |
+| Variant E (Exploratory Post-Hoc: Tuned Floor $f=0.75$) | 3 (0/3) | 299 (272/27) | 238 (54/184) | 540 | 326 | 214 |
 
 ### Candidate High Risk Flow Table (Validation & Held-Out Test Splits)
 
@@ -130,10 +130,28 @@ Source file: `ml/reports/gateway_evaluation.json`. Evaluates the deployed `v1.0.
 | Test | Unstable ($k=5$) | 299 | 272 | 27 | 90.97% [87.18%, 93.72%] | 9.03% [6.28%, 12.82%] |
 
 #### Pre-Specified Conclusion on Informative Nature of Unstable:
-- **Validation AUROC** of mean overlap predicting False Positives: 0.5815 (95% bootstrap CI: [0.5231, 0.6361]).
-- **Held-Out Test AUROC** of mean overlap predicting False Positives: 0.5478 (95% bootstrap CI: [0.4909, 0.6020]).
-- **Score-Margin Control** ($N=299$ rows with lowest scores above $t_{\text{high}}$ on test): re-routes 107 FPs (35.79% FP share) vs 27 FPs (9.03% FP share) for Unstable (+80 FPs caught, 80 fewer frauds delayed).
-- **Formal Scientific Verdict**: **"no evidence that explanation instability predicts false positive alert status"** on the held-out test split.
+- **Validation Split**: AUROC = 0.5815 (95% bootstrap CI: [0.5231, 0.6361]). Validation meets both conditions (AUROC excludes 0.50, and Unstable FP share lower CI > Stable upper CI).
+- **Held-Out Test Split**: AUROC = 0.5478 (95% bootstrap CI: [0.4909, 0.6020]). Test fails both conditions (AUROC CI includes chance 0.50, and Unstable FP share CI [6.28%, 12.82%] overlaps Stable [5.53%, 8.16%]).
+- **Scientific Evaluation Note**: `docs/analysis-plan.md` does not pre-specify whether Validation or Held-Out Test is the governing split. However, because generalizability to unseen data is required, the pre-specified conclusion on test is: **"no evidence that explanation instability predicts false positive alert status"**.
+
+#### Score-Margin Control vs Unstable Explanation Re-routing:
+- **Restricted Score-Margin Control** (strictly candidate rows with score $\ge t_{\text{high}}$; $N=284$ rows): re-routes 82 FPs (28.87% FP share) vs 16 FPs for Unstable within $s \ge t_{\text{high}}$ (+66 FPs caught, with 66 fewer frauds delayed).
+- **Unrestricted Score-Margin Control** (all candidate rows including rule-boosted rows below $t_{\text{high}}$; $N=299$ rows): re-routes 107 FPs (35.79% FP share). *Labeled unrestricted: includes lower-scoring rule-boosted band rows with higher FP prevalence.*
+
+### Exploratory Post-Hoc Variant E: Score Floor Grid Analysis
+
+| Score Floor $f$ | Validation Queue | Val Queue Rate (/hr) | Val Combined Recall | Val Legit Share (%) | Test Queue | Test Queue Rate (/hr) | Test Combined Recall | Test Legit Share (%) |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| $f = 0.10$ | 1,272 | 16.96 | 99.87% | 0.700% | 1,157 | 7.82 | 99.76% | 0.706% |
+| $f = 0.30$ | 834 | 11.12 | 99.75% | 0.430% | 847 | 5.72 | 99.70% | 0.440% |
+| $f = 0.50$ | 626 | 8.35 | 99.75% | 0.301% | 691 | 4.67 | 99.63% | 0.307% |
+| $f = 0.70$ | 477 | 6.36 | 99.37% | 0.211% | 573 | 3.87 | 99.39% | 0.209% |
+| $f = 0.75$ | 430 | 5.73 | 99.24% | 0.182% | 540 | 3.65 | 99.21% | 0.184% |
+| $f = 0.80$ | 397 | 5.29 | 98.73% | 0.165% | 500 | 3.38 | 98.96% | 0.153% |
+| $f = 0.85$ | 340 | 4.53 | 98.73% | 0.129% | 449 | 3.03 | 98.48% | 0.116% |
+| $f = 0.90$ | 257 | 3.43 | 97.97% | 0.082% | 402 | 2.72 | 97.81% | 0.085% |
+| $f = 0.92$ | 224 | 2.99 | 97.09% | 0.066% | 366 | 2.47 | 97.02% | 0.065% |
+| $f = 0.94$ | 194 | 2.59 | 96.33% | 0.051% | 337 | 2.28 | 96.65% | 0.045% |
 
 ### ML Score Distribution of Frauds Flagged Only by Rules ($s < t_{\text{review}}$)
 

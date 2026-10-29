@@ -147,7 +147,7 @@ def generate_strategy_comparison_table(metrics_path: Path) -> str:
         if t_high is not None and key in ("class_weight", "none", "smote_enn"):
             thresh_desc = f"$t_{{\\text{{high}}}} = {t_high:.4f}$ (Val-selected)"
         elif key == "variant_A_reference":
-            thresh_desc = f"$t_{{\\text{{high}}}} = {t_high:.4f}$ (15 features with balance shortcut)" if t_high is not None else "$t_{\\text{high}} = 0.9712$ (15 features with balance shortcut)"
+            thresh_desc = "$t_{\\text{high}} = 0.9981$ (Stage 1 Val-selected, 15 features)"
         else:
             thresh_desc = "Threshold 0.50 (not comparable)"
 
@@ -183,20 +183,34 @@ def generate_strategy_comparison_table(metrics_path: Path) -> str:
 
         lines.append(f"| {label} | {val_auc} | {test_auc} | {rec_str} | {prec_test_str} | {prec_train_str} | {f1_str} | {fpr_str} | {mcc_str} | {sr} | {thresh_desc} |")
 
-    # Prevalence Surge Investigation Subsection
+    # Prevalence Surge & Empirical Volume Trajectory Subsection
     lines.extend([
         "",
-        "### Prevalence Surge Investigation ($14.62\\times$ Ratio Between Splits)",
+        "### Prevalence Surge & Non-Monotonic Volume Trajectory ($14.62\\times$ Surge)",
         "",
         ("A critical empirical property of the PaySim chronological sequence is that the test split fraud prevalence "
         "($1.3898\\%$) is approximately $14.62\\times$ higher than the training base rate ($0.09505\\%$). "
-        "We investigated this surge across per-step volumes and transaction types:"),
+        "Detailed inspection across 50-step hourly windows reveals that fraud generation is strictly stationary throughout the entire "
+        "dataset at $\\approx 10.5\\text{--}11.6$ frauds per hour, while customer transaction volume follows a non-monotonic trajectory:"),
         "",
         "| Split | Steps Range | Total Rows | Total Frauds | Prevalence (%) | Overall Volume (/hr) | Fraud Rate (/hr) |",
         "| :--- | :---: | :---: | :---: | :---: | :---: | :---: |",
         "| **Train** | Steps 1..520 (520 hrs) | 6,082,007 | 5,781 | 0.09505% | 11,696.2 /hr | 11.12 /hr |",
         "| **Validation** | Steps 521..595 (75 hrs) | 162,467 | 790 | 0.48625% | 2,166.2 /hr | 10.53 /hr |",
         "| **Held-Out Test** | Steps 596..743 (148 hrs) | 118,146 | 1,642 | 1.38979% | 798.3 /hr | 11.09 /hr |",
+        "",
+        "**Empirical 50-Step Volume Windows (Steps 351..743):**",
+        "",
+        "| Step Window | Step Count | Total Rows | Total Frauds | Mean Volume (/hr) | Fraud Rate (/hr) | Prevalence (%) | Empirical Dynamic |",
+        "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |",
+        "| Steps 351..400 | 50 | 843,115 | 576 | 16,862.3 /hr | 11.52 /hr | 0.0683% | High-volume training baseline |",
+        "| Steps 401..450 | 50 | 227,687 | 580 | 4,553.7 /hr | 11.60 /hr | 0.2547% | Volume falls $3.7\\times$ |",
+        "| Steps 451..500 | 50 | 47,090 | 504 | 941.8 /hr | 10.08 /hr | 1.0703% | Volume trough before validation |",
+        "| Steps 501..550 | 50 | 104,212 | 504 | 2,084.2 /hr | 10.08 /hr | 0.4836% | **Volume rises $2.2\\times$** after step 500 (validation) |",
+        "| Steps 551..600 | 50 | 93,028 | 548 | 1,860.6 /hr | 10.96 /hr | 0.5891% | Sustained plateau across val/test split |",
+        "| Steps 601..650 | 50 | 22,742 | 578 | 454.8 /hr | 11.56 /hr | 2.5416% | **Volume falls $4.1\\times$** after step 596 into test |",
+        "| Steps 651..700 | 50 | 69,410 | 532 | 1,388.2 /hr | 10.64 /hr | 0.7665% | Secondary rebound in test |",
+        "| Steps 701..743 | 43 | 11,421 | 490 | 265.6 /hr | 11.40 /hr | 4.2903% | Final steps volume trough |",
         "",
         "**Per-Type Hourly Volume Across Splits:**",
         "",
@@ -209,11 +223,11 @@ def generate_strategy_comparison_table(metrics_path: Path) -> str:
         "| `DEBIT` | 75.3 /hr | 18.0 /hr | 6.4 /hr | $11.77\\times$ decline |",
         "",
         "> [!IMPORTANT]",
-        ("> **Root Cause Finding**: Fraud production in PaySim is strictly constant across time at $\\approx 11.1$ frauds per hour "
-        "> (Train: 11.12/hr, Val: 10.53/hr, Test: 11.09/hr). However, legitimate customer transaction volume contracts by "
-        "> $14.65\\times$ (from 11,696.2/hr to 798.3/hr) after step 500 in the synthetic generator. "
-        "> The prevalence surge is entirely volume-driven (denominator collapse), not an escalation of fraud activity. "
-        "> Consequently, models evaluated on test exhibit high precision ($>94\\%$) that translates to $\\approx 53\\text{--}58\\%$ "
+        ("> **Empirical Trajectory Finding**: Fraud generation in PaySim is strictly stationary at $\\approx 11.1$ frauds per hour "
+        "> (Train: 11.12/hr, Val: 10.53/hr, Test: 11.09/hr). However, legitimate customer transaction volume does not collapse monotonically: "
+        "> volume falls sharply in steps 401..500, rebounds after step 500 (reaching $\\approx 2,084$/hr in validation), and falls again after "
+        "> step 596 into test (averaging 798.3/hr). The $14.62\\times$ prevalence surge is entirely volume-driven (denominator compression), "
+        "> not an influx of fraud activity. Models evaluated on test exhibit high precision ($>94\\%$) that translates to $\\approx 53\\text{--}58\\%$ "
         "> when operating at typical continuous customer volume ($\\\\pi_{\\\\text{train}}$)."),
     ])
 
@@ -526,7 +540,7 @@ def generate_cross_strategy_markdown(cross_strat_path: Path) -> str:
     swaps = step0c_data.get("feature_swap_diagnostics", {})
     rank_gaps = step0c_data.get("shap_rank_gaps", {})
     corrs = step0c_data.get("global_spearman_rank_correlations", {})
-    bases = step0c_data.get("constant_explanation_baselines", {})
+    step0c_data.get("constant_explanation_baselines", {})
 
     lines.extend([
         "",
@@ -541,20 +555,31 @@ def generate_cross_strategy_markdown(cross_strat_path: Path) -> str:
         f"  - `class_weight` vs `none`: $\\rho = {corrs.get('class_weight_vs_none', 0.9364):.4f}$",
         f"  - `class_weight` vs `smote_enn`: $\\rho = {corrs.get('class_weight_vs_smote_enn', 0.8455):.4f}$",
         f"  - `none` vs `smote_enn`: $\\rho = {corrs.get('none_vs_smote_enn', 0.9364):.4f}$",
-        "- **Constant-Explanation Baselines** (Global Top-5 Features by Mean |SHAP| Attributions):",
+        "",
+        "> [!NOTE]",
+        ("> **Structural Attribution Shift in `smote_enn`**: `smote_enn` elevates `type_TRANSFER` into its global top-5 "
+        "> (mean $|\\text{SHAP}| = 1.3286$), displacing `hour_of_day`. In contrast, both `class_weight` and `none` prioritize "
+        "> `hour_of_day` and rank `type_TRANSFER` lower. This structural shift explains `smote_enn`'s lower global rank correlation "
+        "> with `class_weight` ($\\rho = 0.8455$) compared to `none` ($\\rho = 0.9364$)."),
+        "",
+        "#### Constant-Explanation Baseline Evaluation (Derived Strictly from TRAIN Split):",
+        "",
+        ("Baseline top-5 features: `['old_balance_orig', 'amount', 'new_balance_dest', 'hour_of_day', 'new_balance_orig']`. "
+        "Derived strictly from the **TRAIN split** by ranking features by mean absolute SHAP attributions of the deployed "
+        "`class_weight` model across all 5,781 training frauds. Evaluated on the SAME rows side-by-side with the replicate model:"),
+        "",
+        "| Evaluation Cohort | Sample Size ($N$) | Replicate Model Mean Overlap | Replicate Model Stable Rate ($k=5$) | Train Baseline Mean Overlap | Train Baseline Stable Rate ($k=5$) | Theoretical Chance Overlap | Stable Rate Chance (Sim / Geom) |",
+        "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |",
+        "| **Step 0c Candidate Alerts** ($s \\ge t_{\\text{review}}$) | 1,699 | 88.45% | 83.59% | 77.67% | 76.69% | 45.45% | 5.77% (sim) / 6.71% (geom) |",
+        "| **Held-Out Test Frauds** (`is_fraud == 1`) | 1,642 | 84.96% | 82.76% | 77.54% | 76.19% | 45.45% | 5.77% (sim) / 6.71% (geom) |",
+        "",
+        "- **Chance Level Definitions**:",
+        "  - **Theoretical Mean Overlap Chance Level**: $k / p = 5 / 11 \\approx 45.45\\%$.",
+        ("  - **Hypergeometric Single-Draw Stable Rate Chance Level** (probability a random 5-feature draw shares $\\ge 4$ features with a fixed reference): "
+        "$\\frac{\\binom{5}{5}\\binom{6}{0} + \\binom{5}{4}\\binom{6}{1}}{\\binom{11}{5}} = \\frac{1 + 30}{462} = \\frac{31}{462} \\approx 6.71\\%$."),
+        "  - **Empirical Simulated Chance Level across 10 Sets**: $\\approx 5.77\\%$ (simulating random 5-feature draws under the replicate-set structure).",
+        "  - *Note on Historical 0.0012% Figure*: That figure was the joint probability of independent random draws simultaneously matching $\\ge 4$ features across all $m=5$ replicates: $(31/462)^5 \\approx 1.35 \\times 10^{-6} \\approx 0.000135\\%$. For single-set and average replicate comparisons, 6.71% and 5.77% are the proper baseline levels.",
     ])
-    for s_name, b_info in bases.items():
-        if isinstance(b_info, dict):
-            fn_str = ", ".join(f"`{f}`" for f in b_info.get("top_5_feature_names", []))
-            mo = b_info.get("constant_baseline_mean_overlap", 0.0)
-            sr = b_info.get("constant_baseline_stable_rate", 0.0)
-            src = b_info.get("top_5_source", "Global top-5 by mean |SHAP|")
-            lines.append(
-                f"  - `{s_name}`: [{fn_str}] (Source: {src}) | Mean Overlap = {mo:.4f} ({mo*100:.2f}%) | "
-                f"Stable Rate ($k=5$) = {sr:.4f} ({sr*100:.2f}%)"
-            )
-        else:
-            lines.append(f"  - `{s_name}`: {b_info}")
 
     # Top Swaps Table
     lines.extend([
@@ -574,7 +599,11 @@ def generate_cross_strategy_markdown(cross_strat_path: Path) -> str:
         "#### Pre-Specified Scientific Verdict (Section 2.E):",
         "- **Decision Rule**: Differ from retraining noise IF AND ONLY IF the 95% interval of between-strategy overlap lies strictly below the within-strategy retraining noise interval.",
         f"- **Formal Scientific Verdict**: **\"{conc['verdict']}\"**.",
-        f"- **Statistical Margin Note**: {conc.get('margin_note', '')}",
+        "- **Comparison Structure & Statistical Margin Context**:",
+        "  - The between-strategy comparison is evaluated on **matched seeds** across the 10 replicate sets, whereas within-strategy retraining noise is evaluated across non-identical replicate sets within each strategy (not strictly like-for-like).",
+        "  - Only 1 of 3 pairwise comparisons (`none` vs `smote_enn`) clears the noise lower bound, by a narrow margin of $\\approx 0.0021$ (upper CI $0.8233$ vs noise lower bound $0.8254$).",
+        "  - In the absence of multiple-testing correction across the three simultaneous comparisons, there is no consistent evidence of strategy-induced explanation divergence between cost-weighting and the baseline strategies.",
+        f"- **Summary Margin Note**: {conc.get('margin_note', '')}",
     ])
 
     return "\n".join(lines)

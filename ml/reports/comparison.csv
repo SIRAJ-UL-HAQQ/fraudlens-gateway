@@ -5,4 +5,4 @@ smote_enn,0.9689595997609548,0.9853,0.905,0.9538,0.9287,0.0006,0.8623
 Logistic Regression baseline,-,0.8505,0.8155,0.6749,0.7386,0.0055,-
 Random Forest baseline,-,0.9362,0.8721,0.8575,0.8647,0.002,-
 Rules baseline (union: drain or >200k),-,-,0.9951,0.0477,0.091,0.2802,-
-Variant A reference (15 features),0.9998,0.9999,0.9994,0.9832,0.9912,0.0002,0.8307
+Variant A reference (threshold 0.50, m=2 replicates, 15 features: NOT comparable to the validation-threshold rows),0.9998,0.9999,0.9994,0.9832,0.9912,0.0002,0.8307

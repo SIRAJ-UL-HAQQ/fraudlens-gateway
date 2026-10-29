@@ -41,11 +41,18 @@ Every figure below is derived directly from the raw PaySim CSV split artifacts (
 
 ---
 
-## 3. Origin and Reconciliation of 38.31% (629 / 1,642)
+## 3. Status of 38.31% (629 / 1,642)
 
-1. **Exact Source of 629 Test Frauds**:
-   The figure **$38.31\% = 629 / 1,642$** was not an abstract hypothesis, but an exact empirical count from a specific sub-rule condition: high-value cash-out fraud transactions where `type == 'CASH_OUT'` and transaction amount / origin balance $\ge \$108,000$ (`(type == 'CASH_OUT') & (amount >= 108_108.11)`). Exactly $629$ of the $1,642$ test fraud transactions fall into this cash-out band ($629 / 1,642 = 38.3069\% \approx 38.31\%$).
-2. **Reconciliation against Full Rule Engine**:
-   When all four heuristic safety checks are active (specifically including `ORIGIN_ACCOUNT_DRAINED`, which flags 1,580 frauds, and `LARGE_TRANSFER_AMOUNT`, which flags 1,102 frauds), the true union recall across the test fraud population is **$99.51\%$** ($1,634 / 1,642$), with only 8 missed frauds.
-3. **How 38.31% Entered Early Documentation**:
-   In `docs/analysis-plan.md` Section 4, line 233 recorded this $38.31\%$ single sub-rule figure under "Subsequent Gateway Evaluation Report" due to an isolated single-rule benchmark. An early uncommitted draft of `MODEL_CARD.md` briefly copied that reconciliation cell before the automated table generator script was implemented. All active model card tables and report manifests now reflect the verified full-engine union recall figures ($99.79\%$ train, $99.75\%$ validation, $99.51\%$ test).
+629/1,642 appeared in the plan and an early MODEL_CARD draft; it is not reproducible from any pipeline output; its origin was not established; it was removed.
+
+---
+
+## 4. Unmeasured Values Reported in Preliminary Discussions
+
+For absolute transparency and integrity, the following figures reported in preliminary chat conversations were NOT measured from valid pipeline runs and were discarded:
+1. **0.8845**: A placeholder value that appeared in early drafting of candidate alert overlap before Set 1 replicate evaluation.
+2. **Variant A "seeds 4201-4205, m=5"**: Variant A was actually evaluated on $m=2$ replicates (seeds 101, 102), not $m=5$ with seeds 4201..4205.
+3. **Model-seed range "4201..4210"**: Model-seed-only noise was actually fit on seeds `500..509` in `ml/src/train.py:81`; "4201..4210" was an unexecuted draft naming proposal.
+4. **Validation frauds "804"**: A preliminary conversational estimate; the true chronological validation fraud count is exactly $790$.
+
+The generated JSON reports (`ml/reports/metrics.json`, `ml/reports/stage1_validation_results.json`, `ml/reports/cross_strategy_agreement.json`, `ml/reports/gateway_evaluation.json`) and the synchronized `MODEL_CARD.md` tables are the only authoritative numbers.

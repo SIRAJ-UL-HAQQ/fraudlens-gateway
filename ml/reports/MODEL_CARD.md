@@ -73,7 +73,7 @@ Split prevalence: Held-Out Test $\pi_{\text{test}} = 1.3898\%$ ($1,642 / 118,146
 | Random Forest baseline | - | 0.9362 | 87.21% | 85.75% | 28.88% | 0.8647 | 0.2043% | 0.8628 | - | Threshold 0.50 (not comparable) |
 | Full-train reference (none, 6.08M) | - | 0.9823 | 77.89% | 99.77% | 96.64% | 0.8748 | 0.0026% | 0.8801 | - | Threshold 0.50 (not comparable) |
 | Full-train reference (class_weight, 6.08M) | - | 0.9831 | 99.94% | 53.93% | 7.32% | 0.7005 | 1.2034% | 0.7297 | - | Threshold 0.50 (not comparable) |
-| Variant A reference (15 features) | - | 0.9999 | 99.94% | 98.32% | 79.82% | 0.9912 | 0.0240% | 0.9912 | 83.07% | $t_{\text{high}} = 0.9981$ (Stage 1 Val-selected, 15 features) |
+| Variant A reference (threshold 0.50, m=2 replicates, 15 features: NOT comparable to the validation-threshold rows) | - | 0.9999 | 99.94% | 98.32% | 79.82% | 0.9912 | 0.0240% | 0.9912 | 83.07% | Threshold 0.50 (not comparable to validation-threshold rows) |
 
 ### Prevalence Surge & Non-Monotonic Volume Trajectory ($14.62\times$ Surge)
 
@@ -182,7 +182,11 @@ Baseline top-5 features: `['old_balance_orig', 'amount', 'new_balance_dest', 'ho
 | **Held-Out Test Frauds** (`is_fraud == 1`) | 1,642 | 85.54% [84.74%, 86.35%] | 83.59% [81.12%, 86.05%] | 79.05% [77.31%, 80.80%] | 78.87% [72.84%, 84.90%] |
 
 > [!NOTE]
-> The constant baseline evaluates a single pairwise comparison per row between the model's top-5 explanation and the constant train reference explanation. In contrast, replicate stability averages pairwise overlap across $m=5$ non-identical replicate models.
+> **Key Findings & Comparison Context**:
+> 1. **Mean Overlap**: The replicate model's mean overlap (84.96% Set 1; 85.54% 10-set mean, 95% CI [84.74%, 86.35%]) is strictly above the constant baseline (77.54% Set 1; 79.05% 10-set mean, 95% CI [77.31%, 80.80%]) with disjoint 95% intervals.
+> 2. **Stable Rate**: Stable-rate intervals overlap between the replicate model (83.59% [81.12%, 86.05%]) and the constant baseline (78.87% [72.84%, 84.90%]).
+> 3. **Comparison Asymmetry**: The constant baseline evaluates a single pairwise comparison per row between the model's top-5 explanation and the fixed train reference explanation, whereas replicate stability averages pairwise overlap across five non-identical replicate models.
+> 4. **Strategy Effect Scope**: No strategy effect claim is made beyond the per-pair verdicts established under Section 2.E.
 
 - **Chance Level Definitions**:
   - **Theoretical Expected Mean Overlap**: $k / p = 5 / 11 \approx 45.45\%$.
@@ -226,7 +230,7 @@ Split prevalence: Held-Out Test $\pi_{\text{test}} = 1.3898\%$ ($1,642 / 118,146
 | Random Forest baseline | - | 0.9362 | 87.21% | 85.75% | 28.88% | 0.8647 | 0.2043% | 0.8628 | - | Threshold 0.50 (not comparable) |
 | Full-train reference (none, 6.08M) | - | 0.9823 | 77.89% | 99.77% | 96.64% | 0.8748 | 0.0026% | 0.8801 | - | Threshold 0.50 (not comparable) |
 | Full-train reference (class_weight, 6.08M) | - | 0.9831 | 99.94% | 53.93% | 7.32% | 0.7005 | 1.2034% | 0.7297 | - | Threshold 0.50 (not comparable) |
-| Variant A reference (15 features) | - | 0.9999 | 99.94% | 98.32% | 79.82% | 0.9912 | 0.0240% | 0.9912 | 83.07% | $t_{\text{high}} = 0.9981$ (Stage 1 Val-selected, 15 features) |
+| Variant A reference (threshold 0.50, m=2 replicates, 15 features: NOT comparable to the validation-threshold rows) | - | 0.9999 | 99.94% | 98.32% | 79.82% | 0.9912 | 0.0240% | 0.9912 | 83.07% | Threshold 0.50 (not comparable to validation-threshold rows) |
 
 ### Prevalence Surge & Non-Monotonic Volume Trajectory ($14.62\times$ Surge)
 
@@ -369,7 +373,7 @@ Source file: `ml/reports/gateway_evaluation.json`. Evaluates the deployed `v1.0.
 - **Full-Train Reference Models & `metrics.json` History**: Between the preliminary Step 2 run (`metrics.json` SHA256: `77b1ef34...`) and the clean verified rerun (`metrics.json` SHA256: `a4283e32...`), the hash changed and full-train `none` recall moved from $98.66\% \to 77.89\%$ (and full-train `class_weight` recall from $98.4\% \to 99.94\%$). The preliminary run evaluated full-train models at default cutoff $0.50$ without standardized validation-derived thresholds, and is thus not comparable. The current rows in `metrics.json` (PR-AUC 0.9823 for `none`, 0.9831 for `class_weight` at threshold 0.50) supersede all earlier preliminary rows.
 - **Variant A Reference Disclosures**:
   - **Threshold for Confusion Counts**: The test confusion matrix counts (`true_positives: 1641, false_positives: 28, false_negatives: 1, true_negatives: 116476`) recorded in `ml/reports/metrics.json` under JSON key `strategy_comparison.variant_A_reference.confusion_matrix` were produced at default threshold **`0.50`**, NOT at its validation-calibrated operating threshold **`0.9981`** recorded in `ml/reports/stage1_validation_results.json` under JSON key `variant_A.threshold_calibration.threshold_high`.
-  - **Stability Rate History**: The preliminary $96.22\%$ stability rate reported in the initial Stage 2 draft resulted directly from the defective `round()` arithmetic bug (which rounded overlap counts such as $3.6/5 = 72\%$ up to $4/5 = 80\%$, declaring stability). Once corrected with exact unrounded comparison (`overlap_count >= 4.0`) in commit `e5f14a2`, the true stability rate on test frauds was revealed to be **$83.07\%$** ($m=2$ replicates; JSON key: `strategy_comparison.variant_A_reference.shap_stability.primary_k5.stability_rate`).
+  - **Stability Rate History**: The preliminary $96.22\%$ stability rate reported in the initial Stage 2 draft was consistent with the round() bug (which rounded overlap counts such as $3.6/5 = 72\%$ up to $4/5 = 80\%$, declaring stability). Once corrected with exact unrounded comparison (`overlap_count >= 4.0`) in commit `e5f14a2`, the true stability rate on test frauds was revealed to be **$83.07\%$** ($m=2$ replicates; JSON key: `strategy_comparison.variant_A_reference.shap_stability.primary_k5.stability_rate`).
   - **Seed Mapping in `ml/src/train.py`**:
     - `MAIN_SEEDS = [42, 43, 44, 45, 46, 47, 48, 49, 50, 51]` (`ml/src/train.py:64`): 10 main seeds for the 10 replicate sets (determines 10:1 non-fraud subsampling draw and XGBoost model seed).
     - `REPLICATE_SEEDS_PER_SET = [[101..105], ..., [1001..1005]]` (`ml/src/train.py:68`): 10 lists of 5 replicate seeds for data-draw variation.

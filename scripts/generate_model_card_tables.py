@@ -133,7 +133,7 @@ def generate_strategy_comparison_table(metrics_path: Path) -> str:
         ("random_forest", "Random Forest baseline"),
         ("full_train_none", "Full-train reference (none, 6.08M)"),
         ("full_train_class_weight", "Full-train reference (class_weight, 6.08M)"),
-        ("variant_A_reference", "Variant A reference (15 features)"),
+        ("variant_A_reference", "Variant A reference (threshold 0.50, m=2 replicates, 15 features: NOT comparable to the validation-threshold rows)"),
     ]
 
     for key, label in order:
@@ -147,7 +147,7 @@ def generate_strategy_comparison_table(metrics_path: Path) -> str:
         if t_high is not None and key in ("class_weight", "none", "smote_enn"):
             thresh_desc = f"$t_{{\\text{{high}}}} = {t_high:.4f}$ (Val-selected)"
         elif key == "variant_A_reference":
-            thresh_desc = "$t_{\\text{high}} = 0.9981$ (Stage 1 Val-selected, 15 features)"
+            thresh_desc = "Threshold 0.50 (not comparable to validation-threshold rows)"
         else:
             thresh_desc = "Threshold 0.50 (not comparable)"
 
@@ -583,7 +583,11 @@ def generate_cross_strategy_markdown(cross_strat_path: Path) -> str:
         "| **Held-Out Test Frauds** (`is_fraud == 1`) | 1,642 | 85.54% [84.74%, 86.35%] | 83.59% [81.12%, 86.05%] | 79.05% [77.31%, 80.80%] | 78.87% [72.84%, 84.90%] |",
         "",
         "> [!NOTE]",
-        "> The constant baseline evaluates a single pairwise comparison per row between the model's top-5 explanation and the constant train reference explanation. In contrast, replicate stability averages pairwise overlap across $m=5$ non-identical replicate models.",
+        "> **Key Findings & Comparison Context**:",
+        "> 1. **Mean Overlap**: The replicate model's mean overlap (84.96% Set 1; 85.54% 10-set mean, 95% CI [84.74%, 86.35%]) is strictly above the constant baseline (77.54% Set 1; 79.05% 10-set mean, 95% CI [77.31%, 80.80%]) with disjoint 95% intervals.",
+        "> 2. **Stable Rate**: Stable-rate intervals overlap between the replicate model (83.59% [81.12%, 86.05%]) and the constant baseline (78.87% [72.84%, 84.90%]).",
+        "> 3. **Comparison Asymmetry**: The constant baseline evaluates a single pairwise comparison per row between the model's top-5 explanation and the fixed train reference explanation, whereas replicate stability averages pairwise overlap across five non-identical replicate models.",
+        "> 4. **Strategy Effect Scope**: No strategy effect claim is made beyond the per-pair verdicts established under Section 2.E.",
         "",
         "- **Chance Level Definitions**:",
         "  - **Theoretical Expected Mean Overlap**: $k / p = 5 / 11 \\approx 45.45\\%$.",

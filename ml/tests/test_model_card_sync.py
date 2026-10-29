@@ -111,7 +111,7 @@ def test_strategy_comparison_table_cells_match_metrics_json():
         "Random Forest baseline": "random_forest",
         "Full-train reference (none, 6.08M)": "full_train_none",
         "Full-train reference (class_weight, 6.08M)": "full_train_class_weight",
-        "Variant A reference (15 features)": "variant_A_reference",
+        "Variant A reference (threshold 0.50, m=2 replicates, 15 features: NOT comparable to the validation-threshold rows)": "variant_A_reference",
     }
 
     for line in table_lines:
@@ -175,7 +175,7 @@ def test_strategy_comparison_table_cells_match_metrics_json():
                 f"key `strategy_comparison.{key}.threshold_high` '{expected_thresh}'"
             )
         elif key == "variant_A_reference":
-            expected_thresh = "$t_{\\text{high}} = 0.9981$ (Stage 1 Val-selected, 15 features)"
+            expected_thresh = "Threshold 0.50 (not comparable to validation-threshold rows)"
             assert cells[10] == expected_thresh, (
                 f"Cell Threshold mismatch for {key}: markdown '{cells[10]}' vs expected '{expected_thresh}'"
             )

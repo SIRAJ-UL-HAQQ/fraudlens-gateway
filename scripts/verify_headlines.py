@@ -1,7 +1,7 @@
 """Verify headline figures across raw artifacts, model manifests, and canonical reports.
 
-Recomputes ~15 critical headline figures from raw data and model artifacts,
-comparing each value against canonical reports. Exits non-zero on any mismatch.
+Recomputes ~17 critical headline figures from raw data and saved model artifacts,
+and confirms read figures from canonical reports. Exits non-zero on any mismatch.
 """
 
 import json
@@ -11,6 +11,7 @@ from pathlib import Path
 import joblib
 import numpy as np
 import pandas as pd
+import shap
 
 
 def check_approx_equal(val1: float, val2: float, tol: float = 1e-4) -> bool:
@@ -19,9 +20,9 @@ def check_approx_equal(val1: float, val2: float, tol: float = 1e-4) -> bool:
 
 
 def main() -> None:
-    print("=" * 78)
+    print("=" * 145)
     print("FraudLens Gateway: Independent Headline Verification Audit")
-    print("=" * 78)
+    print("=" * 145)
 
     repo_root = Path(__file__).resolve().parent.parent
     data_path = repo_root / "ml" / "data" / "raw" / "paysim.csv"
@@ -72,7 +73,7 @@ def main() -> None:
 
     del raw_df  # Free memory
 
-    # 2. Manifest thresholds
+    # 2. Manifest thresholds (READ from manifests)
     recomputed_cw_thigh = float(cw_manifest["thresholds"]["high"])
     recomputed_cw_treview = float(cw_manifest["thresholds"]["review"])
     recomputed_none_thigh = float(none_manifest["thresholds"]["high"])
@@ -111,38 +112,70 @@ def main() -> None:
     denom = (tpr * pi_train) + (fpr * (1.0 - pi_train))
     recomp_prec_train = (tpr * pi_train) / denom if denom > 0 else 0.0
 
-    # Gateway queue sizes from gateway_evaluation.json
+    # 4. Recompute 10-set baseline overlap and model vs Set 1 overlap on test frauds
+    print("Recomputing 10-set SHAP overlaps from the 10 saved class_weight models...", flush=True)
+    test_frauds_df = test_df[test_df["is_fraud"] == 1]
+    X_tf = test_frauds_df[API_INPUT_COLUMNS]
+
+    preproc = cw_model.named_steps["prep"]
+    X_proc = preproc.transform(X_tf)
+    const_top5_idx = {1, 0, 4, 5, 2}  # old_balance_orig, amount, new_balance_dest, hour_of_day, new_balance_orig
+
+    all_top5 = []
+    exp1 = shap.TreeExplainer(cw_model.named_steps["clf"])
+    shap1 = exp1.shap_values(X_proc)
+    top5_1 = [set(np.argsort(-np.abs(row))[:5]) for row in shap1]
+    all_top5.append(top5_1)
+
+    for i in range(2, 11):
+        m_i = joblib.load(repo_root / "ml" / "replicate_sets" / "class_weight" / f"set_{i}" / "model.joblib")
+        exp_i = shap.TreeExplainer(m_i.named_steps["clf"])
+        shap_i = exp_i.shap_values(X_proc)
+        top5_i = [set(np.argsort(-np.abs(row))[:5]) for row in shap_i]
+        all_top5.append(top5_i)
+
+    # 10-set baseline mean overlap across the 10 saved models
+    base_overlaps = [np.mean([len(s & const_top5_idx) / 5.0 for s in top5_m]) for top5_m in all_top5]
+    recomp_base_10set_ov = float(np.mean(base_overlaps))
+
+    # 10-set model vs Set 1 mean overlap across sets 2..10
+    vs_set1_overlaps = [np.mean([len(s_i & s_1) / 5.0 for s_i, s_1 in zip(top5_m, top5_1)]) for top5_m in all_top5[1:]]
+    recomp_model_10set_ov = float(np.mean(vs_set1_overlaps))
+
+    # Gateway queue sizes from gateway_evaluation.json (READ)
     gw_test = gw_data["variant_evaluations"]["test"]
     recomp_gw_b_queue = gw_test["variant_B"]["decisions"]["analyst_review"]["count"]
     recomp_gw_d_queue = gw_test["variant_D"]["decisions"]["analyst_review"]["count"]
 
-    # Table of verification items
+    # Table of verification items: (name, recomp_val, report_val, source_note, tol, check_type)
     checks = [
-        ("Overall Fraud Ratio", recomputed_fraud_ratio, eda_data["data_provenance"]["overall_fraud_ratio"], "paysim.csv vs eda.json", 1e-6),
-        ("Train Split Rows", recomputed_train_rows, eda_data["split_statistics"]["train"]["total_rows"], "paysim.csv step<=520 vs eda.json", 0),
-        ("Validation Split Rows", recomputed_val_rows, eda_data["split_statistics"]["validation"]["total_rows"], "paysim.csv step 521..595 vs eda.json", 0),
-        ("Test Split Rows", recomputed_test_rows, eda_data["split_statistics"]["test"]["total_rows"], "paysim.csv step>=596 vs eda.json", 0),
-        ("Test Split Frauds", recomputed_test_frauds, eda_data["split_statistics"]["test"]["fraud_count"], "paysim.csv isFraud==1 vs eda.json", 0),
-        ("Manifest class_weight t_high", recomputed_cw_thigh, metrics_data["strategy_comparison"]["class_weight"]["threshold_high"], "manifest.json vs metrics.json", 1e-4),
-        ("Manifest class_weight t_review", recomputed_cw_treview, metrics_data["strategy_comparison"]["class_weight"]["threshold_review"], "manifest.json vs metrics.json", 1e-4),
-        ("Manifest none t_high", recomputed_none_thigh, metrics_data["strategy_comparison"]["none"]["threshold_high"], "manifest.json vs metrics.json", 1e-4),
-        ("Manifest smote_enn t_high", recomputed_smote_thigh, metrics_data["strategy_comparison"]["smote_enn"]["threshold_high"], "manifest.json vs metrics.json", 1e-4),
-        ("Deployed True Positives (TP)", recomp_tp, metrics_data["strategy_comparison"]["class_weight"]["metrics_at_high"]["confusion_matrix"]["true_positives"], "model.joblib vs metrics.json", 0),
-        ("Deployed False Positives (FP)", recomp_fp, metrics_data["strategy_comparison"]["class_weight"]["metrics_at_high"]["confusion_matrix"]["false_positives"], "model.joblib vs metrics.json", 0),
-        ("Deployed False Negatives (FN)", recomp_fn, metrics_data["strategy_comparison"]["class_weight"]["metrics_at_high"]["confusion_matrix"]["false_negatives"], "model.joblib vs metrics.json", 0),
-        ("Deployed True Negatives (TN)", recomp_tn, metrics_data["strategy_comparison"]["class_weight"]["metrics_at_high"]["confusion_matrix"]["true_negatives"], "model.joblib vs metrics.json", 0),
-        ("Precision @ Train Prevalence (%)", round(recomp_prec_train * 100.0, 2), 52.69, "Calculated from TP/FP vs MODEL_CARD", 0.05),
-        ("Step 0c Cohort Size (score >= t_rev)", recomp_step0c_size, step0c_data["cohort_size"], "model.joblib scores vs step0c.json", 0),
-        ("Gateway Variant B Test Queue Size", recomp_gw_b_queue, 302, "gateway_evaluation.json vs MODEL_CARD", 0),
-        ("Gateway Variant D Test Queue Size", recomp_gw_d_queue, 338, "gateway_evaluation.json vs MODEL_CARD", 0),
-        ("Variant A Test Frauds Stability Rate (read from metrics.json, not independently recomputable (model unsaved))", metrics_data["strategy_comparison"]["variant_A_reference"]["shap_stability"]["primary_k5"]["stability_rate"], 0.8307, "metrics.json vs MODEL_CARD", 1e-4),
+        ("Overall Fraud Ratio", recomputed_fraud_ratio, eda_data["data_provenance"]["overall_fraud_ratio"], "paysim.csv vs eda.json", 1e-6, "RECOMPUTED"),
+        ("Train Split Rows", recomputed_train_rows, eda_data["split_statistics"]["train"]["total_rows"], "paysim.csv step<=520 vs eda.json", 0, "RECOMPUTED"),
+        ("Validation Split Rows", recomputed_val_rows, eda_data["split_statistics"]["validation"]["total_rows"], "paysim.csv step 521..595 vs eda.json", 0, "RECOMPUTED"),
+        ("Test Split Rows", recomputed_test_rows, eda_data["split_statistics"]["test"]["total_rows"], "paysim.csv step>=596 vs eda.json", 0, "RECOMPUTED"),
+        ("Test Split Frauds", recomputed_test_frauds, eda_data["split_statistics"]["test"]["fraud_count"], "paysim.csv isFraud==1 vs eda.json", 0, "RECOMPUTED"),
+        ("Manifest class_weight t_high", recomputed_cw_thigh, metrics_data["strategy_comparison"]["class_weight"]["threshold_high"], "manifest.json vs metrics.json", 1e-4, "READ"),
+        ("Manifest class_weight t_review", recomputed_cw_treview, metrics_data["strategy_comparison"]["class_weight"]["threshold_review"], "manifest.json vs metrics.json", 1e-4, "READ"),
+        ("Manifest none t_high", recomputed_none_thigh, metrics_data["strategy_comparison"]["none"]["threshold_high"], "manifest.json vs metrics.json", 1e-4, "READ"),
+        ("Manifest smote_enn t_high", recomputed_smote_thigh, metrics_data["strategy_comparison"]["smote_enn"]["threshold_high"], "manifest.json vs metrics.json", 1e-4, "READ"),
+        ("Deployed True Positives (TP)", recomp_tp, metrics_data["strategy_comparison"]["class_weight"]["metrics_at_high"]["confusion_matrix"]["true_positives"], "model.joblib vs metrics.json", 0, "RECOMPUTED"),
+        ("Deployed False Positives (FP)", recomp_fp, metrics_data["strategy_comparison"]["class_weight"]["metrics_at_high"]["confusion_matrix"]["false_positives"], "model.joblib vs metrics.json", 0, "RECOMPUTED"),
+        ("Deployed False Negatives (FN)", recomp_fn, metrics_data["strategy_comparison"]["class_weight"]["metrics_at_high"]["confusion_matrix"]["false_negatives"], "model.joblib vs metrics.json", 0, "RECOMPUTED"),
+        ("Deployed True Negatives (TN)", recomp_tn, metrics_data["strategy_comparison"]["class_weight"]["metrics_at_high"]["confusion_matrix"]["true_negatives"], "model.joblib vs metrics.json", 0, "RECOMPUTED"),
+        ("Precision @ Train Prevalence (%)", round(recomp_prec_train * 100.0, 2), 52.69, "Calculated from TP/FP vs MODEL_CARD", 0.05, "RECOMPUTED"),
+        ("Step 0c Cohort Size (score >= t_rev)", recomp_step0c_size, step0c_data["cohort_size"], "model.joblib scores vs step0c.json", 0, "RECOMPUTED"),
+        ("10-Set Baseline Mean Overlap (Test Frauds)", round(recomp_base_10set_ov, 4), 0.7905, "10 saved models SHAP vs MODEL_CARD", 1e-4, "RECOMPUTED"),
+        ("10-Set Model vs Set 1 Mean Overlap (Test Frauds)", round(recomp_model_10set_ov, 4), 0.8629, "10 saved models SHAP vs cross_strategy.json", 1e-4, "RECOMPUTED"),
+        ("Gateway Variant B Test Queue Size", recomp_gw_b_queue, 302, "gateway_evaluation.json vs MODEL_CARD", 0, "READ"),
+        ("Gateway Variant D Test Queue Size", recomp_gw_d_queue, 338, "gateway_evaluation.json vs MODEL_CARD", 0, "READ"),
+        ("Variant A (threshold 0.50, m=2 replicates, 15 features: NOT comparable to the validation-threshold rows)", metrics_data["strategy_comparison"]["variant_A_reference"]["shap_stability"]["primary_k5"]["stability_rate"], 0.8307, "metrics.json vs MODEL_CARD", 1e-4, "READ"),
     ]
 
     all_passed = True
-    print(f"\n{'Headline Metric':<82} | {'Recomputed':<12} | {'Report Value':<12} | {'Tolerance':<9} | {'Status'}")
-    print("-" * 130)
+    print(f"\n{'Headline Metric':<105} | {'Value/Recomp':<12} | {'Report Value':<12} | {'Tolerance':<9} | {'Status'}")
+    print("-" * 153)
 
-    for name, recomp_val, report_val, _, tol in checks:
+    for name, recomp_val, report_val, _, tol, check_type in checks:
         if isinstance(recomp_val, (int, np.integer)) and isinstance(report_val, (int, np.integer)):
             match = recomp_val == report_val
             r_str = f"{recomp_val:,}"
@@ -152,17 +185,20 @@ def main() -> None:
             r_str = f"{recomp_val:.4f}" if isinstance(recomp_val, float) else str(recomp_val)
             rep_str = f"{report_val:.4f}" if isinstance(report_val, float) else str(report_val)
 
-        status_str = "PASS" if match else "FAIL"
         if not match:
+            status_str = "FAIL"
             all_passed = False
-        print(f"{name:<82} | {r_str:<12} | {rep_str:<12} | {tol:<9} | {status_str}")
+        else:
+            status_str = "READ" if check_type == "READ" else "PASS"
 
-    print("-" * 130)
+        print(f"{name:<105} | {r_str:<12} | {rep_str:<12} | {tol:<9} | {status_str}")
+
+    print("-" * 153)
     if all_passed:
-        print(f"SUCCESS: All {len(checks)} headline numbers verified bit-exact against raw artifacts!")
+        print(f"SUCCESS: All {len(checks)} headline checks verified (recomputed values matched, read values confirmed)!")
         sys.exit(0)
     else:
-        print("ERROR: One or more headline numbers diverged between raw artifacts and reports!")
+        print("ERROR: One or more headline checks failed verification!")
         sys.exit(1)
 
 

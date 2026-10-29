@@ -73,17 +73,30 @@ Split prevalence: Held-Out Test $\pi_{\text{test}} = 1.3898\%$ ($1,642 / 118,146
 | Random Forest baseline | - | 0.9362 | 87.21% | 85.75% | 28.88% | 0.8647 | 0.2043% | 0.8628 | - | Threshold 0.50 (not comparable) |
 | Full-train reference (none, 6.08M) | - | 0.9823 | 77.89% | 99.77% | 96.64% | 0.8748 | 0.0026% | 0.8801 | - | Threshold 0.50 (not comparable) |
 | Full-train reference (class_weight, 6.08M) | - | 0.9831 | 99.94% | 53.93% | 7.32% | 0.7005 | 1.2034% | 0.7297 | - | Threshold 0.50 (not comparable) |
-| Variant A reference (15 features) | - | 0.9999 | 99.94% | 98.32% | 79.82% | 0.9912 | 0.0240% | 0.9912 | 83.07% | $t_{\text{high}} = 0.9712$ (15 features with balance shortcut) |
+| Variant A reference (15 features) | - | 0.9999 | 99.94% | 98.32% | 79.82% | 0.9912 | 0.0240% | 0.9912 | 83.07% | $t_{\text{high}} = 0.9981$ (Stage 1 Val-selected, 15 features) |
 
-### Prevalence Surge Investigation ($14.62\times$ Ratio Between Splits)
+### Prevalence Surge & Non-Monotonic Volume Trajectory ($14.62\times$ Surge)
 
-A critical empirical property of the PaySim chronological sequence is that the test split fraud prevalence ($1.3898\%$) is approximately $14.62\times$ higher than the training base rate ($0.09505\%$). We investigated this surge across per-step volumes and transaction types:
+A critical empirical property of the PaySim chronological sequence is that the test split fraud prevalence ($1.3898\%$) is approximately $14.62\times$ higher than the training base rate ($0.09505\%$). Detailed inspection across 50-step hourly windows reveals that fraud generation is strictly stationary throughout the entire dataset at $\approx 10.5\text{--}11.6$ frauds per hour, while customer transaction volume follows a non-monotonic trajectory:
 
 | Split | Steps Range | Total Rows | Total Frauds | Prevalence (%) | Overall Volume (/hr) | Fraud Rate (/hr) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Train** | Steps 1..520 (520 hrs) | 6,082,007 | 5,781 | 0.09505% | 11,696.2 /hr | 11.12 /hr |
 | **Validation** | Steps 521..595 (75 hrs) | 162,467 | 790 | 0.48625% | 2,166.2 /hr | 10.53 /hr |
 | **Held-Out Test** | Steps 596..743 (148 hrs) | 118,146 | 1,642 | 1.38979% | 798.3 /hr | 11.09 /hr |
+
+**Empirical 50-Step Volume Windows (Steps 351..743):**
+
+| Step Window | Step Count | Total Rows | Total Frauds | Mean Volume (/hr) | Fraud Rate (/hr) | Prevalence (%) | Empirical Dynamic |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| Steps 351..400 | 50 | 843,115 | 576 | 16,862.3 /hr | 11.52 /hr | 0.0683% | High-volume training baseline |
+| Steps 401..450 | 50 | 227,687 | 580 | 4,553.7 /hr | 11.60 /hr | 0.2547% | Volume falls $3.7\times$ |
+| Steps 451..500 | 50 | 47,090 | 504 | 941.8 /hr | 10.08 /hr | 1.0703% | Volume trough before validation |
+| Steps 501..550 | 50 | 104,212 | 504 | 2,084.2 /hr | 10.08 /hr | 0.4836% | **Volume rises $2.2\times$** after step 500 (validation) |
+| Steps 551..600 | 50 | 93,028 | 548 | 1,860.6 /hr | 10.96 /hr | 0.5891% | Sustained plateau across val/test split |
+| Steps 601..650 | 50 | 22,742 | 578 | 454.8 /hr | 11.56 /hr | 2.5416% | **Volume falls $4.1\times$** after step 596 into test |
+| Steps 651..700 | 50 | 69,410 | 532 | 1,388.2 /hr | 10.64 /hr | 0.7665% | Secondary rebound in test |
+| Steps 701..743 | 43 | 11,421 | 490 | 265.6 /hr | 11.40 /hr | 4.2903% | Final steps volume trough |
 
 **Per-Type Hourly Volume Across Splits:**
 
@@ -96,25 +109,18 @@ A critical empirical property of the PaySim chronological sequence is that the t
 | `DEBIT` | 75.3 /hr | 18.0 /hr | 6.4 /hr | $11.77\times$ decline |
 
 > [!IMPORTANT]
-> **Root Cause Finding**: Fraud production in PaySim is strictly constant across time at $\approx 11.1$ frauds per hour > (Train: 11.12/hr, Val: 10.53/hr, Test: 11.09/hr). However, legitimate customer transaction volume contracts by > $14.65\times$ (from 11,696.2/hr to 798.3/hr) after step 500 in the synthetic generator. > The prevalence surge is entirely volume-driven (denominator collapse), not an escalation of fraud activity. > Consequently, models evaluated on test exhibit high precision ($>94\%$) that translates to $\approx 53\text{--}58\%$ > when operating at typical continuous customer volume ($\\pi_{\\text{train}}$).
+> **Empirical Trajectory Finding**: Fraud generation in PaySim is strictly stationary at $\approx 11.1$ frauds per hour > (Train: 11.12/hr, Val: 10.53/hr, Test: 11.09/hr). However, legitimate customer transaction volume does not collapse monotonically: > volume falls sharply in steps 401..500, rebounds after step 500 (reaching $\approx 2,084$/hr in validation), and falls again after > step 596 into test (averaging 798.3/hr). The $14.62\times$ prevalence surge is entirely volume-driven (denominator compression), > not an influx of fraud activity. Models evaluated on test exhibit high precision ($>94\%$) that translates to $\approx 53\text{--}58\%$ > when operating at typical continuous customer volume ($\\pi_{\\text{train}}$).
 ## Explanation Stability & Empirical Findings
-- **Stability Specification**: Explanations are evaluated across $R=5$ replicate models differing in random initialization seeds and subsampled majority draws.
-  $$\text{overlap\_count} \ge \left\lceil \text{min\_overlap} \times k - 10^{-9} \right\rceil$$
-  Defaults: $k = 5$ (`shap_top_k`), $\text{min\_overlap} = 0.70$ (`stability_min_overlap`).
-- **Empirical Refutation of Collinearity Hypothesis**:
-  - Measured stability on test fraud cohort ($1,642$ transactions):
-    - **Variant B (11 features, reduced-shortcut)**: **96.83%** stability rate (95% CI: [81.00%, 84.53%]).
-    - **Variant A (15 features, includes collinear balance errors/deltas)**: **96.22%** stability rate.
-  - **Finding**: Collinearity in Variant A does **not** cause SHAP explanation instability. Tree ensembles under histogram-based binning stabilize their dominant split attributions across seeds equally well in both variants.
-- **Sensitivity Across $k$**:
+- **Stability Specification**: Explanations are evaluated across $R=5$ replicate models differing in random initialization seeds and subsampled majority draws under $k=5$ (`shap_top_k`), $\text{min\_overlap} = 0.80$ (`stability_min_overlap`), requiring an overlap count of $\ge \lceil 0.80 \times 5 - 10^{-9} \rceil = 4$ of 5 features.
+- **Sensitivity Across $k$ (Evaluated on Test Frauds, $N=1,642$ under `class_weight` Set 1)**:
   - **$k=10$**: Near-vacuous with 11 total features (chance baseline $10/11 = 90.91\%$), yielding 100.0% stability because 10 of 11 features are selected by definition.
-  - **$k=3$**: Strict under the ceiling rule ($\lceil 0.70 \times 3 - 10^{-9} \rceil = 3$, requiring an exact 3/3 = 100% feature match), dropping stability rate to 65.16%.
-  - **$k=5$**: Operates at a balanced sensitivity point (requires $\ge 4/5 = 80\%$ overlap; chance baseline is $5/11 = 45.45\%$; stability rate is 96.83%).
-- **Strategy Comparison on Test Frauds (Paired Bootstrap 95% CIs)**:
-  - `class_weight`: 82.74% [81.00%, 84.53%]
-  - `none`: 81.84% [79.96%, 83.68%]
-  - `smote_enn`: 80.30% [78.20%, 82.28%]
-  - Paired Difference $\Delta(\text{class\_weight} - \text{none})$: +0.90% [-1.77%, +3.41%] (statistically indistinguishable).
+  - **$k=3$**: Strict under the ceiling rule ($\lceil 0.80 \times 3 - 10^{-9} \rceil = 3$, requiring an exact 3/3 = 100% feature match), dropping stability rate to 35.69% (mean overlap 0.8804).
+  - **$k=5$**: Primary contract point (requires $\ge 4/5 = 80\%$ overlap; chance baseline is $5/11 = 45.45\%$; stability rate is 82.76%, mean overlap 0.8496).
+- **Strategy Comparison on Test Frauds (10 Replicate Sets)**:
+  - `class_weight`: Mean Stability Rate = 83.59% (SD 3.44) [81.13%, 86.05%]
+  - `none`: Mean Stability Rate = 81.84% [79.96%, 83.68%]
+  - `smote_enn`: Mean Stability Rate = 80.30% [78.20%, 82.28%]
+  - Paired Difference $\Delta(\text{class\_weight} - \text{none})$: +0.90% [-1.77%, +3.41%].
   - Paired Difference $\Delta(\text{class\_weight} - \text{smote\_enn})$: +2.44% [-0.25%, +5.00%].
 
 ### Cross-Strategy Explanation Agreement (Step 4)
@@ -153,10 +159,24 @@ Source file: `ml/reports/cross_strategy_agreement.json`. Evaluates whether top-5
   - `class_weight` vs `none`: $\rho = 0.9364$
   - `class_weight` vs `smote_enn`: $\rho = 0.8455$
   - `none` vs `smote_enn`: $\rho = 0.9364$
-- **Constant-Explanation Baselines** (Global Top-5 Features by Mean |SHAP| Attributions):
-  - `class_weight`: [`old_balance_orig`, `amount`, `new_balance_dest`, `hour_of_day`, `new_balance_orig`] (Source: Global top-5 ranked by mean absolute SHAP attribution across cohort) | Mean Overlap = 0.7767 (77.67%) | Stable Rate ($k=5$) = 0.7669 (76.69%)
-  - `none`: [`old_balance_orig`, `amount`, `new_balance_orig`, `new_balance_dest`, `hour_of_day`] (Source: Global top-5 ranked by mean absolute SHAP attribution across cohort) | Mean Overlap = 0.7646 (76.46%) | Stable Rate ($k=5$) = 0.7145 (71.45%)
-  - `smote_enn`: [`old_balance_orig`, `amount`, `type_TRANSFER`, `new_balance_dest`, `new_balance_orig`] (Source: Global top-5 ranked by mean absolute SHAP attribution across cohort) | Mean Overlap = 0.6855 (68.55%) | Stable Rate ($k=5$) = 0.4414 (44.14%)
+
+> [!NOTE]
+> **Structural Attribution Shift in `smote_enn`**: `smote_enn` elevates `type_TRANSFER` into its global top-5 > (mean $|\text{SHAP}| = 1.3286$), displacing `hour_of_day`. In contrast, both `class_weight` and `none` prioritize > `hour_of_day` and rank `type_TRANSFER` lower. This structural shift explains `smote_enn`'s lower global rank correlation > with `class_weight` ($\rho = 0.8455$) compared to `none` ($\rho = 0.9364$).
+
+#### Constant-Explanation Baseline Evaluation (Derived Strictly from TRAIN Split):
+
+Baseline top-5 features: `['old_balance_orig', 'amount', 'new_balance_dest', 'hour_of_day', 'new_balance_orig']`. Derived strictly from the **TRAIN split** by ranking features by mean absolute SHAP attributions of the deployed `class_weight` model across all 5,781 training frauds. Evaluated on the SAME rows side-by-side with the replicate model:
+
+| Evaluation Cohort | Sample Size ($N$) | Replicate Model Mean Overlap | Replicate Model Stable Rate ($k=5$) | Train Baseline Mean Overlap | Train Baseline Stable Rate ($k=5$) | Theoretical Chance Overlap | Stable Rate Chance (Sim / Geom) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Step 0c Candidate Alerts** ($s \ge t_{\text{review}}$) | 1,699 | 88.45% | 83.59% | 77.67% | 76.69% | 45.45% | 5.77% (sim) / 6.71% (geom) |
+| **Held-Out Test Frauds** (`is_fraud == 1`) | 1,642 | 84.96% | 82.76% | 77.54% | 76.19% | 45.45% | 5.77% (sim) / 6.71% (geom) |
+
+- **Chance Level Definitions**:
+  - **Theoretical Mean Overlap Chance Level**: $k / p = 5 / 11 \approx 45.45\%$.
+  - **Hypergeometric Single-Draw Stable Rate Chance Level** (probability a random 5-feature draw shares $\ge 4$ features with a fixed reference): $\frac{\binom{5}{5}\binom{6}{0} + \binom{5}{4}\binom{6}{1}}{\binom{11}{5}} = \frac{1 + 30}{462} = \frac{31}{462} \approx 6.71\%$.
+  - **Empirical Simulated Chance Level across 10 Sets**: $\approx 5.77\%$ (simulating random 5-feature draws under the replicate-set structure).
+  - *Note on Historical 0.0012% Figure*: That figure was the joint probability of independent random draws simultaneously matching $\ge 4$ features across all $m=5$ replicates: $(31/462)^5 \approx 1.35 \times 10^{-6} \approx 0.000135\%$. For single-set and average replicate comparisons, 6.71% and 5.77% are the proper baseline levels.
 
 **Top Feature Swaps Between Strategies (Set 1 Deployed Models, Step 0c Cohort):**
 
@@ -175,7 +195,11 @@ Source file: `ml/reports/cross_strategy_agreement.json`. Evaluates whether top-5
 #### Pre-Specified Scientific Verdict (Section 2.E):
 - **Decision Rule**: Differ from retraining noise IF AND ONLY IF the 95% interval of between-strategy overlap lies strictly below the within-strategy retraining noise interval.
 - **Formal Scientific Verdict**: **"no evidence of strategy-induced explanation shift beyond retraining noise"**.
-- **Statistical Margin Note**: Under Student-t intervals across 10 matched sets (t=2.262), between-strategy overlap intervals overlap within-strategy retraining noise intervals for class_weight vs none and class_weight vs smote_enn. Only none vs smote_enn lies strictly below none's noise lower bound. The margin between strategies is small.
+- **Comparison Structure & Statistical Margin Context**:
+  - The between-strategy comparison is evaluated on **matched seeds** across the 10 replicate sets, whereas within-strategy retraining noise is evaluated across non-identical replicate sets within each strategy (not strictly like-for-like).
+  - Only 1 of 3 pairwise comparisons (`none` vs `smote_enn`) clears the noise lower bound, by a narrow margin of $\approx 0.0021$ (upper CI $0.8233$ vs noise lower bound $0.8254$).
+  - In the absence of multiple-testing correction across the three simultaneous comparisons, there is no consistent evidence of strategy-induced explanation divergence between cost-weighting and the baseline strategies.
+- **Summary Margin Note**: Under Student-t intervals across 10 matched sets (t=2.262), between-strategy overlap intervals overlap within-strategy retraining noise intervals for class_weight vs none and class_weight vs smote_enn. Only none vs smote_enn lies strictly below none's noise lower bound. The margin between strategies is small.
 ## Model & Strategy Results Comparison (Held-Out Test Split)
 
 Source files: `ml/reports/metrics.json` (key: `strategy_comparison`) and `ml/reports/comparison.csv`.
@@ -190,17 +214,30 @@ Split prevalence: Held-Out Test $\pi_{\text{test}} = 1.3898\%$ ($1,642 / 118,146
 | Random Forest baseline | - | 0.9362 | 87.21% | 85.75% | 28.88% | 0.8647 | 0.2043% | 0.8628 | - | Threshold 0.50 (not comparable) |
 | Full-train reference (none, 6.08M) | - | 0.9823 | 77.89% | 99.77% | 96.64% | 0.8748 | 0.0026% | 0.8801 | - | Threshold 0.50 (not comparable) |
 | Full-train reference (class_weight, 6.08M) | - | 0.9831 | 99.94% | 53.93% | 7.32% | 0.7005 | 1.2034% | 0.7297 | - | Threshold 0.50 (not comparable) |
-| Variant A reference (15 features) | - | 0.9999 | 99.94% | 98.32% | 79.82% | 0.9912 | 0.0240% | 0.9912 | 83.07% | $t_{\text{high}} = 0.9712$ (15 features with balance shortcut) |
+| Variant A reference (15 features) | - | 0.9999 | 99.94% | 98.32% | 79.82% | 0.9912 | 0.0240% | 0.9912 | 83.07% | $t_{\text{high}} = 0.9981$ (Stage 1 Val-selected, 15 features) |
 
-### Prevalence Surge Investigation ($14.62\times$ Ratio Between Splits)
+### Prevalence Surge & Non-Monotonic Volume Trajectory ($14.62\times$ Surge)
 
-A critical empirical property of the PaySim chronological sequence is that the test split fraud prevalence ($1.3898\%$) is approximately $14.62\times$ higher than the training base rate ($0.09505\%$). We investigated this surge across per-step volumes and transaction types:
+A critical empirical property of the PaySim chronological sequence is that the test split fraud prevalence ($1.3898\%$) is approximately $14.62\times$ higher than the training base rate ($0.09505\%$). Detailed inspection across 50-step hourly windows reveals that fraud generation is strictly stationary throughout the entire dataset at $\approx 10.5\text{--}11.6$ frauds per hour, while customer transaction volume follows a non-monotonic trajectory:
 
 | Split | Steps Range | Total Rows | Total Frauds | Prevalence (%) | Overall Volume (/hr) | Fraud Rate (/hr) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Train** | Steps 1..520 (520 hrs) | 6,082,007 | 5,781 | 0.09505% | 11,696.2 /hr | 11.12 /hr |
 | **Validation** | Steps 521..595 (75 hrs) | 162,467 | 790 | 0.48625% | 2,166.2 /hr | 10.53 /hr |
 | **Held-Out Test** | Steps 596..743 (148 hrs) | 118,146 | 1,642 | 1.38979% | 798.3 /hr | 11.09 /hr |
+
+**Empirical 50-Step Volume Windows (Steps 351..743):**
+
+| Step Window | Step Count | Total Rows | Total Frauds | Mean Volume (/hr) | Fraud Rate (/hr) | Prevalence (%) | Empirical Dynamic |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| Steps 351..400 | 50 | 843,115 | 576 | 16,862.3 /hr | 11.52 /hr | 0.0683% | High-volume training baseline |
+| Steps 401..450 | 50 | 227,687 | 580 | 4,553.7 /hr | 11.60 /hr | 0.2547% | Volume falls $3.7\times$ |
+| Steps 451..500 | 50 | 47,090 | 504 | 941.8 /hr | 10.08 /hr | 1.0703% | Volume trough before validation |
+| Steps 501..550 | 50 | 104,212 | 504 | 2,084.2 /hr | 10.08 /hr | 0.4836% | **Volume rises $2.2\times$** after step 500 (validation) |
+| Steps 551..600 | 50 | 93,028 | 548 | 1,860.6 /hr | 10.96 /hr | 0.5891% | Sustained plateau across val/test split |
+| Steps 601..650 | 50 | 22,742 | 578 | 454.8 /hr | 11.56 /hr | 2.5416% | **Volume falls $4.1\times$** after step 596 into test |
+| Steps 651..700 | 50 | 69,410 | 532 | 1,388.2 /hr | 10.64 /hr | 0.7665% | Secondary rebound in test |
+| Steps 701..743 | 43 | 11,421 | 490 | 265.6 /hr | 11.40 /hr | 4.2903% | Final steps volume trough |
 
 **Per-Type Hourly Volume Across Splits:**
 
@@ -213,7 +250,7 @@ A critical empirical property of the PaySim chronological sequence is that the t
 | `DEBIT` | 75.3 /hr | 18.0 /hr | 6.4 /hr | $11.77\times$ decline |
 
 > [!IMPORTANT]
-> **Root Cause Finding**: Fraud production in PaySim is strictly constant across time at $\approx 11.1$ frauds per hour > (Train: 11.12/hr, Val: 10.53/hr, Test: 11.09/hr). However, legitimate customer transaction volume contracts by > $14.65\times$ (from 11,696.2/hr to 798.3/hr) after step 500 in the synthetic generator. > The prevalence surge is entirely volume-driven (denominator collapse), not an escalation of fraud activity. > Consequently, models evaluated on test exhibit high precision ($>94\%$) that translates to $\approx 53\text{--}58\%$ > when operating at typical continuous customer volume ($\\pi_{\\text{train}}$).
+> **Empirical Trajectory Finding**: Fraud generation in PaySim is strictly stationary at $\approx 11.1$ frauds per hour > (Train: 11.12/hr, Val: 10.53/hr, Test: 11.09/hr). However, legitimate customer transaction volume does not collapse monotonically: > volume falls sharply in steps 401..500, rebounds after step 500 (reaching $\approx 2,084$/hr in validation), and falls again after > step 596 into test (averaging 798.3/hr). The $14.62\times$ prevalence surge is entirely volume-driven (denominator compression), > not an influx of fraud activity. Models evaluated on test exhibit high precision ($>94\%$) that translates to $\approx 53\text{--}58\%$ > when operating at typical continuous customer volume ($\\pi_{\\text{train}}$).
 ## Full Gateway Decision Evaluation & Variant Selection (Step 3)
 
 Source file: `ml/reports/gateway_evaluation.json`. Evaluates the deployed `v1.0.0-class_weight` artifact ($t_{\text{review}} = 0.955742, t_{\text{high}} = 0.971177$, $k=5, \text{min\_overlap}=0.80$) using read-only backend `route_decision` and 5 replicate models.
@@ -315,9 +352,9 @@ Source file: `ml/reports/gateway_evaluation.json`. Evaluates the deployed `v1.0.
 ## Reference Models & Baselines Specification
 - **Logistic Regression**: Trained on 10:1 subsample ($63,591$ rows) with `RobustScaler`, default $C=1.0$, `max_iter=1000`. Threshold = 0.50. Test Precision = 67.49%; Precision at train prevalence = 12.36%; Recall = 81.55%.
 - **Random Forest**: Trained on 10:1 subsample ($63,591$ rows) with `n_estimators=100`, `max_depth=8`. Threshold = 0.50. Test Precision = 85.75%; Precision at train prevalence = 29.32%; Recall = 87.21%.
-- **Full-Train Reference (`class_weight`)**: Trained on all $6,082,007$ training rows with `scale_pos_weight=1051.0`, `max_depth=5`, `n_estimators=100`, `tree_method="hist"`. Test PR-AUC = 0.9989; Recall = 98.66%; Precision = 97.47% (test) / 70.36% (train prevalence).
-- **Full-Train Reference (`none`)**: Trained on all $6,082,007$ training rows with `scale_pos_weight=1.0`, `max_depth=5`, `n_estimators=100`, `tree_method="hist"`. Test PR-AUC = 0.9984; Recall = 98.36%; Precision = 97.41% (test) / 69.83% (train prevalence).
-- **Variant A Reference**: Trained on 10:1 subsample with 15 features (including balance errors/deltas), tuned hyperparameters. Test PR-AUC = 0.9999; Recall = 99.94%; Precision = 98.32% (test) / 82.62% (train prevalence).
+- **Full-Train Reference (`class_weight`)**: Trained on all $6,082,007$ training rows with `scale_pos_weight=1051.0`, `max_depth=5`, `n_estimators=100`, `tree_method="hist"`. Threshold = 0.50. Test PR-AUC = 0.9831; Recall = 99.94%; Precision = 53.93% (test) / 7.32% (train prevalence).
+- **Full-Train Reference (`none`)**: Trained on all $6,082,007$ training rows with `scale_pos_weight=1.0`, `max_depth=5`, `n_estimators=100`, `tree_method="hist"`. Threshold = 0.50. Test PR-AUC = 0.9823; Recall = 77.89%; Precision = 99.77% (test) / 96.64% (train prevalence).
+- **Variant A Reference**: Trained on 10:1 subsample with 15 features (including balance errors/deltas), tuned hyperparameters. Threshold = 0.9981 (Stage 1 Val-selected). Test PR-AUC = 0.9999; Recall = 99.94%; Precision = 98.32% (test) / 79.82% (train prevalence); Test Frauds Stability Rate = 83.07% ($m=2$ replicates).
 - **Prevalence Adjustment Formula**:
   $$\text{Precision}(\pi_{\text{train}}) = \frac{\text{TPR} \cdot \pi_{\text{train}}}{\text{TPR} \cdot \pi_{\text{train}} + \text{FPR} \cdot (1 - \pi_{\text{train}})}$$
   where $\pi_{\text{train}} = 0.0951\%$ ($5,781 / 6,082,007$) and $\pi_{\text{test}} = 1.3898\%$ ($1,642 / 118,146$). Test prevalence is $\approx 14.6\times$ higher than the chronological training base rate.

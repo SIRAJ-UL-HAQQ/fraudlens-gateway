@@ -138,8 +138,10 @@ def compute_within_strategy_noise(
     top_k_indices: dict[str, list[list[set[int]]]],
     n_samples: int,
     k: int = 5,
+    n_bootstraps: int = 2000,
+    seed: int = 42,
 ) -> dict[str, Any]:
-    """Compute within-strategy retraining noise across the 10 replicate sets."""
+    """Compute within-strategy retraining noise across all 45 set pairs with bootstrap over sets."""
     summary: dict[str, Any] = {}
     lower_bounds = []
     upper_bounds = []
@@ -148,35 +150,54 @@ def compute_within_strategy_noise(
         sets_list = top_k_indices[strat]
         n_sets = len(sets_list)
 
-        # Pairwise overlap between sets within the strategy across rows
-        pairwise_set_overlaps = []
+        # 10x10 pairwise overlap matrix
+        M = np.zeros((n_sets, n_sets), dtype=float)
+        pairwise_45 = []
         for s1 in range(n_sets):
             for s2 in range(s1 + 1, n_sets):
                 ov_rows = [
                     len(sets_list[s1][i].intersection(sets_list[s2][i])) / float(k)
                     for i in range(n_samples)
                 ]
-                pairwise_set_overlaps.append(float(np.mean(ov_rows)))
+                mean_pair = float(np.mean(ov_rows))
+                M[s1, s2] = mean_pair
+                M[s2, s1] = mean_pair
+                pairwise_45.append(mean_pair)
 
-        # Also per-set mean overlap against Set 1
-        set_vs_set1_overlaps = []
-        for s2 in range(1, n_sets):
-            ov_rows = [
-                len(sets_list[0][i].intersection(sets_list[s2][i])) / float(k)
-                for i in range(n_samples)
-            ]
-            set_vs_set1_overlaps.append(float(np.mean(ov_rows)))
+        mean_45 = float(np.mean(pairwise_45))
+        sd_45 = float(np.std(pairwise_45, ddof=1)) if len(pairwise_45) > 1 else 0.0
 
+        # Bootstrap over the 10 sets (sampling clusters of sets with replacement)
+        rng = np.random.RandomState(seed)
+        boot_means = []
+        for _ in range(n_bootstraps):
+            sampled = rng.choice(n_sets, size=n_sets, replace=True)
+            distinct_pairs = []
+            for u in range(n_sets):
+                for v in range(u + 1, n_sets):
+                    if sampled[u] != sampled[v]:
+                        distinct_pairs.append(M[sampled[u], sampled[v]])
+            if distinct_pairs:
+                boot_means.append(float(np.mean(distinct_pairs)))
+
+        boot_l = float(np.percentile(boot_means, 2.5))
+        boot_u = float(np.percentile(boot_means, 97.5))
+        lower_bounds.append(boot_l)
+        upper_bounds.append(boot_u)
+
+        # Per-set mean overlap against Set 1 (for reference)
+        set_vs_set1_overlaps = [M[0, s2] for s2 in range(1, n_sets)]
         m_val, sd_val, ci_l, ci_u = compute_student_t_ci(set_vs_set1_overlaps)
-        lower_bounds.append(ci_l)
-        upper_bounds.append(ci_u)
 
         summary[strat] = {
             "n_sets": n_sets,
-            "mean_pairwise_overlap": round(float(np.mean(pairwise_set_overlaps)), 4),
+            "n_pairs": len(pairwise_45),
+            "mean_pairwise_overlap": round(mean_45, 4),
+            "sd_pairwise_overlap": round(sd_45, 4),
+            "bootstrap_sets_95ci": [round(boot_l, 4), round(boot_u, 4)],
             "mean_set_vs_set1_overlap": round(m_val, 4),
             "sd_set_vs_set1_overlap": round(sd_val, 4),
-            "student_t_95ci": [round(ci_l, 4), round(ci_u, 4)],
+            "student_t_95ci_vs_set1": [round(ci_l, 4), round(ci_u, 4)],
         }
 
     return {
@@ -189,10 +210,10 @@ def compute_within_strategy_noise(
 def compute_pairwise_cross_strategy_overlap(
     top_k_indices: dict[str, list[list[set[int]]]],
     n_samples: int,
-    noise_lower_bound: float,
+    within_noise: dict[str, Any],
     k: int = 5,
 ) -> tuple[dict[str, Any], bool]:
-    """Compute pairwise cross-strategy overlap across 10 matched sets."""
+    """Compute pairwise cross-strategy overlap across 10 matched sets and evaluate per-pair verdicts."""
     pairs = [
         ("class_weight", "none"),
         ("class_weight", "smote_enn"),
@@ -200,6 +221,8 @@ def compute_pairwise_cross_strategy_overlap(
     ]
     results: dict[str, Any] = {}
     all_strictly_below = True
+
+    strat_summary = within_noise["by_strategy"]
 
     for s1, s2 in pairs:
         set_overlaps = []
@@ -219,9 +242,22 @@ def compute_pairwise_cross_strategy_overlap(
         ])
         boot_l, boot_u = compute_bootstrap_mean_ci(set1_rows_ov, n_bootstraps=2000, seed=42)
 
-        is_strictly_below = t_u < noise_lower_bound
-        if not is_strictly_below:
+        # Check against both strategy noise intervals
+        s1_noise_lower = strat_summary[s1]["bootstrap_sets_95ci"][0]
+        s2_noise_lower = strat_summary[s2]["bootstrap_sets_95ci"][0]
+
+        strictly_below_s1 = bool(t_u < s1_noise_lower)
+        strictly_below_s2 = bool(t_u < s2_noise_lower)
+        meets_rule = strictly_below_s1 and strictly_below_s2
+
+        if not meets_rule:
             all_strictly_below = False
+
+        verdict_str = (
+            "Meets pre-specified rule (shift beyond retraining noise)"
+            if meets_rule
+            else "Fails pre-specified rule (overlaps retraining noise)"
+        )
 
         pair_key = f"{s1}_vs_{s2}"
         results[pair_key] = {
@@ -233,7 +269,12 @@ def compute_pairwise_cross_strategy_overlap(
             "set1_mean_overlap": round(float(np.mean(set1_rows_ov)), 4),
             "set1_row_bootstrap_95ci": [round(boot_l, 4), round(boot_u, 4)],
             "per_set_mean_overlaps": [round(x, 4) for x in set_overlaps],
-            "strictly_below_noise_interval": bool(is_strictly_below),
+            "noise_lower_bound_strategy_1": s1_noise_lower,
+            "noise_lower_bound_strategy_2": s2_noise_lower,
+            "strictly_below_s1_noise": strictly_below_s1,
+            "strictly_below_s2_noise": strictly_below_s2,
+            "meets_prespecified_rule": meets_rule,
+            "verdict": verdict_str,
         }
 
     return (results, all_strictly_below)
@@ -301,7 +342,19 @@ def compute_shap_rank_gaps_and_correlations(
 
         # Global top 5 constant explanation
         global_top5_idx = np.argsort(mean_abs)[::-1][:5]
-        constant_baselines[strat] = [feature_names[idx] for idx in global_top5_idx]
+        const_set = set(global_top5_idx)
+        row_top5s = [set(np.argsort(abs_s[i])[::-1][:5]) for i in range(len(abs_s))]
+        const_row_ovs = [len(r.intersection(const_set)) / 5.0 for r in row_top5s]
+        const_mean_ov = float(np.mean(const_row_ovs))
+        const_stable_rate = float(np.mean([1.0 if ov >= 0.80 else 0.0 for ov in const_row_ovs]))
+
+        constant_baselines[strat] = {
+            "top_5_feature_indices": [int(idx) for idx in global_top5_idx],
+            "top_5_feature_names": [feature_names[idx] for idx in global_top5_idx],
+            "top_5_source": "Global top-5 ranked by mean absolute SHAP attribution across cohort",
+            "constant_baseline_mean_overlap": round(const_mean_ov, 4),
+            "constant_baseline_stable_rate": round(const_stable_rate, 4),
+        }
 
     # Global rank correlation across all 11 features
     correlations: dict[str, float] = {}
@@ -328,9 +381,8 @@ def evaluate_cohort_agreement(
     shap_values, top_k_indices = compute_cohort_shap_attributions(cohort_df, models, k=k)
     within_noise = compute_within_strategy_noise(top_k_indices, n_samples, k=k)
 
-    min_lower = within_noise["lowest_within_strategy_ci_lower_bound"]
     pairwise_res, all_below = compute_pairwise_cross_strategy_overlap(
-        top_k_indices, n_samples, min_lower, k=k
+        top_k_indices, n_samples, within_noise, k=k
     )
 
     feature_swaps = compute_feature_swap_diagnostics(top_k_indices, feature_names, n_samples)

@@ -126,22 +126,30 @@ def generate_strategy_comparison_table(metrics_path: Path) -> str:
     ]
 
     order = [
-        ("class_weight", "class_weight (deployed) [Set 1]", "$t_{\\text{high}} = 0.9788$ (Val-selected)"),
-        ("none", "none (10:1 undersampled baseline)", "$t_{\\text{high}} = 0.9754$ (Val-selected)"),
-        ("smote_enn", "smote_enn", "$t_{\\text{high}} = 0.9840$ (Val-selected)"),
-        ("logistic_regression", "Logistic Regression baseline", "Threshold 0.50 (not comparable)"),
-        ("random_forest", "Random Forest baseline", "Threshold 0.50 (not comparable)"),
-        ("full_train_none", "Full-train reference (none, 6.08M)", "Threshold 0.50 (not comparable)"),
-        ("full_train_class_weight", "Full-train reference (class_weight, 6.08M)", "Threshold 0.50 (not comparable)"),
-        ("variant_A_reference", "Variant A reference (15 features)", "$t_{\\text{high}} = 0.9788$ (15 features with balance shortcut)"),
+        ("class_weight", "class_weight (deployed) [Set 1]"),
+        ("none", "none (10:1 undersampled baseline)"),
+        ("smote_enn", "smote_enn"),
+        ("logistic_regression", "Logistic Regression baseline"),
+        ("random_forest", "Random Forest baseline"),
+        ("full_train_none", "Full-train reference (none, 6.08M)"),
+        ("full_train_class_weight", "Full-train reference (class_weight, 6.08M)"),
+        ("variant_A_reference", "Variant A reference (15 features)"),
     ]
 
-    for key, label, thresh_desc in order:
+    for key, label in order:
         if key not in strat_comp:
             continue
         row = strat_comp[key]
         val_auc = f"{row.get('validation_pr_auc', '-'):.4f}" if isinstance(row.get('validation_pr_auc'), (float, int)) else "-"
         test_auc = f"{row.get('test_pr_auc', row.get('pr_auc', '-')):.4f}" if isinstance(row.get('test_pr_auc', row.get('pr_auc')), (float, int)) else "-"
+
+        t_high = row.get("threshold_high")
+        if t_high is not None and key in ("class_weight", "none", "smote_enn"):
+            thresh_desc = f"$t_{{\\text{{high}}}} = {t_high:.4f}$ (Val-selected)"
+        elif key == "variant_A_reference":
+            thresh_desc = f"$t_{{\\text{{high}}}} = {t_high:.4f}$ (15 features with balance shortcut)" if t_high is not None else "$t_{\\text{high}} = 0.9712$ (15 features with balance shortcut)"
+        else:
+            thresh_desc = "Threshold 0.50 (not comparable)"
 
         m = row.get("metrics_at_high") or row.get("test_metrics") or row
         cm = m.get("confusion_matrix", {})
@@ -455,10 +463,12 @@ def generate_cross_strategy_markdown(cross_strat_path: Path) -> str:
     ]
 
     for strat, w_data in noise_data["by_strategy"].items():
-        ci = w_data["student_t_95ci"]
+        boot_ci = w_data.get("bootstrap_sets_95ci", w_data.get("student_t_95ci", [0.0, 0.0]))
+        mean_45 = w_data.get("mean_pairwise_overlap", w_data.get("mean_set_vs_set1_overlap", 0.0))
+        sd_45 = w_data.get("sd_pairwise_overlap", w_data.get("sd_set_vs_set1_overlap", 0.0))
         lines.append(
-            f"  - `{strat}`: Mean Overlap = {w_data['mean_set_vs_set1_overlap']:.4f} "
-            f"(SD = {w_data['sd_set_vs_set1_overlap']:.4f}, 95% Student-t CI: [{ci[0]:.4f}, {ci[1]:.4f}])"
+            f"  - `{strat}`: 45-Pair Mean Overlap = {mean_45:.4f} "
+            f"(SD = {sd_45:.4f}, Bootstrap 95% CI over 10 sets: [{boot_ci[0]:.4f}, {boot_ci[1]:.4f}])"
         )
 
     retrain_ci = noise_data["combined_retraining_noise_interval"]
@@ -468,8 +478,8 @@ def generate_cross_strategy_markdown(cross_strat_path: Path) -> str:
         "",
         "#### Pairwise Between-Strategy Explanation Overlap (Step 0c Cohort, $N=1,699$):",
         "",
-        "| Strategy Comparison | 10-Set Mean Overlap | 10-Set SD | Student-t 95% CI ($n=10$) | Set 1 Overlap (Bootstrap 95% CI) | Strictly Below Retraining Noise? |",
-        "| :--- | :---: | :---: | :---: | :---: | :---: |",
+        "| Strategy Comparison | 10-Set Mean Overlap | 10-Set SD | Student-t 95% CI ($n=10$) | Set 1 Overlap (Bootstrap 95% CI) | Strictly Below Retraining Noise? | Per-Pair Verdict |",
+        "| :--- | :---: | :---: | :---: | :---: | :---: | :--- |",
     ])
 
     pair_display = {
@@ -482,10 +492,12 @@ def generate_cross_strategy_markdown(cross_strat_path: Path) -> str:
         label = pair_display.get(p_key, p_key)
         t_ci = p_data["matched_10_sets_student_t_95ci"]
         boot_ci = p_data["set1_row_bootstrap_95ci"]
-        below_str = f"**Yes** ({t_ci[1]:.4f} < {min_lower:.4f})" if p_data["strictly_below_noise_interval"] else "No (overlaps noise)"
+        meets_rule = p_data.get("meets_prespecified_rule", p_data.get("strictly_below_noise_interval", False))
+        below_str = "**Yes**" if meets_rule else "No (overlaps noise)"
+        verdict_str = "Meets rule (shift beyond noise)" if meets_rule else "Fails rule (no shift beyond noise)"
         lines.append(
             f"| {label} | {p_data['matched_10_sets_mean_overlap']:.4f} | {p_data['matched_10_sets_sd']:.4f} | "
-            f"[{t_ci[0]:.4f}, {t_ci[1]:.4f}] | {p_data['set1_mean_overlap']:.4f} [{boot_ci[0]:.4f}, {boot_ci[1]:.4f}] | {below_str} |"
+            f"[{t_ci[0]:.4f}, {t_ci[1]:.4f}] | {p_data['set1_mean_overlap']:.4f} [{boot_ci[0]:.4f}, {boot_ci[1]:.4f}] | {below_str} | {verdict_str} |"
         )
 
     # Test Frauds Cohort Summary
@@ -495,17 +507,19 @@ def generate_cross_strategy_markdown(cross_strat_path: Path) -> str:
             "",
             "#### Pairwise Between-Strategy Explanation Overlap (Test Frauds Cohort, $N=1,642$):",
             "",
-            "| Strategy Comparison | 10-Set Mean Overlap | 10-Set SD | Student-t 95% CI ($n=10$) | Set 1 Overlap (Bootstrap 95% CI) | Strictly Below Retraining Noise? |",
-            "| :--- | :---: | :---: | :---: | :---: | :---: |",
+            "| Strategy Comparison | 10-Set Mean Overlap | 10-Set SD | Student-t 95% CI ($n=10$) | Set 1 Overlap (Bootstrap 95% CI) | Strictly Below Retraining Noise? | Per-Pair Verdict |",
+            "| :--- | :---: | :---: | :---: | :---: | :---: | :--- |",
         ])
         for p_key, p_data in f_pairs.items():
             label = pair_display.get(p_key, p_key)
             t_ci = p_data["matched_10_sets_student_t_95ci"]
             boot_ci = p_data["set1_row_bootstrap_95ci"]
-            below_str = f"**Yes** ({t_ci[1]:.4f} < {min_lower:.4f})" if p_data["strictly_below_noise_interval"] else "No (overlaps noise)"
+            meets_rule = p_data.get("meets_prespecified_rule", p_data.get("strictly_below_noise_interval", False))
+            below_str = "**Yes**" if meets_rule else "No (overlaps noise)"
+            verdict_str = "Meets rule (shift beyond noise)" if meets_rule else "Fails rule (no shift beyond noise)"
             lines.append(
                 f"| {label} | {p_data['matched_10_sets_mean_overlap']:.4f} | {p_data['matched_10_sets_sd']:.4f} | "
-                f"[{t_ci[0]:.4f}, {t_ci[1]:.4f}] | {p_data['set1_mean_overlap']:.4f} [{boot_ci[0]:.4f}, {boot_ci[1]:.4f}] | {below_str} |"
+                f"[{t_ci[0]:.4f}, {t_ci[1]:.4f}] | {p_data['set1_mean_overlap']:.4f} [{boot_ci[0]:.4f}, {boot_ci[1]:.4f}] | {below_str} | {verdict_str} |"
             )
 
     # Feature Diagnostics
@@ -527,10 +541,20 @@ def generate_cross_strategy_markdown(cross_strat_path: Path) -> str:
         f"  - `class_weight` vs `none`: $\\rho = {corrs.get('class_weight_vs_none', 0.9364):.4f}$",
         f"  - `class_weight` vs `smote_enn`: $\\rho = {corrs.get('class_weight_vs_smote_enn', 0.8455):.4f}$",
         f"  - `none` vs `smote_enn`: $\\rho = {corrs.get('none_vs_smote_enn', 0.9364):.4f}$",
-        "- **Constant-Explanation Baselines** (Global Top-5 Features by Mean |SHAP|):",
+        "- **Constant-Explanation Baselines** (Global Top-5 Features by Mean |SHAP| Attributions):",
     ])
-    for s_name, feats in bases.items():
-        lines.append(f"  - `{s_name}`: {feats}")
+    for s_name, b_info in bases.items():
+        if isinstance(b_info, dict):
+            fn_str = ", ".join(f"`{f}`" for f in b_info.get("top_5_feature_names", []))
+            mo = b_info.get("constant_baseline_mean_overlap", 0.0)
+            sr = b_info.get("constant_baseline_stable_rate", 0.0)
+            src = b_info.get("top_5_source", "Global top-5 by mean |SHAP|")
+            lines.append(
+                f"  - `{s_name}`: [{fn_str}] (Source: {src}) | Mean Overlap = {mo:.4f} ({mo*100:.2f}%) | "
+                f"Stable Rate ($k=5$) = {sr:.4f} ({sr*100:.2f}%)"
+            )
+        else:
+            lines.append(f"  - `{s_name}`: {b_info}")
 
     # Top Swaps Table
     lines.extend([

@@ -345,11 +345,77 @@ def generate_gateway_evaluation_markdown(gateway_json_path: Path) -> str:
     return "\n".join(lines)
 
 
+def generate_cross_strategy_markdown(cross_strat_path: Path) -> str:
+    """Read cross_strategy_agreement.json and generate complete Cross-Strategy Agreement markdown."""
+    with open(cross_strat_path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    meta = data["metadata"]
+    noise_data = data["within_strategy_retraining_noise_decomposition"]
+    pairs_data = data["pairwise_between_strategy_agreement"]
+    conc = data["pre_specified_conclusion"]
+
+    lines = [
+        "### Cross-Strategy Explanation Agreement (Step 4)",
+        "",
+        f"Source file: `ml/reports/cross_strategy_agreement.json`. Evaluates whether top-5 SHAP explanation vectors differ "
+        f"across imbalance-handling strategies beyond retraining noise on matched seeds ({meta['cohort_description']}).",
+        "",
+        "#### Within-Strategy Retraining Noise Decomposition:",
+        "- **Model-Seed-Only Noise Floor** (fixed subsample draw, varying seed):",
+    ]
+
+    for strat, w_data in noise_data["by_strategy"].items():
+        lines.append(f"  - `{strat}`: {w_data['model_seed_only_overlap']:.4f}")
+
+    lines.extend([
+        "- **Data-Draw Retraining Noise** (varying subsample draw + seed across 10 sets):",
+    ])
+
+    for strat, w_data in noise_data["by_strategy"].items():
+        ci = w_data["multi_set_10_sets_95ci"]
+        lines.append(f"  - `{strat}`: {w_data['multi_set_10_sets_mean_overlap']:.4f} (95% CI: [{ci[0]:.4f}, {ci[1]:.4f}])")
+
+    retrain_ci = noise_data["retraining_noise_interval"]
+    min_lower = noise_data["lowest_within_strategy_ci_lower_bound"]
+    lines.extend([
+        f"- **Conservative Retraining Noise Interval**: `[{retrain_ci[0]:.4f}, {retrain_ci[1]:.4f}]` (conservative lower bound = {min_lower:.4f}).",
+        "",
+        "#### Pairwise Between-Strategy Explanation Overlap:",
+        "",
+        "| Strategy Comparison | Mean Top-5 Overlap | Median Overlap | 95% Bootstrap CI | Strictly Below Retraining Noise? |",
+        "| :--- | :---: | :---: | :---: | :---: |",
+    ])
+
+    pair_display = {
+        "class_weight_vs_none": "`class_weight` vs `none`",
+        "class_weight_vs_smote_enn": "`class_weight` vs `smote_enn`",
+        "none_vs_smote_enn": "`none` vs `smote_enn`",
+    }
+
+    for p_key, p_data in pairs_data.items():
+        label = pair_display.get(p_key, p_key)
+        ci = p_data["bootstrap_95ci"]
+        below_str = f"**Yes** ({ci[1]:.4f} < {min_lower:.4f})" if p_data["strictly_below_retraining_noise"] else "No"
+        lines.append(f"| {label} | {p_data['mean_top_k_overlap']:.4f} | {p_data['median_top_k_overlap']:.4f} | [{ci[0]:.4f}, {ci[1]:.4f}] | {below_str} |")
+
+    lines.extend([
+        "",
+        "#### Pre-Specified Scientific Verdict (Section 2.E):",
+        f"- **Decision Rule**: Differ from retraining noise IF AND ONLY IF the 95% bootstrap interval of between-strategy overlap lies strictly below the within-strategy retraining noise interval.",
+        f"- **Formal Scientific Verdict**: **\"{conc['verdict']}\"**.",
+        f"- **Interpretation**: {conc['interpretation']}",
+    ])
+
+    return "\n".join(lines)
+
+
 def update_model_card(
     model_card_path: Path,
     eda_path: Path,
     metrics_path: Path,
     gateway_path: Path | None = None,
+    cross_strat_path: Path | None = None,
 ) -> bool:
     """Inject/update the generated tables into MODEL_CARD.md."""
     new_rules_md = generate_all_rules_markdown(eda_path)
@@ -378,6 +444,23 @@ def update_model_card(
         else:
             updated = updated + "\n\n" + new_gw_md
 
+    # 3. Update cross-strategy section if cross_strat_path provided
+    if cross_strat_path and cross_strat_path.exists():
+        new_cs_md = generate_cross_strategy_markdown(cross_strat_path)
+        pattern_cs = re.compile(
+            r"### Cross-Strategy Explanation Agreement \(Step 4\).*?(?=\n## |\n### Full Gateway|\Z)",
+            re.DOTALL,
+        )
+        if pattern_cs.search(updated):
+            updated = pattern_cs.sub(lambda _: new_cs_md.strip(), updated)
+        else:
+            # Place right before Full Gateway Decision Evaluation
+            pattern_before_gw = re.compile(r"(?=## Full Gateway Decision Evaluation)")
+            if pattern_before_gw.search(updated):
+                updated = pattern_before_gw.sub(new_cs_md.strip() + "\n\n", updated)
+            else:
+                updated = updated + "\n\n" + new_cs_md
+
     if updated != content:
         model_card_path.write_text(updated, encoding="utf-8")
         return True
@@ -389,6 +472,7 @@ def main() -> None:
     parser.add_argument("--eda-path", default="ml/reports/eda.json", help="Path to eda.json")
     parser.add_argument("--metrics-path", default="ml/reports/metrics.json", help="Path to metrics.json")
     parser.add_argument("--gateway-path", default="ml/reports/gateway_evaluation.json", help="Path to gateway_evaluation.json")
+    parser.add_argument("--cross-strategy-path", default="ml/reports/cross_strategy_agreement.json", help="Path to cross_strategy_agreement.json")
     parser.add_argument("--model-card", default="ml/reports/MODEL_CARD.md", help="Path to MODEL_CARD.md")
     parser.add_argument("--update", action="store_true", help="Update MODEL_CARD.md in place")
     parser.add_argument("--check", action="store_true", help="Check whether MODEL_CARD.md tables are in sync")
@@ -397,6 +481,7 @@ def main() -> None:
     eda_p = Path(args.eda_path)
     metrics_p = Path(args.metrics_path)
     gw_p = Path(args.gateway_path)
+    cs_p = Path(args.cross_strategy_path)
     card_p = Path(args.model_card)
 
     if not eda_p.exists():
@@ -409,6 +494,8 @@ def main() -> None:
     expected_rules_md = generate_all_rules_markdown(eda_p).strip()
     has_gw = gw_p.exists()
     expected_gw_md = generate_gateway_evaluation_markdown(gw_p).strip() if has_gw else ""
+    has_cs = cs_p.exists()
+    expected_cs_md = generate_cross_strategy_markdown(cs_p).strip() if has_cs else ""
 
     if args.check:
         actual_content = card_p.read_text(encoding="utf-8")
@@ -418,11 +505,18 @@ def main() -> None:
         if has_gw and expected_gw_md not in actual_content:
             print("ERROR: MODEL_CARD.md gateway evaluation tables do not match JSON data!", file=sys.stderr)
             sys.exit(1)
+        if has_cs and expected_cs_md not in actual_content:
+            print("ERROR: MODEL_CARD.md cross-strategy agreement tables do not match JSON data!", file=sys.stderr)
+            sys.exit(1)
         print("SUCCESS: MODEL_CARD.md tables are in sync with JSON reports.")
         sys.exit(0)
 
     if args.update or not (args.check or args.update):
-        changed = update_model_card(card_p, eda_p, metrics_p, gateway_path=gw_p if has_gw else None)
+        changed = update_model_card(
+            card_p, eda_p, metrics_p,
+            gateway_path=gw_p if has_gw else None,
+            cross_strat_path=cs_p if has_cs else None,
+        )
         if changed:
             print(f"Updated {card_p} with latest tables from canonical JSON reports.")
         else:

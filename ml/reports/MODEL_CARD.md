@@ -79,6 +79,34 @@ Validation evaluation of Variant B reveals that model discriminative power is co
   - Paired Difference $\Delta(\text{class\_weight} - \text{none})$: +0.90% [-1.77%, +3.41%] (statistically indistinguishable).
   - Paired Difference $\Delta(\text{class\_weight} - \text{smote\_enn})$: +2.44% [-0.25%, +5.00%].
 
+### Cross-Strategy Explanation Agreement (Step 4)
+
+Source file: `ml/reports/cross_strategy_agreement.json`. Evaluates whether top-5 SHAP explanation vectors differ across imbalance-handling strategies beyond retraining noise on matched seeds (Step 0c cohort: held-out test transactions with deployed score >= t_review (N=1,699, matched seed 42)).
+
+#### Within-Strategy Retraining Noise Decomposition:
+- **Model-Seed-Only Noise Floor** (fixed subsample draw, varying seed):
+  - `class_weight`: 0.8740
+  - `none`: 0.8650
+  - `smote_enn`: 0.9062
+- **Data-Draw Retraining Noise** (varying subsample draw + seed across 10 sets):
+  - `class_weight`: 0.8554 (95% CI: [0.8485, 0.8623])
+  - `none`: 0.8509 (95% CI: [0.8379, 0.8639])
+  - `smote_enn`: 0.8650 (95% CI: [0.8587, 0.8713])
+- **Conservative Retraining Noise Interval**: `[0.8379, 0.8713]` (conservative lower bound = 0.8379).
+
+#### Pairwise Between-Strategy Explanation Overlap:
+
+| Strategy Comparison | Mean Top-5 Overlap | Median Overlap | 95% Bootstrap CI | Strictly Below Retraining Noise? |
+| :--- | :---: | :---: | :---: | :---: |
+| `class_weight` vs `none` | 0.8281 | 0.8000 | [0.8219, 0.8346] | **Yes** (0.8346 < 0.8379) |
+| `class_weight` vs `smote_enn` | 0.7927 | 0.8000 | [0.7868, 0.7987] | **Yes** (0.7987 < 0.8379) |
+| `none` vs `smote_enn` | 0.8018 | 0.8000 | [0.7965, 0.8075] | **Yes** (0.8075 < 0.8379) |
+
+#### Pre-Specified Scientific Verdict (Section 2.E):
+- **Decision Rule**: Differ from retraining noise IF AND ONLY IF the 95% bootstrap interval of between-strategy overlap lies strictly below the within-strategy retraining noise interval.
+- **Formal Scientific Verdict**: **"evidence of strategy-induced explanation shift beyond retraining noise"**.
+- **Interpretation**: For all strategy pairs, between-strategy overlap (95% bootstrap CIs: [0.8219, 0.8346], [0.7868, 0.7987], [0.7965, 0.8075]) lies strictly below the within-strategy retraining noise interval [0.8379, 0.8713]. Consequently, there is statistically significant evidence that imbalance-handling strategies induce an attribution shift exceeding retraining noise.
+
 ## Full Gateway Decision Evaluation & Variant Selection (Step 3)
 
 Source file: `ml/reports/gateway_evaluation.json`. Evaluates the deployed `v1.0.0-class_weight` artifact ($t_{\text{review}} = 0.955742, t_{\text{high}} = 0.971177$, $k=5, \text{min\_overlap}=0.80$) using read-only backend `route_decision` and 5 replicate models.

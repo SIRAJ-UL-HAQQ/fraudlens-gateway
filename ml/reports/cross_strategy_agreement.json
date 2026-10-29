@@ -1,0 +1,99 @@
+{
+  "metadata": {
+    "evaluation_step": "Step 4 Cross-Strategy Explanation Agreement",
+    "cohort_description": "Step 0c cohort: held-out test transactions with deployed score >= t_review (N=1,699, matched seed 42)",
+    "n_samples": 1699,
+    "k": 5,
+    "chance_baseline": 0.4545,
+    "pre_specified_decision_rule": "Cross-strategy agreement is concluded to differ from retraining noise IF AND ONLY IF the 95% bootstrap interval of between-strategy overlap lies strictly below the within-strategy retraining noise interval."
+  },
+  "within_strategy_retraining_noise_decomposition": {
+    "by_strategy": {
+      "class_weight": {
+        "model_seed_only_overlap": 0.874,
+        "multi_set_10_sets_mean_overlap": 0.8554,
+        "multi_set_10_sets_sd": 0.0111,
+        "multi_set_10_sets_95ci": [
+          0.8485,
+          0.8623
+        ]
+      },
+      "none": {
+        "model_seed_only_overlap": 0.865,
+        "multi_set_10_sets_mean_overlap": 0.8509,
+        "multi_set_10_sets_sd": 0.0209,
+        "multi_set_10_sets_95ci": [
+          0.8379,
+          0.8639
+        ]
+      },
+      "smote_enn": {
+        "model_seed_only_overlap": 0.9062,
+        "multi_set_10_sets_mean_overlap": 0.865,
+        "multi_set_10_sets_sd": 0.0102,
+        "multi_set_10_sets_95ci": [
+          0.8587,
+          0.8713
+        ]
+      }
+    },
+    "lowest_within_strategy_ci_lower_bound": 0.8379,
+    "retraining_noise_interval": [
+      0.8379,
+      0.8713
+    ],
+    "description": "Decomposed into model-seed-only variation (fixed subsample draw, seeds 4201..4210) and multi-set data-draw variation (seeds 42..51 across 10 sets)"
+  },
+  "pairwise_between_strategy_agreement": {
+    "class_weight_vs_none": {
+      "strategy_1": "class_weight",
+      "strategy_2": "none",
+      "n_samples": 1699,
+      "k": 5,
+      "chance_baseline": 0.4545,
+      "mean_top_k_overlap": 0.8281,
+      "median_top_k_overlap": 0.8,
+      "std_top_k_overlap": 0.1304,
+      "bootstrap_95ci": [
+        0.8219,
+        0.8346
+      ],
+      "strictly_below_retraining_noise": true
+    },
+    "class_weight_vs_smote_enn": {
+      "strategy_1": "class_weight",
+      "strategy_2": "smote_enn",
+      "n_samples": 1699,
+      "k": 5,
+      "chance_baseline": 0.4545,
+      "mean_top_k_overlap": 0.7927,
+      "median_top_k_overlap": 0.8,
+      "std_top_k_overlap": 0.1249,
+      "bootstrap_95ci": [
+        0.7868,
+        0.7987
+      ],
+      "strictly_below_retraining_noise": true
+    },
+    "none_vs_smote_enn": {
+      "strategy_1": "none",
+      "strategy_2": "smote_enn",
+      "n_samples": 1699,
+      "k": 5,
+      "chance_baseline": 0.4545,
+      "mean_top_k_overlap": 0.8018,
+      "median_top_k_overlap": 0.8,
+      "std_top_k_overlap": 0.1182,
+      "bootstrap_95ci": [
+        0.7965,
+        0.8075
+      ],
+      "strictly_below_retraining_noise": true
+    }
+  },
+  "pre_specified_conclusion": {
+    "all_pairwise_intervals_strictly_below_noise": true,
+    "verdict": "evidence of strategy-induced explanation shift beyond retraining noise",
+    "interpretation": "For all strategy pairs, between-strategy overlap (95% bootstrap CIs: [0.8219, 0.8346], [0.7868, 0.7987], [0.7965, 0.8075]) lies strictly below the within-strategy retraining noise interval [0.8379, 0.8713]. Consequently, there is statistically significant evidence that imbalance-handling strategies induce an attribution shift exceeding retraining noise."
+  }
+}

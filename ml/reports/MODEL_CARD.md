@@ -168,8 +168,6 @@ Evaluated strictly on **TRAIN** (steps 1..520) and **VALIDATION** (steps 521..59
 | Union (All Rules) | PAYMENT | 56,586 | 0 | 1,485 | 2.624% | - | 0.00% | 2.624% |
 | Union (All Rules) | CASH_IN | 36,591 | 0 | 640 | 1.749% | - | 0.00% | 1.749% |
 | Union (All Rules) | DEBIT | 1,352 | 0 | 75 | 5.547% | - | 0.00% | 5.547% |
-
-
 ## Limitations & Operational Constraints
 1. **Validation Re-use**: Both Optuna hyperparameter optimization and threshold calibration were determined on the same temporal validation split.
 2. **Uncalibrated Output**: Risk scores reflect ranking confidence; they must not be interpreted as empirical fraud probabilities.

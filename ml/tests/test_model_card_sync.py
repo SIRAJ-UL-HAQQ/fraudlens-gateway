@@ -4,6 +4,7 @@ from pathlib import Path
 
 from scripts.generate_model_card_tables import (
     generate_all_rules_markdown,
+    generate_gateway_evaluation_markdown,
     generate_strategy_comparison_table,
 )
 
@@ -32,4 +33,22 @@ def test_strategy_comparison_generator_runs():
     table_md = generate_strategy_comparison_table(metrics_path)
     assert "| Model / Strategy |" in table_md
     assert "class_weight (deployed)" in table_md
+
+
+def test_model_card_gateway_tables_match_json():
+    """Assert MODEL_CARD.md contains the exact gateway evaluation table generated from gateway_evaluation.json."""
+    gw_path = Path("ml/reports/gateway_evaluation.json")
+    model_card_path = Path("ml/reports/MODEL_CARD.md")
+
+    if not gw_path.exists():
+        return
+
+    expected_gw_section = generate_gateway_evaluation_markdown(gw_path).strip()
+    actual_model_card_content = model_card_path.read_text(encoding="utf-8")
+
+    assert expected_gw_section in actual_model_card_content, (
+        "MODEL_CARD.md gateway evaluation tables have diverged from canonical JSON in gateway_evaluation.json. "
+        "Run `python scripts/generate_model_card_tables.py --update` to resync."
+    )
+
 

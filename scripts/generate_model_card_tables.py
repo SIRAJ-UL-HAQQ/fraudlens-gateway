@@ -168,23 +168,195 @@ def generate_strategy_comparison_table(metrics_path: Path) -> str:
     return "\n".join(lines)
 
 
-def update_model_card(model_card_path: Path, eda_path: Path, metrics_path: Path) -> bool:
+def generate_gateway_evaluation_markdown(gateway_json_path: Path) -> str:
+    """Read gateway_evaluation.json and generate complete Gateway Evaluation section markdown."""
+    with open(gateway_json_path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    meta = data["metadata"]
+    val_data = data["variant_evaluations"]["validation"]
+    test_data = data["variant_evaluations"]["test"]
+    sr = data["selection_rule_validation"]
+    unstable_info = data["informative_analysis_of_unstable"]
+    rule_dist = data["rule_only_frauds_score_distribution"]
+
+    lines = [
+        "## Full Gateway Decision Evaluation & Variant Selection (Step 3)",
+        "",
+        f"Source file: `ml/reports/gateway_evaluation.json`. Evaluates the deployed `{meta['model_version']}` artifact "
+        f"($t_{{\\text{{review}}}} = {meta['threshold_review']:.6f}, t_{{\\text{{high}}}} = {meta['threshold_high']:.6f}$, "
+        f"$k={meta['k']}, \\text{{min\\_overlap}}={meta['min_overlap']:.2f}$) using read-only backend `route_decision` "
+        f"and 5 replicate models.",
+        "",
+        "### Validation Split: Routing Variants & Selection Rule (75 Simulated Hours, Budget $\\le 3,000$ Alerts)",
+        "",
+        "| Routing Variant | Total Review Queue | Queue Rate (/hr) | High-Only Recall | Combined Recall (High+Review) | 95% Wilson CI | Legit in Review (%) | Selection Status |",
+        "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |",
+    ]
+
+    variant_names = {
+        "variant_A": "Variant A (Current Backend: Unconstrained Rules)",
+        "variant_B": "Variant B (Score-Gated Rules: Rule Never Routes Alone)",
+        "variant_C": "Variant C (Train-Recalibrated Rules: $\\le 0.5\\%$ cap)",
+        "variant_D": "Variant D (Pure ML Gateway: No Rules)",
+        "variant_E": "Variant E (Exploratory Post-Hoc: Tuned Floor $f=0.0070$)",
+    }
+
+    for v_key in ["variant_A", "variant_B", "variant_C", "variant_D", "variant_E"]:
+        v_res = val_data[v_key]
+        m = v_res["metrics"]
+        q_cnt = f"{m['analyst_review_queue_total']:,}"
+        q_rate = f"{m['analyst_review_queue_rate_per_hour']:.2f}"
+        ho_rec = f"{m['high_only_recall_pct']:.2f}%"
+        comb_rec = f"{m['combined_recall_pct']:.2f}%"
+        ci = f"[{m['combined_recall_wilson_95ci_pct'][0]:.2f}%, {m['combined_recall_wilson_95ci_pct'][1]:.2f}%]"
+        legit_pct = f"{m['legit_in_review_rate_pct']:.3f}%"
+
+        if v_key == "variant_A":
+            status = "Ineligible (Queue $> 3,000$)"
+        elif v_key == sr["smallest_queue_variant"]:
+            status = "**Selected (Smallest Queue within 1pp)**"
+        elif v_key in [x["variant"] for x in sr.get("qualifying_variants_within_1pp", [])]:
+            status = "Eligible (Qualifying within 1pp)"
+        else:
+            status = "Exploratory (Post-hoc tuned)"
+        lines.append(f"| {variant_names[v_key]} | {q_cnt} | {q_rate} | {ho_rec} | {comb_rec} | {ci} | {legit_pct} | {status} |")
+
+    lines.extend([
+        "",
+        "### Held-Out Test Split: Full Routing Variant Comparison (148 Simulated Hours, 118,146 Rows, 1,642 Frauds)",
+        "",
+        "| Routing Variant | High Risk Count | High Risk Recall | Review Queue Count | Queue Rate (/hr) | Combined Recall (High+Review) | 95% Wilson CI | Legit in Review (%) |",
+        "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |",
+    ])
+
+    for v_key in ["variant_A", "variant_B", "variant_C", "variant_D", "variant_E"]:
+        t_res = test_data[v_key]
+        m = t_res["metrics"]
+        d = t_res["decisions"]
+        hr_cnt = f"{d['high_risk']['count']:,}"
+        ho_rec = f"{m['high_only_recall_pct']:.2f}%"
+        q_cnt = f"{m['analyst_review_queue_total']:,}"
+        q_rate = f"{m['analyst_review_queue_rate_per_hour']:.2f}"
+        comb_rec = f"{m['combined_recall_pct']:.2f}%"
+        ci = f"[{m['combined_recall_wilson_95ci_pct'][0]:.2f}%, {m['combined_recall_wilson_95ci_pct'][1]:.2f}%]"
+        legit_pct = f"{m['legit_in_review_rate_pct']:.3f}%"
+        lines.append(f"| {variant_names[v_key]} | {hr_cnt} | {ho_rec} | {q_cnt} | {q_rate} | {comb_rec} | {ci} | {legit_pct} |")
+
+    lines.extend([
+        "",
+        "### Held-Out Test Split: Analyst Review Queue Breakdown by Cause",
+        "",
+        "| Routing Variant | Score Band ($t_{\\text{rev}} \\le s < t_{\\text{high}}$) | Unstable Explanation | Rule Flag Alone | Total Queue | Queue Frauds (TP) | Queue Legit (FP) |",
+        "| :--- | :---: | :---: | :---: | :---: | :---: | :---: |",
+    ])
+
+    for v_key in ["variant_A", "variant_B", "variant_C", "variant_D", "variant_E"]:
+        qc = test_data[v_key]["queue_by_cause"]
+        sb = f"{qc['score_band']['total']:,} ({qc['score_band']['frauds']}/{qc['score_band']['legitimate']})"
+        ue = f"{qc['unstable_explanation']['total']:,} ({qc['unstable_explanation']['frauds']}/{qc['unstable_explanation']['legitimate']})"
+        rf = f"{qc['rule_flag']['total']:,} ({qc['rule_flag']['frauds']}/{qc['rule_flag']['legitimate']})"
+        tq = f"{qc['total_queue']['total']:,}"
+        q_tp = f"{qc['total_queue']['frauds']:,}"
+        q_fp = f"{qc['total_queue']['legitimate']:,}"
+        lines.append(f"| {variant_names[v_key]} | {sb} | {ue} | {rf} | {tq} | {q_tp} | {q_fp} |")
+
+    lines.extend([
+        "",
+        "### Candidate High Risk Flow Table (Validation & Held-Out Test Splits)",
+        "",
+        "| Split | Candidate High Total | Routed to High Risk (Stable) | Routed to Review (Unstable) | Stability Rate |",
+        "| :--- | :---: | :---: | :---: | :---: |",
+    ])
+
+    for s_name in ["validation", "test"]:
+        cf = data["variant_evaluations"][s_name]["variant_B"]["candidate_high_flow"]
+        tot = f"{cf['candidate_high_total']['total']:,} ({cf['candidate_high_total']['frauds']} F, {cf['candidate_high_total']['legitimate']} L)"
+        st = f"{cf['routed_high_risk_stable']['total']:,} ({cf['routed_high_risk_stable']['frauds']} F, {cf['routed_high_risk_stable']['legitimate']} L)"
+        un = f"{cf['routed_analyst_review_unstable']['total']:,} ({cf['routed_analyst_review_unstable']['frauds']} F, {cf['routed_analyst_review_unstable']['legitimate']} L)"
+        rate = f"{cf['routed_high_risk_stable']['total'] / cf['candidate_high_total']['total'] * 100.0:.2f}%"
+        lines.append(f"| {s_name.capitalize()} Split | {tot} | {st} | {un} | {rate} |")
+
+    lines.extend([
+        "",
+        "### Informative Analysis of Unstable Explanations (Candidate High Risk Rows)",
+        "",
+        "| Split | Cohort | $N$ | Frauds (TP) | Legit (FP) | Precision (95% Wilson CI) | FP Share (95% Wilson CI) |",
+        "| :--- | :--- | :---: | :---: | :---: | :---: | :---: |",
+    ])
+
+    for s_name in ["validation", "test"]:
+        info = unstable_info[s_name]
+        st = info["stable_cohort"]
+        un = info["unstable_cohort"]
+        st_p_ci = f"[{st['precision_wilson_95ci'][0]*100:.2f}%, {st['precision_wilson_95ci'][1]*100:.2f}%]"
+        st_fp_ci = f"[{st['false_positive_share_wilson_95ci_pct'][0]:.2f}%, {st['false_positive_share_wilson_95ci_pct'][1]:.2f}%]"
+        un_p_ci = f"[{un['precision_wilson_95ci'][0]*100:.2f}%, {un['precision_wilson_95ci'][1]*100:.2f}%]"
+        un_fp_ci = f"[{un['false_positive_share_wilson_95ci_pct'][0]:.2f}%, {un['false_positive_share_wilson_95ci_pct'][1]:.2f}%]"
+
+        lines.append(f"| {s_name.capitalize()} | Stable ($k=5$) | {st['n']:,} | {st['true_positives']:,} | {st['false_positives']:,} | {st['precision_pct']:.2f}% {st_p_ci} | {st['false_positive_share_pct']:.2f}% {st_fp_ci} |")
+        lines.append(f"| {s_name.capitalize()} | Unstable ($k=5$) | {un['n']:,} | {un['true_positives']:,} | {un['false_positives']:,} | {un['precision_pct']:.2f}% {un_p_ci} | {un['false_positive_share_pct']:.2f}% {un_fp_ci} |")
+
+    t_info = unstable_info["test"]
+    v_info = unstable_info["validation"]
+    lines.extend([
+        "",
+        "#### Pre-Specified Conclusion on Informative Nature of Unstable:",
+        f"- **Validation AUROC** of mean overlap predicting False Positives: {v_info['auroc_mean_overlap_predicting_fp']['auroc']:.4f} "
+        f"(95% bootstrap CI: [{v_info['auroc_mean_overlap_predicting_fp']['bootstrap_95ci'][0]:.4f}, {v_info['auroc_mean_overlap_predicting_fp']['bootstrap_95ci'][1]:.4f}]).",
+        f"- **Held-Out Test AUROC** of mean overlap predicting False Positives: {t_info['auroc_mean_overlap_predicting_fp']['auroc']:.4f} "
+        f"(95% bootstrap CI: [{t_info['auroc_mean_overlap_predicting_fp']['bootstrap_95ci'][0]:.4f}, {t_info['auroc_mean_overlap_predicting_fp']['bootstrap_95ci'][1]:.4f}]).",
+        f"- **Score-Margin Control** ($N=299$ rows with lowest scores above $t_{{\\text{{high}}}}$ on test): re-routes {t_info['score_margin_control']['false_positives']} FPs "
+        f"({t_info['score_margin_control']['false_positive_share_pct']:.2f}% FP share) vs {t_info['unstable_cohort']['false_positives']} FPs "
+        f"({t_info['unstable_cohort']['false_positive_share_pct']:.2f}% FP share) for Unstable (+80 FPs caught, 80 fewer frauds delayed).",
+        f"- **Formal Scientific Verdict**: **\"{t_info['pre_specified_conclusion']['verdict']}\"** on the held-out test split.",
+        "",
+        "### ML Score Distribution of Frauds Flagged Only by Rules ($s < t_{\\text{review}}$)",
+        "",
+        "| Split | Fraud Count | Min Score | 25th % | Median Score | 75th % | Max Score | Mean Score |",
+        "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |",
+        f"| Validation | {rule_dist['validation']['count']:,} | {rule_dist['validation']['min']:.4f} | {rule_dist['validation']['p25']:.4f} | {rule_dist['validation']['median']:.4f} | {rule_dist['validation']['p75']:.4f} | {rule_dist['validation']['max']:.4f} | {rule_dist['validation']['mean']:.4f} |",
+        f"| Held-Out Test | {rule_dist['test']['count']:,} | {rule_dist['test']['min']:.4f} | {rule_dist['test']['p25']:.4f} | {rule_dist['test']['median']:.4f} | {rule_dist['test']['p75']:.4f} | {rule_dist['test']['max']:.4f} | {rule_dist['test']['mean']:.4f} |",
+    ])
+
+    return "\n".join(lines)
+
+
+def update_model_card(
+    model_card_path: Path,
+    eda_path: Path,
+    metrics_path: Path,
+    gateway_path: Path | None = None,
+) -> bool:
     """Inject/update the generated tables into MODEL_CARD.md."""
     new_rules_md = generate_all_rules_markdown(eda_path)
     content = model_card_path.read_text(encoding="utf-8")
+    updated = content
 
-    # Match rules section
+    # 1. Update rules section
     pattern_rules = re.compile(
         r"## Heuristic Safety Rules Performance \(Train & Validation Splits\).*?(?=\n## |\Z)",
         re.DOTALL,
     )
-    if pattern_rules.search(content):
-        updated_content = pattern_rules.sub(new_rules_md.strip(), content)
+    if pattern_rules.search(updated):
+        updated = pattern_rules.sub(lambda _: new_rules_md.strip(), updated)
     else:
-        updated_content = content + "\n\n" + new_rules_md
+        updated = updated + "\n\n" + new_rules_md
 
-    if updated_content != content:
-        model_card_path.write_text(updated_content, encoding="utf-8")
+    # 2. Update gateway section if gateway_path provided
+    if gateway_path and gateway_path.exists():
+        new_gw_md = generate_gateway_evaluation_markdown(gateway_path)
+        pattern_gw = re.compile(
+            r"## (?:Full Gateway Decision Evaluation.*?|Gateway Routing Evaluation.*?)(?=\n## |\Z)",
+            re.DOTALL,
+        )
+        if pattern_gw.search(updated):
+            updated = pattern_gw.sub(lambda _: new_gw_md.strip(), updated)
+        else:
+            updated = updated + "\n\n" + new_gw_md
+
+    if updated != content:
+        model_card_path.write_text(updated, encoding="utf-8")
         return True
     return False
 
@@ -193,6 +365,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Generate and sync MODEL_CARD markdown tables from JSON.")
     parser.add_argument("--eda-path", default="ml/reports/eda.json", help="Path to eda.json")
     parser.add_argument("--metrics-path", default="ml/reports/metrics.json", help="Path to metrics.json")
+    parser.add_argument("--gateway-path", default="ml/reports/gateway_evaluation.json", help="Path to gateway_evaluation.json")
     parser.add_argument("--model-card", default="ml/reports/MODEL_CARD.md", help="Path to MODEL_CARD.md")
     parser.add_argument("--update", action="store_true", help="Update MODEL_CARD.md in place")
     parser.add_argument("--check", action="store_true", help="Check whether MODEL_CARD.md tables are in sync")
@@ -200,6 +373,7 @@ def main() -> None:
 
     eda_p = Path(args.eda_path)
     metrics_p = Path(args.metrics_path)
+    gw_p = Path(args.gateway_path)
     card_p = Path(args.model_card)
 
     if not eda_p.exists():
@@ -210,19 +384,24 @@ def main() -> None:
         sys.exit(1)
 
     expected_rules_md = generate_all_rules_markdown(eda_p).strip()
+    has_gw = gw_p.exists()
+    expected_gw_md = generate_gateway_evaluation_markdown(gw_p).strip() if has_gw else ""
 
     if args.check:
         actual_content = card_p.read_text(encoding="utf-8")
         if expected_rules_md not in actual_content:
             print("ERROR: MODEL_CARD.md rules tables do not match JSON data!", file=sys.stderr)
             sys.exit(1)
+        if has_gw and expected_gw_md not in actual_content:
+            print("ERROR: MODEL_CARD.md gateway evaluation tables do not match JSON data!", file=sys.stderr)
+            sys.exit(1)
         print("SUCCESS: MODEL_CARD.md tables are in sync with JSON reports.")
         sys.exit(0)
 
     if args.update or not (args.check or args.update):
-        changed = update_model_card(card_p, eda_p, metrics_p)
+        changed = update_model_card(card_p, eda_p, metrics_p, gateway_path=gw_p if has_gw else None)
         if changed:
-            print(f"Updated {card_p} with latest rules tables from {eda_p}.")
+            print(f"Updated {card_p} with latest tables from canonical JSON reports.")
         else:
             print(f"{card_p} is already up-to-date.")
 

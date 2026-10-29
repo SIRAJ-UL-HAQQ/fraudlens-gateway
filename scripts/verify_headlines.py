@@ -135,12 +135,12 @@ def main() -> None:
         ("Step 0c Cohort Size (score >= t_rev)", recomp_step0c_size, step0c_data["cohort_size"], "model.joblib scores vs step0c.json", 0),
         ("Gateway Variant B Test Queue Size", recomp_gw_b_queue, 302, "gateway_evaluation.json vs MODEL_CARD", 0),
         ("Gateway Variant D Test Queue Size", recomp_gw_d_queue, 338, "gateway_evaluation.json vs MODEL_CARD", 0),
-        ("Variant A Test Frauds Stability Rate", metrics_data["strategy_comparison"]["variant_A_reference"]["shap_stability"]["primary_k5"]["stability_rate"], 0.8307, "metrics.json vs MODEL_CARD", 1e-4),
+        ("Variant A Test Frauds Stability Rate (read from metrics.json, not independently recomputable (model unsaved))", metrics_data["strategy_comparison"]["variant_A_reference"]["shap_stability"]["primary_k5"]["stability_rate"], 0.8307, "metrics.json vs MODEL_CARD", 1e-4),
     ]
 
     all_passed = True
-    print(f"\n{'Headline Metric':<36} | {'Recomputed':<14} | {'Report Value':<14} | {'Tolerance':<9} | {'Status'}")
-    print("-" * 88)
+    print(f"\n{'Headline Metric':<82} | {'Recomputed':<12} | {'Report Value':<12} | {'Tolerance':<9} | {'Status'}")
+    print("-" * 130)
 
     for name, recomp_val, report_val, _, tol in checks:
         if isinstance(recomp_val, (int, np.integer)) and isinstance(report_val, (int, np.integer)):
@@ -155,9 +155,9 @@ def main() -> None:
         status_str = "PASS" if match else "FAIL"
         if not match:
             all_passed = False
-        print(f"{name:<36} | {r_str:<14} | {rep_str:<14} | {tol:<9} | {status_str}")
+        print(f"{name:<82} | {r_str:<12} | {rep_str:<12} | {tol:<9} | {status_str}")
 
-    print("-" * 88)
+    print("-" * 130)
     if all_passed:
         print(f"SUCCESS: All {len(checks)} headline numbers verified bit-exact against raw artifacts!")
         sys.exit(0)

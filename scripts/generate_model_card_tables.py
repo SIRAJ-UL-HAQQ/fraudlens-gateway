@@ -568,17 +568,31 @@ def generate_cross_strategy_markdown(cross_strat_path: Path) -> str:
         "Derived strictly from the **TRAIN split** by ranking features by mean absolute SHAP attributions of the deployed "
         "`class_weight` model across all 5,781 training frauds. Evaluated on the SAME rows side-by-side with the replicate model:"),
         "",
-        "| Evaluation Cohort | Sample Size ($N$) | Replicate Model Mean Overlap | Replicate Model Stable Rate ($k=5$) | Train Baseline Mean Overlap | Train Baseline Stable Rate ($k=5$) | Theoretical Chance Overlap | Stable Rate Chance (Sim / Geom) |",
-        "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |",
-        "| **Step 0c Candidate Alerts** ($s \\ge t_{\\text{review}}$) | 1,699 | 88.45% | 83.59% | 77.67% | 76.69% | 45.45% | 5.77% (sim) / 6.71% (geom) |",
-        "| **Held-Out Test Frauds** (`is_fraud == 1`) | 1,642 | 84.96% | 82.76% | 77.54% | 76.19% | 45.45% | 5.77% (sim) / 6.71% (geom) |",
+        "**Set 1 Evaluation (Primary Deployed Artifact, $m=5$ Replicates):**",
+        "",
+        "| Evaluation Cohort | Sample Size ($N$) | Replicate Model Mean Overlap | Replicate Model Stable Rate ($k=5$) | Train Baseline Mean Overlap | Train Baseline Stable Rate ($k=5$) |",
+        "| :--- | :---: | :---: | :---: | :---: | :---: |",
+        "| **Step 0c Candidate Alerts** ($s \\ge t_{\\text{review}}$) | 1,699 | 84.93% | 82.40% | 77.67% | 76.69% |",
+        "| **Held-Out Test Frauds** (`is_fraud == 1`) | 1,642 | 84.96% | 82.76% | 77.54% | 76.19% |",
+        "",
+        "**Across 10 Replicate Sets (Mean + 95% Student-t Confidence Interval across Sets):**",
+        "",
+        "| Evaluation Cohort | Sample Size ($N$) | Replicate Model Mean Overlap | Replicate Model Stable Rate ($k=5$) | Train Baseline Mean Overlap | Train Baseline Stable Rate ($k=5$) |",
+        "| :--- | :---: | :---: | :---: | :---: | :---: |",
+        "| **Step 0c Candidate Alerts** ($s \\ge t_{\\text{review}}$) | 1,699 | 86.30% [84.99%, 87.61%] | - | 79.09% [77.41%, 80.76%] | 79.31% [73.50%, 85.11%] |",
+        "| **Held-Out Test Frauds** (`is_fraud == 1`) | 1,642 | 85.54% [84.74%, 86.35%] | 83.59% [81.12%, 86.05%] | 79.05% [77.31%, 80.80%] | 78.87% [72.84%, 84.90%] |",
+        "",
+        "> [!NOTE]",
+        "> The constant baseline evaluates a single pairwise comparison per row between the model's top-5 explanation and the constant train reference explanation. In contrast, replicate stability averages pairwise overlap across $m=5$ non-identical replicate models.",
         "",
         "- **Chance Level Definitions**:",
-        "  - **Theoretical Mean Overlap Chance Level**: $k / p = 5 / 11 \\approx 45.45\\%$.",
-        ("  - **Hypergeometric Single-Draw Stable Rate Chance Level** (probability a random 5-feature draw shares $\\ge 4$ features with a fixed reference): "
+        "  - **Theoretical Expected Mean Overlap**: $k / p = 5 / 11 \\approx 45.45\\%$.",
+        ("  - **Hypergeometric Single-Draw Probability** (probability a random 5-feature draw shares $\\ge 4$ features with a fixed reference): "
         "$\\frac{\\binom{5}{5}\\binom{6}{0} + \\binom{5}{4}\\binom{6}{1}}{\\binom{11}{5}} = \\frac{1 + 30}{462} = \\frac{31}{462} \\approx 6.71\\%$."),
-        "  - **Empirical Simulated Chance Level across 10 Sets**: $\\approx 5.77\\%$ (simulating random 5-feature draws under the replicate-set structure).",
-        "  - *Note on Historical 0.0012% Figure*: That figure was the joint probability of independent random draws simultaneously matching $\\ge 4$ features across all $m=5$ replicates: $(31/462)^5 \\approx 1.35 \\times 10^{-6} \\approx 0.000135\\%$. For single-set and average replicate comparisons, 6.71% and 5.77% are the proper baseline levels.",
+        ("  - **Joint 5-Replicate Probability** (probability that ALL five independent replicates simultaneously share $\\ge 4$ features with the reference): "
+        "$(\\frac{31}{462})^5 \\approx 1.36 \\times 10^{-6} = 0.000136\\%$."),
+        ("  - **Simulated Mean-Overlap Probability** (probability that the mean overlap across five random replicates $\\ge 4/5$ / $0.80$): "
+        "$\\approx 0.0012\\%$ (empirical simulation of 1,000,000 5-draw replicates)."),
     ])
 
     # Top Swaps Table

@@ -167,16 +167,28 @@ Source file: `ml/reports/cross_strategy_agreement.json`. Evaluates whether top-5
 
 Baseline top-5 features: `['old_balance_orig', 'amount', 'new_balance_dest', 'hour_of_day', 'new_balance_orig']`. Derived strictly from the **TRAIN split** by ranking features by mean absolute SHAP attributions of the deployed `class_weight` model across all 5,781 training frauds. Evaluated on the SAME rows side-by-side with the replicate model:
 
-| Evaluation Cohort | Sample Size ($N$) | Replicate Model Mean Overlap | Replicate Model Stable Rate ($k=5$) | Train Baseline Mean Overlap | Train Baseline Stable Rate ($k=5$) | Theoretical Chance Overlap | Stable Rate Chance (Sim / Geom) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Step 0c Candidate Alerts** ($s \ge t_{\text{review}}$) | 1,699 | 88.45% | 83.59% | 77.67% | 76.69% | 45.45% | 5.77% (sim) / 6.71% (geom) |
-| **Held-Out Test Frauds** (`is_fraud == 1`) | 1,642 | 84.96% | 82.76% | 77.54% | 76.19% | 45.45% | 5.77% (sim) / 6.71% (geom) |
+**Set 1 Evaluation (Primary Deployed Artifact, $m=5$ Replicates):**
+
+| Evaluation Cohort | Sample Size ($N$) | Replicate Model Mean Overlap | Replicate Model Stable Rate ($k=5$) | Train Baseline Mean Overlap | Train Baseline Stable Rate ($k=5$) |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Step 0c Candidate Alerts** ($s \ge t_{\text{review}}$) | 1,699 | 84.93% | 82.40% | 77.67% | 76.69% |
+| **Held-Out Test Frauds** (`is_fraud == 1`) | 1,642 | 84.96% | 82.76% | 77.54% | 76.19% |
+
+**Across 10 Replicate Sets (Mean + 95% Student-t Confidence Interval across Sets):**
+
+| Evaluation Cohort | Sample Size ($N$) | Replicate Model Mean Overlap | Replicate Model Stable Rate ($k=5$) | Train Baseline Mean Overlap | Train Baseline Stable Rate ($k=5$) |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Step 0c Candidate Alerts** ($s \ge t_{\text{review}}$) | 1,699 | 86.30% [84.99%, 87.61%] | - | 79.09% [77.41%, 80.76%] | 79.31% [73.50%, 85.11%] |
+| **Held-Out Test Frauds** (`is_fraud == 1`) | 1,642 | 85.54% [84.74%, 86.35%] | 83.59% [81.12%, 86.05%] | 79.05% [77.31%, 80.80%] | 78.87% [72.84%, 84.90%] |
+
+> [!NOTE]
+> The constant baseline evaluates a single pairwise comparison per row between the model's top-5 explanation and the constant train reference explanation. In contrast, replicate stability averages pairwise overlap across $m=5$ non-identical replicate models.
 
 - **Chance Level Definitions**:
-  - **Theoretical Mean Overlap Chance Level**: $k / p = 5 / 11 \approx 45.45\%$.
-  - **Hypergeometric Single-Draw Stable Rate Chance Level** (probability a random 5-feature draw shares $\ge 4$ features with a fixed reference): $\frac{\binom{5}{5}\binom{6}{0} + \binom{5}{4}\binom{6}{1}}{\binom{11}{5}} = \frac{1 + 30}{462} = \frac{31}{462} \approx 6.71\%$.
-  - **Empirical Simulated Chance Level across 10 Sets**: $\approx 5.77\%$ (simulating random 5-feature draws under the replicate-set structure).
-  - *Note on Historical 0.0012% Figure*: That figure was the joint probability of independent random draws simultaneously matching $\ge 4$ features across all $m=5$ replicates: $(31/462)^5 \approx 1.35 \times 10^{-6} \approx 0.000135\%$. For single-set and average replicate comparisons, 6.71% and 5.77% are the proper baseline levels.
+  - **Theoretical Expected Mean Overlap**: $k / p = 5 / 11 \approx 45.45\%$.
+  - **Hypergeometric Single-Draw Probability** (probability a random 5-feature draw shares $\ge 4$ features with a fixed reference): $\frac{\binom{5}{5}\binom{6}{0} + \binom{5}{4}\binom{6}{1}}{\binom{11}{5}} = \frac{1 + 30}{462} = \frac{31}{462} \approx 6.71\%$.
+  - **Joint 5-Replicate Probability** (probability that ALL five independent replicates simultaneously share $\ge 4$ features with the reference): $(\frac{31}{462})^5 \approx 1.36 \times 10^{-6} = 0.000136\%$.
+  - **Simulated Mean-Overlap Probability** (probability that the mean overlap across five random replicates $\ge 4/5$ / $0.80$): $\approx 0.0012\%$ (empirical simulation of 1,000,000 5-draw replicates).
 
 **Top Feature Swaps Between Strategies (Set 1 Deployed Models, Step 0c Cohort):**
 
@@ -350,11 +362,19 @@ Source file: `ml/reports/gateway_evaluation.json`. Evaluates the deployed `v1.0.
 | Validation | 38 | 0.1264 | 0.8534 | 0.9136 | 0.9399 | 0.9543 | 0.8508 |
 | Held-Out Test | 63 | 0.1902 | 0.8084 | 0.8980 | 0.9322 | 0.9556 | 0.8476 |
 ## Reference Models & Baselines Specification
-- **Logistic Regression**: Trained on 10:1 subsample ($63,591$ rows) with `RobustScaler`, default $C=1.0$, `max_iter=1000`. Threshold = 0.50. Test Precision = 67.49%; Precision at train prevalence = 12.36%; Recall = 81.55%.
-- **Random Forest**: Trained on 10:1 subsample ($63,591$ rows) with `n_estimators=100`, `max_depth=8`. Threshold = 0.50. Test Precision = 85.75%; Precision at train prevalence = 29.32%; Recall = 87.21%.
-- **Full-Train Reference (`class_weight`)**: Trained on all $6,082,007$ training rows with `scale_pos_weight=1051.0`, `max_depth=5`, `n_estimators=100`, `tree_method="hist"`. Threshold = 0.50. Test PR-AUC = 0.9831; Recall = 99.94%; Precision = 53.93% (test) / 7.32% (train prevalence).
-- **Full-Train Reference (`none`)**: Trained on all $6,082,007$ training rows with `scale_pos_weight=1.0`, `max_depth=5`, `n_estimators=100`, `tree_method="hist"`. Threshold = 0.50. Test PR-AUC = 0.9823; Recall = 77.89%; Precision = 99.77% (test) / 96.64% (train prevalence).
-- **Variant A Reference**: Trained on 10:1 subsample with 15 features (including balance errors/deltas), tuned hyperparameters. Threshold = 0.9981 (Stage 1 Val-selected). Test PR-AUC = 0.9999; Recall = 99.94%; Precision = 98.32% (test) / 79.82% (train prevalence); Test Frauds Stability Rate = 83.07% ($m=2$ replicates).
+- **Logistic Regression**: Trained on 10:1 subsample ($63,591$ rows) with `RobustScaler`, default $C=1.0$, `max_iter=1000`. Evaluated at threshold = 0.50 (default classifier cutoff, not comparable to validation-selected operating thresholds). Test Precision = 67.49%; Precision at train prevalence = 12.36%; Recall = 81.55%.
+- **Random Forest**: Trained on 10:1 subsample ($63,591$ rows) with `n_estimators=100`, `max_depth=8`. Evaluated at threshold = 0.50 (default classifier cutoff). Test Precision = 85.75%; Precision at train prevalence = 29.32%; Recall = 87.21%.
+- **Full-Train Reference (`class_weight`)**: Trained on all $6,082,007$ training rows with `scale_pos_weight=1051.0`, `max_depth=5`, `n_estimators=100`, `tree_method="hist"`. Evaluated at threshold = 0.50. Test PR-AUC = 0.9831; Recall = 99.94%; Precision = 53.93% (test) / 7.32% (train prevalence).
+- **Full-Train Reference (`none`)**: Trained on all $6,082,007$ training rows with `scale_pos_weight=1.0`, `max_depth=5`, `n_estimators=100`, `tree_method="hist"`. Evaluated at threshold = 0.50. Test PR-AUC = 0.9823; Recall = 77.89%; Precision = 99.77% (test) / 96.64% (train prevalence).
+- **Full-Train Reference Models & `metrics.json` History**: Between the preliminary Step 2 run (`metrics.json` SHA256: `77b1ef34...`) and the clean verified rerun (`metrics.json` SHA256: `a4283e32...`), the hash changed and full-train `none` recall moved from $98.66\% \to 77.89\%$ (and full-train `class_weight` recall from $98.4\% \to 99.94\%$). The preliminary run evaluated full-train models at default cutoff $0.50$ without standardized validation-derived thresholds, and is thus not comparable. The current rows in `metrics.json` (PR-AUC 0.9823 for `none`, 0.9831 for `class_weight` at threshold 0.50) supersede all earlier preliminary rows.
+- **Variant A Reference Disclosures**:
+  - **Threshold for Confusion Counts**: The test confusion matrix counts (`true_positives: 1641, false_positives: 28, false_negatives: 1, true_negatives: 116476`) recorded in `ml/reports/metrics.json` under JSON key `strategy_comparison.variant_A_reference.confusion_matrix` were produced at default threshold **`0.50`**, NOT at its validation-calibrated operating threshold **`0.9981`** recorded in `ml/reports/stage1_validation_results.json` under JSON key `variant_A.threshold_calibration.threshold_high`.
+  - **Stability Rate History**: The preliminary $96.22\%$ stability rate reported in the initial Stage 2 draft resulted directly from the defective `round()` arithmetic bug (which rounded overlap counts such as $3.6/5 = 72\%$ up to $4/5 = 80\%$, declaring stability). Once corrected with exact unrounded comparison (`overlap_count >= 4.0`) in commit `e5f14a2`, the true stability rate on test frauds was revealed to be **$83.07\%$** ($m=2$ replicates; JSON key: `strategy_comparison.variant_A_reference.shap_stability.primary_k5.stability_rate`).
+  - **Seed Mapping in `ml/src/train.py`**:
+    - `MAIN_SEEDS = [42, 43, 44, 45, 46, 47, 48, 49, 50, 51]` (`ml/src/train.py:64`): 10 main seeds for the 10 replicate sets (determines 10:1 non-fraud subsampling draw and XGBoost model seed).
+    - `REPLICATE_SEEDS_PER_SET = [[101..105], ..., [1001..1005]]` (`ml/src/train.py:68`): 10 lists of 5 replicate seeds for data-draw variation.
+    - `MODEL_SEED_ONLY_SEEDS = [500, 501, 502, 503, 504, 505, 506, 507, 508, 509]` (`ml/src/train.py:81`): 10 model seeds fit on the *fixed* Set 1 subsample draw (seed 42) to isolate pure algorithmic initialization variance from data subsampling variance.
+    - *Note on "4201..4210"*: That seed range appeared in draft descriptive text in early Step 4 reports (commit `a07e2a4`) as a proposed naming convention, but was never the actual seed list in `ml/src/train.py`.
 - **Prevalence Adjustment Formula**:
   $$\text{Precision}(\pi_{\text{train}}) = \frac{\text{TPR} \cdot \pi_{\text{train}}}{\text{TPR} \cdot \pi_{\text{train}} + \text{FPR} \cdot (1 - \pi_{\text{train}})}$$
   where $\pi_{\text{train}} = 0.0951\%$ ($5,781 / 6,082,007$) and $\pi_{\text{test}} = 1.3898\%$ ($1,642 / 118,146$). Test prevalence is $\approx 14.6\times$ higher than the chronological training base rate.

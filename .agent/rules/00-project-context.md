@@ -19,7 +19,7 @@ Columns: step, type, amount, nameOrig, oldbalanceOrg, newbalanceOrig, nameDest,
 oldbalanceDest, newbalanceDest, isFraud, isFlaggedFraud.
 Never hardcode the fraud ratio; compute and report it from the data.
 
-Stack: Python 3.11, FastAPI, Pydantic v2, SQLAlchemy 2 + Alembic, PostgreSQL,
+Stack: Python 3.13.5, FastAPI, Pydantic v2, SQLAlchemy 2 + Alembic, PostgreSQL,
 scikit-learn, XGBoost, imbalanced-learn, SHAP, Optuna, React (Vite) + Tailwind + Recharts,
 Docker Compose, GitHub Actions, pytest.
 

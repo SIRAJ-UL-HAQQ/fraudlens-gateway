@@ -1,0 +1,3589 @@
+{
+  "strategy_comparison": {
+    "class_weight": {
+      "label": "class_weight (deployed)",
+      "validation_pr_auc": 0.9805894520789251,
+      "test_pr_auc": 0.9907,
+      "threshold_review": 0.9557417035102844,
+      "threshold_high": 0.9711773991584778,
+      "metrics_at_high": {
+        "precision": 0.9429,
+        "recall": 0.9446,
+        "f1": 0.9437,
+        "pr_auc": 0.9907,
+        "roc_auc": 0.9999,
+        "mcc": 0.9429,
+        "fpr": 0.0008,
+        "confusion_matrix": {
+          "true_negatives": 116410,
+          "false_positives": 94,
+          "false_negatives": 91,
+          "true_positives": 1551
+        },
+        "recall_ci_95": [
+          0.9341,
+          0.9558
+        ],
+        "fpr_ci_95": [
+          0.0006,
+          0.001
+        ]
+      },
+      "metrics_at_review": {
+        "precision": 0.927,
+        "recall": 0.9592,
+        "f1": 0.9428,
+        "pr_auc": 0.9907,
+        "roc_auc": 0.9999,
+        "mcc": 0.9422,
+        "fpr": 0.0011,
+        "confusion_matrix": {
+          "true_negatives": 116380,
+          "false_positives": 124,
+          "false_negatives": 67,
+          "true_positives": 1575
+        },
+        "recall_ci_95": [
+          0.9496,
+          0.9681
+        ],
+        "fpr_ci_95": [
+          0.0009,
+          0.0012
+        ]
+      },
+      "test_routing": {
+        "total_rows": 118146,
+        "low_risk_count": 116447,
+        "low_risk_share": 0.9856,
+        "analyst_review_count": 54,
+        "analyst_review_share": 0.0005,
+        "high_risk_count": 1645,
+        "high_risk_share": 0.0139
+      },
+      "pr_curve_sample": [
+        {
+          "recall": 1.0,
+          "precision": 0.0139,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0141,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0144,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0146,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0149,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0151,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0154,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.016,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0165,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.017,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0176,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0181,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0187,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0192,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0199,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0205,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0212,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.022,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0228,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0237,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0246,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0256,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0267,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0277,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0289,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0303,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0317,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0332,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0348,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0367,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0388,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.041,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0435,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0463,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0495,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.053,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.057,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0614,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0667,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0732,
+          "threshold": 0.0002
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0805,
+          "threshold": 0.0002
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0895,
+          "threshold": 0.0002
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1008,
+          "threshold": 0.0003
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.115,
+          "threshold": 0.0004
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1337,
+          "threshold": 0.0006
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1592,
+          "threshold": 0.0008
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1967,
+          "threshold": 0.0012
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.2569,
+          "threshold": 0.0022
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.3682,
+          "threshold": 0.0069
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.6432,
+          "threshold": 0.1238
+        },
+        {
+          "recall": 0.0974,
+          "precision": 1.0,
+          "threshold": 1.0
+        }
+      ],
+      "shap_stability": {
+        "fraud_cohort": {
+          "n_samples": 1642,
+          "n_replicates": 5,
+          "n_features_p": 11,
+          "sensitivity": {
+            "k_3": {
+              "k": 3,
+              "chance_baseline": 0.2727,
+              "min_overlap": 0.8,
+              "required_overlap_count": 3,
+              "mean_top_k_overlap": 0.8804,
+              "median_top_k_overlap": 0.9333,
+              "mean_spearman": 0.9442,
+              "stability_rate": 0.3569
+            },
+            "k_5": {
+              "k": 5,
+              "chance_baseline": 0.4545,
+              "min_overlap": 0.8,
+              "required_overlap_count": 4,
+              "mean_top_k_overlap": 0.8496,
+              "median_top_k_overlap": 0.84,
+              "mean_spearman": 0.9442,
+              "stability_rate": 0.8276
+            },
+            "k_10": {
+              "k": 10,
+              "chance_baseline": 0.9091,
+              "min_overlap": 0.8,
+              "required_overlap_count": 8,
+              "mean_top_k_overlap": 0.9956,
+              "median_top_k_overlap": 1.0,
+              "mean_spearman": 0.9442,
+              "stability_rate": 1.0
+            }
+          },
+          "primary_k5": {
+            "k": 5,
+            "chance_baseline": 0.4545,
+            "min_overlap": 0.8,
+            "required_overlap_count": 4,
+            "mean_top_k_overlap": 0.8496,
+            "median_top_k_overlap": 0.84,
+            "mean_spearman": 0.9442,
+            "stability_rate": 0.8276
+          }
+        },
+        "cand_high_cohort": {
+          "mean": 0.8355,
+          "std": 0.0336,
+          "ci_95": [
+            0.8115,
+            0.8595
+          ]
+        },
+        "top_fps_cohort": {
+          "mean": 0.8074,
+          "std": 0.0315,
+          "ci_95": [
+            0.7849,
+            0.83
+          ]
+        },
+        "across_10_sets": {
+          "per_set_stats": [
+            {
+              "set_index": 1,
+              "main_seed": 42,
+              "fraud_cohort_k5_stable_rate": 0.8276,
+              "cand_high_cohort_k5_stable_rate": 0.8274,
+              "top_fps_cohort_k5_stable_rate": 0.8298,
+              "fraud_cohort_k5_mean_overlap": 0.8496,
+              "fraud_cohort_mean_spearman": 0.9442,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8804,
+                    "median_top_k_overlap": 0.9333,
+                    "mean_spearman": 0.9442,
+                    "stability_rate": 0.3569
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8496,
+                    "median_top_k_overlap": 0.84,
+                    "mean_spearman": 0.9442,
+                    "stability_rate": 0.8276
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9956,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9442,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8496,
+                  "median_top_k_overlap": 0.84,
+                  "mean_spearman": 0.9442,
+                  "stability_rate": 0.8276
+                }
+              }
+            },
+            {
+              "set_index": 2,
+              "main_seed": 43,
+              "fraud_cohort_k5_stable_rate": 0.7954,
+              "cand_high_cohort_k5_stable_rate": 0.7982,
+              "top_fps_cohort_k5_stable_rate": 0.7979,
+              "fraud_cohort_k5_mean_overlap": 0.8508,
+              "fraud_cohort_mean_spearman": 0.9258,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8538,
+                    "median_top_k_overlap": 0.9333,
+                    "mean_spearman": 0.9258,
+                    "stability_rate": 0.4434
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8508,
+                    "median_top_k_overlap": 0.84,
+                    "mean_spearman": 0.9258,
+                    "stability_rate": 0.7954
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.998,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9258,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8508,
+                  "median_top_k_overlap": 0.84,
+                  "mean_spearman": 0.9258,
+                  "stability_rate": 0.7954
+                }
+              }
+            },
+            {
+              "set_index": 3,
+              "main_seed": 44,
+              "fraud_cohort_k5_stable_rate": 0.8727,
+              "cand_high_cohort_k5_stable_rate": 0.8729,
+              "top_fps_cohort_k5_stable_rate": 0.8191,
+              "fraud_cohort_k5_mean_overlap": 0.8737,
+              "fraud_cohort_mean_spearman": 0.947,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8936,
+                    "median_top_k_overlap": 0.9333,
+                    "mean_spearman": 0.947,
+                    "stability_rate": 0.3715
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8737,
+                    "median_top_k_overlap": 0.88,
+                    "mean_spearman": 0.947,
+                    "stability_rate": 0.8727
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.998,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.947,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8737,
+                  "median_top_k_overlap": 0.88,
+                  "mean_spearman": 0.947,
+                  "stability_rate": 0.8727
+                }
+              }
+            },
+            {
+              "set_index": 4,
+              "main_seed": 45,
+              "fraud_cohort_k5_stable_rate": 0.838,
+              "cand_high_cohort_k5_stable_rate": 0.834,
+              "top_fps_cohort_k5_stable_rate": 0.7766,
+              "fraud_cohort_k5_mean_overlap": 0.8498,
+              "fraud_cohort_mean_spearman": 0.95,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8799,
+                    "median_top_k_overlap": 0.9333,
+                    "mean_spearman": 0.95,
+                    "stability_rate": 0.3587
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8498,
+                    "median_top_k_overlap": 0.84,
+                    "mean_spearman": 0.95,
+                    "stability_rate": 0.838
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9983,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.95,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8498,
+                  "median_top_k_overlap": 0.84,
+                  "mean_spearman": 0.95,
+                  "stability_rate": 0.838
+                }
+              }
+            },
+            {
+              "set_index": 5,
+              "main_seed": 46,
+              "fraud_cohort_k5_stable_rate": 0.8027,
+              "cand_high_cohort_k5_stable_rate": 0.8024,
+              "top_fps_cohort_k5_stable_rate": 0.7979,
+              "fraud_cohort_k5_mean_overlap": 0.8479,
+              "fraud_cohort_mean_spearman": 0.9448,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8599,
+                    "median_top_k_overlap": 0.8667,
+                    "mean_spearman": 0.9448,
+                    "stability_rate": 0.3179
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8479,
+                    "median_top_k_overlap": 0.84,
+                    "mean_spearman": 0.9448,
+                    "stability_rate": 0.8027
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9972,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9448,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8479,
+                  "median_top_k_overlap": 0.84,
+                  "mean_spearman": 0.9448,
+                  "stability_rate": 0.8027
+                }
+              }
+            },
+            {
+              "set_index": 6,
+              "main_seed": 47,
+              "fraud_cohort_k5_stable_rate": 0.7923,
+              "cand_high_cohort_k5_stable_rate": 0.7939,
+              "top_fps_cohort_k5_stable_rate": 0.8404,
+              "fraud_cohort_k5_mean_overlap": 0.8406,
+              "fraud_cohort_mean_spearman": 0.945,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8609,
+                    "median_top_k_overlap": 0.8667,
+                    "mean_spearman": 0.945,
+                    "stability_rate": 0.3465
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8406,
+                    "median_top_k_overlap": 0.84,
+                    "mean_spearman": 0.945,
+                    "stability_rate": 0.7923
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9984,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.945,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8406,
+                  "median_top_k_overlap": 0.84,
+                  "mean_spearman": 0.945,
+                  "stability_rate": 0.7923
+                }
+              }
+            },
+            {
+              "set_index": 7,
+              "main_seed": 48,
+              "fraud_cohort_k5_stable_rate": 0.8776,
+              "cand_high_cohort_k5_stable_rate": 0.8778,
+              "top_fps_cohort_k5_stable_rate": 0.8617,
+              "fraud_cohort_k5_mean_overlap": 0.8661,
+              "fraud_cohort_mean_spearman": 0.9492,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8829,
+                    "median_top_k_overlap": 0.9333,
+                    "mean_spearman": 0.9492,
+                    "stability_rate": 0.4202
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8661,
+                    "median_top_k_overlap": 0.84,
+                    "mean_spearman": 0.9492,
+                    "stability_rate": 0.8776
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.996,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9492,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8661,
+                  "median_top_k_overlap": 0.84,
+                  "mean_spearman": 0.9492,
+                  "stability_rate": 0.8776
+                }
+              }
+            },
+            {
+              "set_index": 8,
+              "main_seed": 49,
+              "fraud_cohort_k5_stable_rate": 0.8752,
+              "cand_high_cohort_k5_stable_rate": 0.8736,
+              "top_fps_cohort_k5_stable_rate": 0.7553,
+              "fraud_cohort_k5_mean_overlap": 0.8702,
+              "fraud_cohort_mean_spearman": 0.9495,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8796,
+                    "median_top_k_overlap": 0.8667,
+                    "mean_spearman": 0.9495,
+                    "stability_rate": 0.3343
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8702,
+                    "median_top_k_overlap": 0.88,
+                    "mean_spearman": 0.9495,
+                    "stability_rate": 0.8752
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9986,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9495,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8702,
+                  "median_top_k_overlap": 0.88,
+                  "mean_spearman": 0.9495,
+                  "stability_rate": 0.8752
+                }
+              }
+            },
+            {
+              "set_index": 9,
+              "main_seed": 50,
+              "fraud_cohort_k5_stable_rate": 0.8642,
+              "cand_high_cohort_k5_stable_rate": 0.862,
+              "top_fps_cohort_k5_stable_rate": 0.8085,
+              "fraud_cohort_k5_mean_overlap": 0.8589,
+              "fraud_cohort_mean_spearman": 0.9447,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8715,
+                    "median_top_k_overlap": 0.9333,
+                    "mean_spearman": 0.9447,
+                    "stability_rate": 0.3825
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8589,
+                    "median_top_k_overlap": 0.84,
+                    "mean_spearman": 0.9447,
+                    "stability_rate": 0.8642
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9984,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9447,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8589,
+                  "median_top_k_overlap": 0.84,
+                  "mean_spearman": 0.9447,
+                  "stability_rate": 0.8642
+                }
+              }
+            },
+            {
+              "set_index": 10,
+              "main_seed": 51,
+              "fraud_cohort_k5_stable_rate": 0.813,
+              "cand_high_cohort_k5_stable_rate": 0.8128,
+              "top_fps_cohort_k5_stable_rate": 0.7872,
+              "fraud_cohort_k5_mean_overlap": 0.8468,
+              "fraud_cohort_mean_spearman": 0.941,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8596,
+                    "median_top_k_overlap": 0.9333,
+                    "mean_spearman": 0.941,
+                    "stability_rate": 0.335
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8468,
+                    "median_top_k_overlap": 0.84,
+                    "mean_spearman": 0.941,
+                    "stability_rate": 0.813
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9945,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.941,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8468,
+                  "median_top_k_overlap": 0.84,
+                  "mean_spearman": 0.941,
+                  "stability_rate": 0.813
+                }
+              }
+            }
+          ],
+          "fraud_cohort_stability": {
+            "mean": 0.8359,
+            "std": 0.0344,
+            "ci_95": [
+              0.8112,
+              0.8605
+            ]
+          },
+          "cand_high_cohort_stability": {
+            "mean": 0.8355,
+            "std": 0.0336,
+            "ci_95": [
+              0.8115,
+              0.8595
+            ]
+          },
+          "top_fps_cohort_stability": {
+            "mean": 0.8074,
+            "std": 0.0315,
+            "ci_95": [
+              0.7849,
+              0.83
+            ]
+          },
+          "chance_baseline_k5": 0.4545
+        },
+        "model_seed_only_noise": {
+          "mean_top_k_overlap": 0.874,
+          "stability_rate": 0.8995,
+          "mean_spearman": 0.9642
+        }
+      }
+    },
+    "none": {
+      "label": "none (10:1 undersampled baseline)",
+      "validation_pr_auc": 0.9781058473017276,
+      "test_pr_auc": 0.99,
+      "threshold_review": 0.7866618633270264,
+      "threshold_high": 0.8688333630561829,
+      "metrics_at_high": {
+        "precision": 0.95,
+        "recall": 0.9367,
+        "f1": 0.9433,
+        "pr_auc": 0.99,
+        "roc_auc": 0.9998,
+        "mcc": 0.9425,
+        "fpr": 0.0007,
+        "confusion_matrix": {
+          "true_negatives": 116423,
+          "false_positives": 81,
+          "false_negatives": 104,
+          "true_positives": 1538
+        },
+        "recall_ci_95": [
+          0.9247,
+          0.948
+        ],
+        "fpr_ci_95": [
+          0.0005,
+          0.0008
+        ]
+      },
+      "metrics_at_review": {
+        "precision": 0.9216,
+        "recall": 0.9592,
+        "f1": 0.94,
+        "pr_auc": 0.99,
+        "roc_auc": 0.9998,
+        "mcc": 0.9393,
+        "fpr": 0.0012,
+        "confusion_matrix": {
+          "true_negatives": 116370,
+          "false_positives": 134,
+          "false_negatives": 67,
+          "true_positives": 1575
+        },
+        "recall_ci_95": [
+          0.9502,
+          0.9688
+        ],
+        "fpr_ci_95": [
+          0.001,
+          0.0013
+        ]
+      },
+      "test_routing": {
+        "total_rows": 118146,
+        "low_risk_count": 116437,
+        "low_risk_share": 0.9855,
+        "analyst_review_count": 90,
+        "analyst_review_share": 0.0008,
+        "high_risk_count": 1619,
+        "high_risk_share": 0.0137
+      },
+      "pr_curve_sample": [
+        {
+          "recall": 1.0,
+          "precision": 0.0139,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0141,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0144,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0146,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0149,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0151,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0154,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0158,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0163,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0169,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0177,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0184,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0192,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.02,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0206,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0213,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0222,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0231,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0239,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0248,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0258,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0269,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.028,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0291,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0304,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0317,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0332,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0348,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0365,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0384,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0405,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0427,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0452,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0479,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0511,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0545,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0584,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.063,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0682,
+          "threshold": 0.0002
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0744,
+          "threshold": 0.0002
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0817,
+          "threshold": 0.0002
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0908,
+          "threshold": 0.0003
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1021,
+          "threshold": 0.0004
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1165,
+          "threshold": 0.0005
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1361,
+          "threshold": 0.0007
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.163,
+          "threshold": 0.0009
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.2029,
+          "threshold": 0.0014
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.2673,
+          "threshold": 0.0024
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.3907,
+          "threshold": 0.0064
+        },
+        {
+          "recall": 0.9988,
+          "precision": 0.7177,
+          "threshold": 0.1547
+        },
+        {
+          "recall": 0.0384,
+          "precision": 1.0,
+          "threshold": 1.0
+        }
+      ],
+      "shap_stability": {
+        "across_10_sets": {
+          "per_set_stats": [
+            {
+              "set_index": 1,
+              "main_seed": 42,
+              "fraud_cohort_k5_stable_rate": 0.8185,
+              "cand_high_cohort_k5_stable_rate": 0.8207,
+              "top_fps_cohort_k5_stable_rate": 0.7447,
+              "fraud_cohort_k5_mean_overlap": 0.8473,
+              "fraud_cohort_mean_spearman": 0.9171,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8758,
+                    "median_top_k_overlap": 0.9333,
+                    "mean_spearman": 0.9171,
+                    "stability_rate": 0.352
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8473,
+                    "median_top_k_overlap": 0.84,
+                    "mean_spearman": 0.9171,
+                    "stability_rate": 0.8185
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9975,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9171,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8473,
+                  "median_top_k_overlap": 0.84,
+                  "mean_spearman": 0.9171,
+                  "stability_rate": 0.8185
+                }
+              }
+            },
+            {
+              "set_index": 2,
+              "main_seed": 43,
+              "fraud_cohort_k5_stable_rate": 0.8173,
+              "cand_high_cohort_k5_stable_rate": 0.8237,
+              "top_fps_cohort_k5_stable_rate": 0.734,
+              "fraud_cohort_k5_mean_overlap": 0.8481,
+              "fraud_cohort_mean_spearman": 0.878,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8393,
+                    "median_top_k_overlap": 0.8667,
+                    "mean_spearman": 0.878,
+                    "stability_rate": 0.335
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8481,
+                    "median_top_k_overlap": 0.84,
+                    "mean_spearman": 0.878,
+                    "stability_rate": 0.8173
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9975,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.878,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8481,
+                  "median_top_k_overlap": 0.84,
+                  "mean_spearman": 0.878,
+                  "stability_rate": 0.8173
+                }
+              }
+            },
+            {
+              "set_index": 3,
+              "main_seed": 44,
+              "fraud_cohort_k5_stable_rate": 0.8855,
+              "cand_high_cohort_k5_stable_rate": 0.8869,
+              "top_fps_cohort_k5_stable_rate": 0.7766,
+              "fraud_cohort_k5_mean_overlap": 0.8666,
+              "fraud_cohort_mean_spearman": 0.9118,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8933,
+                    "median_top_k_overlap": 0.9333,
+                    "mean_spearman": 0.9118,
+                    "stability_rate": 0.3831
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8666,
+                    "median_top_k_overlap": 0.88,
+                    "mean_spearman": 0.9118,
+                    "stability_rate": 0.8855
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.999,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9118,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8666,
+                  "median_top_k_overlap": 0.88,
+                  "mean_spearman": 0.9118,
+                  "stability_rate": 0.8855
+                }
+              }
+            },
+            {
+              "set_index": 4,
+              "main_seed": 45,
+              "fraud_cohort_k5_stable_rate": 0.7954,
+              "cand_high_cohort_k5_stable_rate": 0.7927,
+              "top_fps_cohort_k5_stable_rate": 0.6596,
+              "fraud_cohort_k5_mean_overlap": 0.8379,
+              "fraud_cohort_mean_spearman": 0.9131,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8894,
+                    "median_top_k_overlap": 0.9333,
+                    "mean_spearman": 0.9131,
+                    "stability_rate": 0.3526
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8379,
+                    "median_top_k_overlap": 0.84,
+                    "mean_spearman": 0.9131,
+                    "stability_rate": 0.7954
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9971,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9131,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8379,
+                  "median_top_k_overlap": 0.84,
+                  "mean_spearman": 0.9131,
+                  "stability_rate": 0.7954
+                }
+              }
+            },
+            {
+              "set_index": 5,
+              "main_seed": 46,
+              "fraud_cohort_k5_stable_rate": 0.8076,
+              "cand_high_cohort_k5_stable_rate": 0.8122,
+              "top_fps_cohort_k5_stable_rate": 0.7766,
+              "fraud_cohort_k5_mean_overlap": 0.8508,
+              "fraud_cohort_mean_spearman": 0.9194,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8663,
+                    "median_top_k_overlap": 0.8667,
+                    "mean_spearman": 0.9194,
+                    "stability_rate": 0.3386
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8508,
+                    "median_top_k_overlap": 0.84,
+                    "mean_spearman": 0.9194,
+                    "stability_rate": 0.8076
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9953,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9194,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8508,
+                  "median_top_k_overlap": 0.84,
+                  "mean_spearman": 0.9194,
+                  "stability_rate": 0.8076
+                }
+              }
+            },
+            {
+              "set_index": 6,
+              "main_seed": 47,
+              "fraud_cohort_k5_stable_rate": 0.8977,
+              "cand_high_cohort_k5_stable_rate": 0.9003,
+              "top_fps_cohort_k5_stable_rate": 0.8723,
+              "fraud_cohort_k5_mean_overlap": 0.8768,
+              "fraud_cohort_mean_spearman": 0.9102,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8938,
+                    "median_top_k_overlap": 0.9333,
+                    "mean_spearman": 0.9102,
+                    "stability_rate": 0.3642
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8768,
+                    "median_top_k_overlap": 0.88,
+                    "mean_spearman": 0.9102,
+                    "stability_rate": 0.8977
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9968,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9102,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8768,
+                  "median_top_k_overlap": 0.88,
+                  "mean_spearman": 0.9102,
+                  "stability_rate": 0.8977
+                }
+              }
+            },
+            {
+              "set_index": 7,
+              "main_seed": 48,
+              "fraud_cohort_k5_stable_rate": 0.8843,
+              "cand_high_cohort_k5_stable_rate": 0.8869,
+              "top_fps_cohort_k5_stable_rate": 0.8298,
+              "fraud_cohort_k5_mean_overlap": 0.867,
+              "fraud_cohort_mean_spearman": 0.9278,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8773,
+                    "median_top_k_overlap": 0.9333,
+                    "mean_spearman": 0.9278,
+                    "stability_rate": 0.3575
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.867,
+                    "median_top_k_overlap": 0.88,
+                    "mean_spearman": 0.9278,
+                    "stability_rate": 0.8843
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9983,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9278,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.867,
+                  "median_top_k_overlap": 0.88,
+                  "mean_spearman": 0.9278,
+                  "stability_rate": 0.8843
+                }
+              }
+            },
+            {
+              "set_index": 8,
+              "main_seed": 49,
+              "fraud_cohort_k5_stable_rate": 0.9019,
+              "cand_high_cohort_k5_stable_rate": 0.9021,
+              "top_fps_cohort_k5_stable_rate": 0.8085,
+              "fraud_cohort_k5_mean_overlap": 0.8754,
+              "fraud_cohort_mean_spearman": 0.9233,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8825,
+                    "median_top_k_overlap": 0.8667,
+                    "mean_spearman": 0.9233,
+                    "stability_rate": 0.3033
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8754,
+                    "median_top_k_overlap": 0.88,
+                    "mean_spearman": 0.9233,
+                    "stability_rate": 0.9019
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9976,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9233,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8754,
+                  "median_top_k_overlap": 0.88,
+                  "mean_spearman": 0.9233,
+                  "stability_rate": 0.9019
+                }
+              }
+            },
+            {
+              "set_index": 9,
+              "main_seed": 50,
+              "fraud_cohort_k5_stable_rate": 0.6705,
+              "cand_high_cohort_k5_stable_rate": 0.6729,
+              "top_fps_cohort_k5_stable_rate": 0.6702,
+              "fraud_cohort_k5_mean_overlap": 0.819,
+              "fraud_cohort_mean_spearman": 0.9108,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8254,
+                    "median_top_k_overlap": 0.8667,
+                    "mean_spearman": 0.9108,
+                    "stability_rate": 0.257
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.819,
+                    "median_top_k_overlap": 0.8,
+                    "mean_spearman": 0.9108,
+                    "stability_rate": 0.6705
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9971,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9108,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.819,
+                  "median_top_k_overlap": 0.8,
+                  "mean_spearman": 0.9108,
+                  "stability_rate": 0.6705
+                }
+              }
+            },
+            {
+              "set_index": 10,
+              "main_seed": 51,
+              "fraud_cohort_k5_stable_rate": 0.6699,
+              "cand_high_cohort_k5_stable_rate": 0.6742,
+              "top_fps_cohort_k5_stable_rate": 0.6809,
+              "fraud_cohort_k5_mean_overlap": 0.82,
+              "fraud_cohort_mean_spearman": 0.9099,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8501,
+                    "median_top_k_overlap": 0.8667,
+                    "mean_spearman": 0.9099,
+                    "stability_rate": 0.3508
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.82,
+                    "median_top_k_overlap": 0.84,
+                    "mean_spearman": 0.9099,
+                    "stability_rate": 0.6699
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9979,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9099,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.82,
+                  "median_top_k_overlap": 0.84,
+                  "mean_spearman": 0.9099,
+                  "stability_rate": 0.6699
+                }
+              }
+            }
+          ],
+          "fraud_cohort_stability": {
+            "mean": 0.8149,
+            "std": 0.086,
+            "ci_95": [
+              0.7533,
+              0.8764
+            ]
+          },
+          "cand_high_cohort_stability": {
+            "mean": 0.8173,
+            "std": 0.0855,
+            "ci_95": [
+              0.7561,
+              0.8784
+            ]
+          },
+          "top_fps_cohort_stability": {
+            "mean": 0.7553,
+            "std": 0.0711,
+            "ci_95": [
+              0.7045,
+              0.8062
+            ]
+          },
+          "chance_baseline_k5": 0.4545
+        },
+        "model_seed_only_noise": {
+          "mean_top_k_overlap": 0.865,
+          "stability_rate": 0.8581,
+          "mean_spearman": 0.9437
+        }
+      }
+    },
+    "smote_enn": {
+      "label": "smote_enn",
+      "validation_pr_auc": 0.9689595997609548,
+      "test_pr_auc": 0.9853,
+      "threshold_review": 0.9796899557113647,
+      "threshold_high": 0.9940186738967896,
+      "metrics_at_high": {
+        "precision": 0.9538,
+        "recall": 0.905,
+        "f1": 0.9287,
+        "pr_auc": 0.9853,
+        "roc_auc": 0.9998,
+        "mcc": 0.9281,
+        "fpr": 0.0006,
+        "confusion_matrix": {
+          "true_negatives": 116432,
+          "false_positives": 72,
+          "false_negatives": 156,
+          "true_positives": 1486
+        },
+        "recall_ci_95": [
+          0.8903,
+          0.9187
+        ],
+        "fpr_ci_95": [
+          0.0005,
+          0.0008
+        ]
+      },
+      "metrics_at_review": {
+        "precision": 0.8809,
+        "recall": 0.9592,
+        "f1": 0.9184,
+        "pr_auc": 0.9853,
+        "roc_auc": 0.9998,
+        "mcc": 0.918,
+        "fpr": 0.0018,
+        "confusion_matrix": {
+          "true_negatives": 116291,
+          "false_positives": 213,
+          "false_negatives": 67,
+          "true_positives": 1575
+        },
+        "recall_ci_95": [
+          0.9497,
+          0.9691
+        ],
+        "fpr_ci_95": [
+          0.0016,
+          0.0021
+        ]
+      },
+      "test_routing": {
+        "total_rows": 118146,
+        "low_risk_count": 116358,
+        "low_risk_share": 0.9849,
+        "analyst_review_count": 230,
+        "analyst_review_share": 0.0019,
+        "high_risk_count": 1558,
+        "high_risk_share": 0.0132
+      },
+      "pr_curve_sample": [
+        {
+          "recall": 1.0,
+          "precision": 0.0139,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0141,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0143,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0145,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0148,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0153,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0162,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0167,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0172,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0178,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0184,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0191,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0197,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0205,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0212,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.022,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0228,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0237,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0247,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0257,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0268,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0281,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0294,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0307,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0321,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0337,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0353,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0371,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.039,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0412,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0435,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0461,
+          "threshold": 0.0
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0488,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0517,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.055,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0588,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0632,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0684,
+          "threshold": 0.0001
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0743,
+          "threshold": 0.0002
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0811,
+          "threshold": 0.0002
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.089,
+          "threshold": 0.0002
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.0987,
+          "threshold": 0.0003
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1108,
+          "threshold": 0.0004
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1261,
+          "threshold": 0.0005
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1465,
+          "threshold": 0.0006
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.1742,
+          "threshold": 0.0009
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.2146,
+          "threshold": 0.0015
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.2779,
+          "threshold": 0.0031
+        },
+        {
+          "recall": 1.0,
+          "precision": 0.3926,
+          "threshold": 0.0119
+        },
+        {
+          "recall": 0.9963,
+          "precision": 0.6605,
+          "threshold": 0.4713
+        },
+        {
+          "recall": 0.1803,
+          "precision": 1.0,
+          "threshold": 1.0
+        }
+      ],
+      "shap_stability": {
+        "across_10_sets": {
+          "per_set_stats": [
+            {
+              "set_index": 1,
+              "main_seed": 42,
+              "fraud_cohort_k5_stable_rate": 0.8033,
+              "cand_high_cohort_k5_stable_rate": 0.8091,
+              "top_fps_cohort_k5_stable_rate": 0.7128,
+              "fraud_cohort_k5_mean_overlap": 0.8435,
+              "fraud_cohort_mean_spearman": 0.9056,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.7997,
+                    "median_top_k_overlap": 0.8,
+                    "mean_spearman": 0.9056,
+                    "stability_rate": 0.2497
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8435,
+                    "median_top_k_overlap": 0.84,
+                    "mean_spearman": 0.9056,
+                    "stability_rate": 0.8033
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9994,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9056,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8435,
+                  "median_top_k_overlap": 0.84,
+                  "mean_spearman": 0.9056,
+                  "stability_rate": 0.8033
+                }
+              }
+            },
+            {
+              "set_index": 2,
+              "main_seed": 43,
+              "fraud_cohort_k5_stable_rate": 0.7923,
+              "cand_high_cohort_k5_stable_rate": 0.7927,
+              "top_fps_cohort_k5_stable_rate": 0.6915,
+              "fraud_cohort_k5_mean_overlap": 0.8545,
+              "fraud_cohort_mean_spearman": 0.9115,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8855,
+                    "median_top_k_overlap": 0.9333,
+                    "mean_spearman": 0.9115,
+                    "stability_rate": 0.3477
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8545,
+                    "median_top_k_overlap": 0.84,
+                    "mean_spearman": 0.9115,
+                    "stability_rate": 0.7923
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9993,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9115,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8545,
+                  "median_top_k_overlap": 0.84,
+                  "mean_spearman": 0.9115,
+                  "stability_rate": 0.7923
+                }
+              }
+            },
+            {
+              "set_index": 3,
+              "main_seed": 44,
+              "fraud_cohort_k5_stable_rate": 0.8575,
+              "cand_high_cohort_k5_stable_rate": 0.8638,
+              "top_fps_cohort_k5_stable_rate": 0.7447,
+              "fraud_cohort_k5_mean_overlap": 0.8732,
+              "fraud_cohort_mean_spearman": 0.9414,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8894,
+                    "median_top_k_overlap": 0.9333,
+                    "mean_spearman": 0.9414,
+                    "stability_rate": 0.3203
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8732,
+                    "median_top_k_overlap": 0.88,
+                    "mean_spearman": 0.9414,
+                    "stability_rate": 0.8575
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9995,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9414,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8732,
+                  "median_top_k_overlap": 0.88,
+                  "mean_spearman": 0.9414,
+                  "stability_rate": 0.8575
+                }
+              }
+            },
+            {
+              "set_index": 4,
+              "main_seed": 45,
+              "fraud_cohort_k5_stable_rate": 0.8806,
+              "cand_high_cohort_k5_stable_rate": 0.8821,
+              "top_fps_cohort_k5_stable_rate": 0.7766,
+              "fraud_cohort_k5_mean_overlap": 0.8672,
+              "fraud_cohort_mean_spearman": 0.9372,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8924,
+                    "median_top_k_overlap": 0.9333,
+                    "mean_spearman": 0.9372,
+                    "stability_rate": 0.3179
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8672,
+                    "median_top_k_overlap": 0.88,
+                    "mean_spearman": 0.9372,
+                    "stability_rate": 0.8806
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9986,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9372,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8672,
+                  "median_top_k_overlap": 0.88,
+                  "mean_spearman": 0.9372,
+                  "stability_rate": 0.8806
+                }
+              }
+            },
+            {
+              "set_index": 5,
+              "main_seed": 46,
+              "fraud_cohort_k5_stable_rate": 0.9026,
+              "cand_high_cohort_k5_stable_rate": 0.9033,
+              "top_fps_cohort_k5_stable_rate": 0.8298,
+              "fraud_cohort_k5_mean_overlap": 0.8703,
+              "fraud_cohort_mean_spearman": 0.9301,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.851,
+                    "median_top_k_overlap": 0.8667,
+                    "mean_spearman": 0.9301,
+                    "stability_rate": 0.2734
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8703,
+                    "median_top_k_overlap": 0.88,
+                    "mean_spearman": 0.9301,
+                    "stability_rate": 0.9026
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.999,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9301,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8703,
+                  "median_top_k_overlap": 0.88,
+                  "mean_spearman": 0.9301,
+                  "stability_rate": 0.9026
+                }
+              }
+            },
+            {
+              "set_index": 6,
+              "main_seed": 47,
+              "fraud_cohort_k5_stable_rate": 0.88,
+              "cand_high_cohort_k5_stable_rate": 0.8815,
+              "top_fps_cohort_k5_stable_rate": 0.7766,
+              "fraud_cohort_k5_mean_overlap": 0.8668,
+              "fraud_cohort_mean_spearman": 0.9501,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.9025,
+                    "median_top_k_overlap": 0.9333,
+                    "mean_spearman": 0.9501,
+                    "stability_rate": 0.4019
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8668,
+                    "median_top_k_overlap": 0.84,
+                    "mean_spearman": 0.9501,
+                    "stability_rate": 0.88
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9988,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9501,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8668,
+                  "median_top_k_overlap": 0.84,
+                  "mean_spearman": 0.9501,
+                  "stability_rate": 0.88
+                }
+              }
+            },
+            {
+              "set_index": 7,
+              "main_seed": 48,
+              "fraud_cohort_k5_stable_rate": 0.8995,
+              "cand_high_cohort_k5_stable_rate": 0.9058,
+              "top_fps_cohort_k5_stable_rate": 0.8404,
+              "fraud_cohort_k5_mean_overlap": 0.8781,
+              "fraud_cohort_mean_spearman": 0.9329,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8931,
+                    "median_top_k_overlap": 0.9333,
+                    "mean_spearman": 0.9329,
+                    "stability_rate": 0.4141
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8781,
+                    "median_top_k_overlap": 0.88,
+                    "mean_spearman": 0.9329,
+                    "stability_rate": 0.8995
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9992,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9329,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8781,
+                  "median_top_k_overlap": 0.88,
+                  "mean_spearman": 0.9329,
+                  "stability_rate": 0.8995
+                }
+              }
+            },
+            {
+              "set_index": 8,
+              "main_seed": 49,
+              "fraud_cohort_k5_stable_rate": 0.838,
+              "cand_high_cohort_k5_stable_rate": 0.8426,
+              "top_fps_cohort_k5_stable_rate": 0.766,
+              "fraud_cohort_k5_mean_overlap": 0.8614,
+              "fraud_cohort_mean_spearman": 0.9264,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8753,
+                    "median_top_k_overlap": 0.8667,
+                    "mean_spearman": 0.9264,
+                    "stability_rate": 0.3045
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8614,
+                    "median_top_k_overlap": 0.84,
+                    "mean_spearman": 0.9264,
+                    "stability_rate": 0.838
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9995,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9264,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8614,
+                  "median_top_k_overlap": 0.84,
+                  "mean_spearman": 0.9264,
+                  "stability_rate": 0.838
+                }
+              }
+            },
+            {
+              "set_index": 9,
+              "main_seed": 50,
+              "fraud_cohort_k5_stable_rate": 0.8849,
+              "cand_high_cohort_k5_stable_rate": 0.8869,
+              "top_fps_cohort_k5_stable_rate": 0.9043,
+              "fraud_cohort_k5_mean_overlap": 0.8619,
+              "fraud_cohort_mean_spearman": 0.9376,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.8878,
+                    "median_top_k_overlap": 0.9333,
+                    "mean_spearman": 0.9376,
+                    "stability_rate": 0.405
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8619,
+                    "median_top_k_overlap": 0.84,
+                    "mean_spearman": 0.9376,
+                    "stability_rate": 0.8849
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9993,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9376,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8619,
+                  "median_top_k_overlap": 0.84,
+                  "mean_spearman": 0.9376,
+                  "stability_rate": 0.8849
+                }
+              }
+            },
+            {
+              "set_index": 10,
+              "main_seed": 51,
+              "fraud_cohort_k5_stable_rate": 0.8843,
+              "cand_high_cohort_k5_stable_rate": 0.8888,
+              "top_fps_cohort_k5_stable_rate": 0.7979,
+              "fraud_cohort_k5_mean_overlap": 0.8731,
+              "fraud_cohort_mean_spearman": 0.9366,
+              "full_stats_frauds": {
+                "n_samples": 1642,
+                "n_replicates": 5,
+                "n_features_p": 11,
+                "sensitivity": {
+                  "k_3": {
+                    "k": 3,
+                    "chance_baseline": 0.2727,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 3,
+                    "mean_top_k_overlap": 0.883,
+                    "median_top_k_overlap": 0.9333,
+                    "mean_spearman": 0.9366,
+                    "stability_rate": 0.324
+                  },
+                  "k_5": {
+                    "k": 5,
+                    "chance_baseline": 0.4545,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 4,
+                    "mean_top_k_overlap": 0.8731,
+                    "median_top_k_overlap": 0.88,
+                    "mean_spearman": 0.9366,
+                    "stability_rate": 0.8843
+                  },
+                  "k_10": {
+                    "k": 10,
+                    "chance_baseline": 0.9091,
+                    "min_overlap": 0.8,
+                    "required_overlap_count": 8,
+                    "mean_top_k_overlap": 0.9988,
+                    "median_top_k_overlap": 1.0,
+                    "mean_spearman": 0.9366,
+                    "stability_rate": 1.0
+                  }
+                },
+                "primary_k5": {
+                  "k": 5,
+                  "chance_baseline": 0.4545,
+                  "min_overlap": 0.8,
+                  "required_overlap_count": 4,
+                  "mean_top_k_overlap": 0.8731,
+                  "median_top_k_overlap": 0.88,
+                  "mean_spearman": 0.9366,
+                  "stability_rate": 0.8843
+                }
+              }
+            }
+          ],
+          "fraud_cohort_stability": {
+            "mean": 0.8623,
+            "std": 0.0389,
+            "ci_95": [
+              0.8344,
+              0.8902
+            ]
+          },
+          "cand_high_cohort_stability": {
+            "mean": 0.8657,
+            "std": 0.0389,
+            "ci_95": [
+              0.8379,
+              0.8935
+            ]
+          },
+          "top_fps_cohort_stability": {
+            "mean": 0.7841,
+            "std": 0.0628,
+            "ci_95": [
+              0.7391,
+              0.829
+            ]
+          },
+          "chance_baseline_k5": 0.4545
+        },
+        "model_seed_only_noise": {
+          "mean_top_k_overlap": 0.9062,
+          "stability_rate": 0.9348,
+          "mean_spearman": 0.949
+        }
+      }
+    },
+    "logistic_regression": {
+      "label": "Logistic Regression baseline",
+      "precision": 0.6749,
+      "recall": 0.8155,
+      "f1": 0.7386,
+      "pr_auc": 0.8505,
+      "roc_auc": 0.9892,
+      "mcc": 0.7379,
+      "fpr": 0.0055,
+      "confusion_matrix": {
+        "true_negatives": 115859,
+        "false_positives": 645,
+        "false_negatives": 303,
+        "true_positives": 1339
+      }
+    },
+    "random_forest": {
+      "label": "Random Forest baseline",
+      "precision": 0.8575,
+      "recall": 0.8721,
+      "f1": 0.8647,
+      "pr_auc": 0.9362,
+      "roc_auc": 0.998,
+      "mcc": 0.8628,
+      "fpr": 0.002,
+      "confusion_matrix": {
+        "true_negatives": 116266,
+        "false_positives": 238,
+        "false_negatives": 210,
+        "true_positives": 1432
+      }
+    },
+    "rules_baseline": {
+      "label": "Rules baseline (backend rule function)",
+      "ORIGIN_ACCOUNT_DRAINED": {
+        "flag_rate": 0.214658,
+        "recall": 0.9622,
+        "precision": 0.0623,
+        "f1": 0.117,
+        "pr_auc": 0.0605,
+        "fpr": 0.2041,
+        "true_positives": 1580,
+        "false_positives": 23781,
+        "true_negatives": 92723,
+        "false_negatives": 62,
+        "total_triggers": 25361,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 11546,
+            "frauds": 821,
+            "triggers": 5366,
+            "flag_rate": 0.46475,
+            "recall": 0.934227,
+            "precision": 0.142937,
+            "fpr": 0.428811,
+            "true_positives": 767,
+            "false_positives": 4599
+          },
+          "CASH_OUT": {
+            "total_rows": 37196,
+            "frauds": 821,
+            "triggers": 19995,
+            "flag_rate": 0.537558,
+            "recall": 0.990256,
+            "precision": 0.04066,
+            "fpr": 0.52734,
+            "true_positives": 813,
+            "false_positives": 19182
+          },
+          "PAYMENT": {
+            "total_rows": 41219,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 27243,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 942,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "LARGE_TRANSFER_AMOUNT": {
+        "flag_rate": 0.174961,
+        "recall": 0.6711,
+        "precision": 0.0533,
+        "f1": 0.0988,
+        "pr_auc": 0.0403,
+        "fpr": 0.168,
+        "true_positives": 1102,
+        "false_positives": 19569,
+        "true_negatives": 96935,
+        "false_negatives": 540,
+        "total_triggers": 20671,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 11546,
+            "frauds": 821,
+            "triggers": 8086,
+            "flag_rate": 0.700329,
+            "recall": 0.676005,
+            "precision": 0.068637,
+            "fpr": 0.702191,
+            "true_positives": 555,
+            "false_positives": 7531
+          },
+          "CASH_OUT": {
+            "total_rows": 37196,
+            "frauds": 821,
+            "triggers": 12585,
+            "flag_rate": 0.338343,
+            "recall": 0.666261,
+            "precision": 0.043464,
+            "fpr": 0.330942,
+            "true_positives": 547,
+            "false_positives": 12038
+          },
+          "PAYMENT": {
+            "total_rows": 41219,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 27243,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 942,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "DEST_BALANCE_INCONSISTENCY": {
+        "flag_rate": 0.055076,
+        "recall": 0.5426,
+        "precision": 0.1369,
+        "f1": 0.2187,
+        "pr_auc": 0.0807,
+        "fpr": 0.0482,
+        "true_positives": 891,
+        "false_positives": 5616,
+        "true_negatives": 110888,
+        "false_negatives": 751,
+        "total_triggers": 6507,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 11546,
+            "frauds": 821,
+            "triggers": 2274,
+            "flag_rate": 0.196951,
+            "recall": 1.0,
+            "precision": 0.361038,
+            "fpr": 0.135478,
+            "true_positives": 821,
+            "false_positives": 1453
+          },
+          "CASH_OUT": {
+            "total_rows": 37196,
+            "frauds": 821,
+            "triggers": 4233,
+            "flag_rate": 0.113803,
+            "recall": 0.085262,
+            "precision": 0.016537,
+            "fpr": 0.114447,
+            "true_positives": 70,
+            "false_positives": 4163
+          },
+          "PAYMENT": {
+            "total_rows": 41219,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 27243,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 942,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "VERY_HIGH_AMOUNT_FOR_TYPE": {
+        "flag_rate": 0.09429,
+        "recall": 0.5231,
+        "precision": 0.0771,
+        "f1": 0.1344,
+        "pr_auc": 0.047,
+        "fpr": 0.0882,
+        "true_positives": 859,
+        "false_positives": 10281,
+        "true_negatives": 106223,
+        "false_negatives": 783,
+        "total_triggers": 11140,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 11546,
+            "frauds": 821,
+            "triggers": 4511,
+            "flag_rate": 0.390698,
+            "recall": 0.466504,
+            "precision": 0.084904,
+            "fpr": 0.384895,
+            "true_positives": 383,
+            "false_positives": 4128
+          },
+          "CASH_OUT": {
+            "total_rows": 37196,
+            "frauds": 821,
+            "triggers": 5894,
+            "flag_rate": 0.158458,
+            "recall": 0.579781,
+            "precision": 0.08076,
+            "fpr": 0.148948,
+            "true_positives": 476,
+            "false_positives": 5418
+          },
+          "PAYMENT": {
+            "total_rows": 41219,
+            "frauds": 0,
+            "triggers": 278,
+            "flag_rate": 0.006744,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.006744,
+            "true_positives": 0,
+            "false_positives": 278
+          },
+          "CASH_IN": {
+            "total_rows": 27243,
+            "frauds": 0,
+            "triggers": 426,
+            "flag_rate": 0.015637,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.015637,
+            "true_positives": 0,
+            "false_positives": 426
+          },
+          "DEBIT": {
+            "total_rows": 942,
+            "frauds": 0,
+            "triggers": 31,
+            "flag_rate": 0.032909,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.032909,
+            "true_positives": 0,
+            "false_positives": 31
+          }
+        }
+      },
+      "union_drain_or_amount": {
+        "flag_rate": 0.290099,
+        "recall": 0.9951,
+        "precision": 0.0477,
+        "f1": 0.091,
+        "pr_auc": 0.0475,
+        "fpr": 0.2802,
+        "true_positives": 1634,
+        "false_positives": 32640,
+        "true_negatives": 83864,
+        "false_negatives": 8,
+        "total_triggers": 34274,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 11546,
+            "frauds": 821,
+            "triggers": 9599,
+            "flag_rate": 0.83137,
+            "recall": 1.0,
+            "precision": 0.08553,
+            "fpr": 0.818462,
+            "true_positives": 821,
+            "false_positives": 8778
+          },
+          "CASH_OUT": {
+            "total_rows": 37196,
+            "frauds": 821,
+            "triggers": 24675,
+            "flag_rate": 0.663378,
+            "recall": 0.990256,
+            "precision": 0.032948,
+            "fpr": 0.656,
+            "true_positives": 813,
+            "false_positives": 23862
+          },
+          "PAYMENT": {
+            "total_rows": 41219,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 27243,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 942,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "union_all_rules": {
+        "flag_rate": 0.31109,
+        "recall": 0.9951,
+        "precision": 0.0445,
+        "f1": 0.0851,
+        "pr_auc": 0.0443,
+        "fpr": 0.3014,
+        "true_positives": 1634,
+        "false_positives": 35120,
+        "true_negatives": 81384,
+        "false_negatives": 8,
+        "total_triggers": 36754,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 11546,
+            "frauds": 821,
+            "triggers": 9854,
+            "flag_rate": 0.853456,
+            "recall": 1.0,
+            "precision": 0.083316,
+            "fpr": 0.842238,
+            "true_positives": 821,
+            "false_positives": 9033
+          },
+          "CASH_OUT": {
+            "total_rows": 37196,
+            "frauds": 821,
+            "triggers": 26165,
+            "flag_rate": 0.703436,
+            "recall": 0.990256,
+            "precision": 0.031072,
+            "fpr": 0.696962,
+            "true_positives": 813,
+            "false_positives": 25352
+          },
+          "PAYMENT": {
+            "total_rows": 41219,
+            "frauds": 0,
+            "triggers": 278,
+            "flag_rate": 0.006744,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.006744,
+            "true_positives": 0,
+            "false_positives": 278
+          },
+          "CASH_IN": {
+            "total_rows": 27243,
+            "frauds": 0,
+            "triggers": 426,
+            "flag_rate": 0.015637,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.015637,
+            "true_positives": 0,
+            "false_positives": 426
+          },
+          "DEBIT": {
+            "total_rows": 942,
+            "frauds": 0,
+            "triggers": 31,
+            "flag_rate": 0.032909,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.032909,
+            "true_positives": 0,
+            "false_positives": 31
+          }
+        }
+      },
+      "drain_ge_95pct_alone": {
+        "flag_rate": 0.214658,
+        "recall": 0.9622,
+        "precision": 0.0623,
+        "f1": 0.117,
+        "pr_auc": 0.0605,
+        "fpr": 0.2041,
+        "true_positives": 1580,
+        "false_positives": 23781,
+        "true_negatives": 92723,
+        "false_negatives": 62,
+        "total_triggers": 25361,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 11546,
+            "frauds": 821,
+            "triggers": 5366,
+            "flag_rate": 0.46475,
+            "recall": 0.934227,
+            "precision": 0.142937,
+            "fpr": 0.428811,
+            "true_positives": 767,
+            "false_positives": 4599
+          },
+          "CASH_OUT": {
+            "total_rows": 37196,
+            "frauds": 821,
+            "triggers": 19995,
+            "flag_rate": 0.537558,
+            "recall": 0.990256,
+            "precision": 0.04066,
+            "fpr": 0.52734,
+            "true_positives": 813,
+            "false_positives": 19182
+          },
+          "PAYMENT": {
+            "total_rows": 41219,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 27243,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 942,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "amount_gt_200k_alone": {
+        "flag_rate": 0.174961,
+        "recall": 0.6711,
+        "precision": 0.0533,
+        "f1": 0.0988,
+        "pr_auc": 0.0403,
+        "fpr": 0.168,
+        "true_positives": 1102,
+        "false_positives": 19569,
+        "true_negatives": 96935,
+        "false_negatives": 540,
+        "total_triggers": 20671,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 11546,
+            "frauds": 821,
+            "triggers": 8086,
+            "flag_rate": 0.700329,
+            "recall": 0.676005,
+            "precision": 0.068637,
+            "fpr": 0.702191,
+            "true_positives": 555,
+            "false_positives": 7531
+          },
+          "CASH_OUT": {
+            "total_rows": 37196,
+            "frauds": 821,
+            "triggers": 12585,
+            "flag_rate": 0.338343,
+            "recall": 0.666261,
+            "precision": 0.043464,
+            "fpr": 0.330942,
+            "true_positives": 547,
+            "false_positives": 12038
+          },
+          "PAYMENT": {
+            "total_rows": 41219,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 27243,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 942,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      }
+    },
+    "full_train_none": {
+      "label": "Full-train reference (none, 6.08M rows)",
+      "precision": 0.9977,
+      "recall": 0.7789,
+      "f1": 0.8748,
+      "pr_auc": 0.9823,
+      "roc_auc": 0.9997,
+      "mcc": 0.8801,
+      "fpr": 0.0,
+      "confusion_matrix": {
+        "true_negatives": 116501,
+        "false_positives": 3,
+        "false_negatives": 363,
+        "true_positives": 1279
+      }
+    },
+    "full_train_class_weight": {
+      "label": "Full-train reference (class_weight, 6.08M rows)",
+      "precision": 0.5393,
+      "recall": 0.9994,
+      "f1": 0.7005,
+      "pr_auc": 0.9831,
+      "roc_auc": 0.9997,
+      "mcc": 0.7297,
+      "fpr": 0.012,
+      "confusion_matrix": {
+        "true_negatives": 115102,
+        "false_positives": 1402,
+        "false_negatives": 1,
+        "true_positives": 1641
+      }
+    },
+    "variant_A_reference": {
+      "label": "Variant A reference (15 features with balance errors/deltas)",
+      "precision": 0.9832,
+      "recall": 0.9994,
+      "f1": 0.9912,
+      "pr_auc": 0.9999,
+      "roc_auc": 1.0,
+      "mcc": 0.9912,
+      "fpr": 0.0002,
+      "confusion_matrix": {
+        "true_negatives": 116476,
+        "false_positives": 28,
+        "false_negatives": 1,
+        "true_positives": 1641
+      },
+      "shap_stability": {
+        "n_samples": 1642,
+        "n_replicates": 2,
+        "n_features_p": 15,
+        "sensitivity": {
+          "k_3": {
+            "k": 3,
+            "chance_baseline": 0.2,
+            "min_overlap": 0.8,
+            "required_overlap_count": 3,
+            "mean_top_k_overlap": 0.8471,
+            "median_top_k_overlap": 0.8333,
+            "mean_spearman": 0.8943,
+            "stability_rate": 0.3149
+          },
+          "k_5": {
+            "k": 5,
+            "chance_baseline": 0.3333,
+            "min_overlap": 0.8,
+            "required_overlap_count": 4,
+            "mean_top_k_overlap": 0.8292,
+            "median_top_k_overlap": 0.8,
+            "mean_spearman": 0.8943,
+            "stability_rate": 0.8307
+          },
+          "k_10": {
+            "k": 10,
+            "chance_baseline": 0.6667,
+            "min_overlap": 0.8,
+            "required_overlap_count": 8,
+            "mean_top_k_overlap": 0.8723,
+            "median_top_k_overlap": 0.85,
+            "mean_spearman": 0.8943,
+            "stability_rate": 0.9896
+          }
+        },
+        "primary_k5": {
+          "k": 5,
+          "chance_baseline": 0.3333,
+          "min_overlap": 0.8,
+          "required_overlap_count": 4,
+          "mean_top_k_overlap": 0.8292,
+          "median_top_k_overlap": 0.8,
+          "mean_spearman": 0.8943,
+          "stability_rate": 0.8307
+        }
+      }
+    },
+    "cross_strategy_shap_agreement": {
+      "n_samples": 1699,
+      "k": 5,
+      "chance_baseline": 0.4545,
+      "pairwise_comparisons": {
+        "class_weight_vs_none": {
+          "strategy_1": "class_weight",
+          "strategy_2": "none",
+          "k": 5,
+          "chance_baseline": 0.4545,
+          "mean_top_k_overlap": 0.8281,
+          "median_top_k_overlap": 0.8,
+          "mean_spearman": 0.9299
+        },
+        "class_weight_vs_smote_enn": {
+          "strategy_1": "class_weight",
+          "strategy_2": "smote_enn",
+          "k": 5,
+          "chance_baseline": 0.4545,
+          "mean_top_k_overlap": 0.7927,
+          "median_top_k_overlap": 0.8,
+          "mean_spearman": 0.8902
+        },
+        "none_vs_smote_enn": {
+          "strategy_1": "none",
+          "strategy_2": "smote_enn",
+          "k": 5,
+          "chance_baseline": 0.4545,
+          "mean_top_k_overlap": 0.8018,
+          "median_top_k_overlap": 0.8,
+          "mean_spearman": 0.8919
+        }
+      }
+    },
+    "informative_nature_of_unstable": {
+      "total_candidate_high": 1645,
+      "stable_cohort": {
+        "count": 1361,
+        "tp": 1283,
+        "fp": 78,
+        "precision": 0.9427,
+        "precision_wilson_ci": [
+          0.929049,
+          0.953837
+        ],
+        "fp_share": 0.0573,
+        "fp_share_wilson_ci": [
+          0.046163,
+          0.070951
+        ]
+      },
+      "unstable_cohort": {
+        "count": 284,
+        "tp": 268,
+        "fp": 16,
+        "precision": 0.9437,
+        "precision_wilson_ci": [
+          0.910454,
+          0.965028
+        ],
+        "fp_share": 0.0563,
+        "fp_share_wilson_ci": [
+          0.034972,
+          0.089546
+        ]
+      },
+      "auroc_mean_overlap_predicting_fp": {
+        "auroc": 0.5324,
+        "ci_95": [
+          0.4772,
+          0.5872
+        ]
+      },
+      "criteria": {
+        "condition_a_fp_share_unstable_strictly_above_stable": false,
+        "condition_b_auroc_ci_excludes_half": false
+      },
+      "statistical_conclusion": "no evidence that explanation instability predicts false positive alert status"
+    }
+  },
+  "evaluation_metrics": {
+    "precision": 0.9429,
+    "recall": 0.9446,
+    "f1": 0.9437,
+    "pr_auc": 0.9907,
+    "roc_auc": 0.9999,
+    "mcc": 0.9429
+  }
+}

@@ -1,0 +1,4424 @@
+{
+  "data_provenance": {
+    "raw_dataset_path": "ml/data/raw/paysim.csv",
+    "total_rows": 6362620,
+    "overall_fraud_count": 8213,
+    "overall_fraud_ratio": 0.00129082,
+    "step_min": 1,
+    "step_max": 743
+  },
+  "per_type_distribution": {
+    "CASH_OUT": {
+      "total_transactions": 2237500,
+      "fraud_count": 4116,
+      "fraud_ratio": 0.00184
+    },
+    "PAYMENT": {
+      "total_transactions": 2151495,
+      "fraud_count": 0,
+      "fraud_ratio": 0.0
+    },
+    "CASH_IN": {
+      "total_transactions": 1399284,
+      "fraud_count": 0,
+      "fraud_ratio": 0.0
+    },
+    "TRANSFER": {
+      "total_transactions": 532909,
+      "fraud_count": 4097,
+      "fraud_ratio": 0.007688
+    },
+    "DEBIT": {
+      "total_transactions": 41432,
+      "fraud_count": 0,
+      "fraud_ratio": 0.0
+    }
+  },
+  "merchant_destination_analysis": {
+    "merchant_transactions": 2151495,
+    "merchant_fraud_count": 0,
+    "merchant_equals_type_payment": true
+  },
+  "split_statistics": {
+    "train": {
+      "step_range": [
+        1,
+        520
+      ],
+      "total_rows": 6082007,
+      "fraud_count": 5781,
+      "fraud_prevalence": 0.000951,
+      "per_type": {
+        "TRANSFER": {
+          "total_rows": 506592,
+          "fraud_count": 2881,
+          "fraud_prevalence": 0.005687
+        },
+        "CASH_OUT": {
+          "total_rows": 2147137,
+          "fraud_count": 2900,
+          "fraud_prevalence": 0.001351
+        },
+        "PAYMENT": {
+          "total_rows": 2053690,
+          "fraud_count": 0,
+          "fraud_prevalence": 0.0
+        },
+        "CASH_IN": {
+          "total_rows": 1335450,
+          "fraud_count": 0,
+          "fraud_prevalence": 0.0
+        },
+        "DEBIT": {
+          "total_rows": 39138,
+          "fraud_count": 0,
+          "fraud_prevalence": 0.0
+        }
+      },
+      "per_step": {
+        "1": {
+          "total_rows": 2708,
+          "fraud_count": 16
+        },
+        "2": {
+          "total_rows": 1014,
+          "fraud_count": 8
+        },
+        "3": {
+          "total_rows": 552,
+          "fraud_count": 4
+        },
+        "4": {
+          "total_rows": 565,
+          "fraud_count": 10
+        },
+        "5": {
+          "total_rows": 665,
+          "fraud_count": 6
+        },
+        "6": {
+          "total_rows": 1660,
+          "fraud_count": 22
+        },
+        "7": {
+          "total_rows": 6837,
+          "fraud_count": 12
+        },
+        "8": {
+          "total_rows": 21097,
+          "fraud_count": 12
+        },
+        "9": {
+          "total_rows": 37628,
+          "fraud_count": 19
+        },
+        "10": {
+          "total_rows": 35991,
+          "fraud_count": 11
+        },
+        "11": {
+          "total_rows": 37241,
+          "fraud_count": 7
+        },
+        "12": {
+          "total_rows": 36153,
+          "fraud_count": 14
+        },
+        "13": {
+          "total_rows": 37515,
+          "fraud_count": 14
+        },
+        "14": {
+          "total_rows": 41485,
+          "fraud_count": 12
+        },
+        "15": {
+          "total_rows": 44609,
+          "fraud_count": 20
+        },
+        "16": {
+          "total_rows": 42471,
+          "fraud_count": 10
+        },
+        "17": {
+          "total_rows": 43361,
+          "fraud_count": 7
+        },
+        "18": {
+          "total_rows": 49579,
+          "fraud_count": 16
+        },
+        "19": {
+          "total_rows": 51352,
+          "fraud_count": 11
+        },
+        "20": {
+          "total_rows": 40625,
+          "fraud_count": 4
+        },
+        "21": {
+          "total_rows": 19152,
+          "fraud_count": 5
+        },
+        "22": {
+          "total_rows": 12635,
+          "fraud_count": 23
+        },
+        "23": {
+          "total_rows": 6144,
+          "fraud_count": 2
+        },
+        "24": {
+          "total_rows": 3216,
+          "fraud_count": 6
+        },
+        "25": {
+          "total_rows": 1598,
+          "fraud_count": 18
+        },
+        "26": {
+          "total_rows": 440,
+          "fraud_count": 12
+        },
+        "27": {
+          "total_rows": 41,
+          "fraud_count": 8
+        },
+        "28": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "29": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "30": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "31": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "32": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "33": {
+          "total_rows": 23616,
+          "fraud_count": 12
+        },
+        "34": {
+          "total_rows": 30904,
+          "fraud_count": 22
+        },
+        "35": {
+          "total_rows": 29157,
+          "fraud_count": 15
+        },
+        "36": {
+          "total_rows": 39774,
+          "fraud_count": 19
+        },
+        "37": {
+          "total_rows": 34000,
+          "fraud_count": 13
+        },
+        "38": {
+          "total_rows": 31453,
+          "fraud_count": 16
+        },
+        "39": {
+          "total_rows": 23391,
+          "fraud_count": 12
+        },
+        "40": {
+          "total_rows": 34270,
+          "fraud_count": 14
+        },
+        "41": {
+          "total_rows": 36348,
+          "fraud_count": 12
+        },
+        "42": {
+          "total_rows": 41304,
+          "fraud_count": 14
+        },
+        "43": {
+          "total_rows": 45060,
+          "fraud_count": 13
+        },
+        "44": {
+          "total_rows": 38523,
+          "fraud_count": 8
+        },
+        "45": {
+          "total_rows": 18500,
+          "fraud_count": 16
+        },
+        "46": {
+          "total_rows": 12445,
+          "fraud_count": 14
+        },
+        "47": {
+          "total_rows": 8681,
+          "fraud_count": 21
+        },
+        "48": {
+          "total_rows": 5693,
+          "fraud_count": 10
+        },
+        "49": {
+          "total_rows": 764,
+          "fraud_count": 4
+        },
+        "50": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "51": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "52": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "53": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "54": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "55": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "56": {
+          "total_rows": 18,
+          "fraud_count": 18
+        },
+        "57": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "58": {
+          "total_rows": 20,
+          "fraud_count": 20
+        },
+        "59": {
+          "total_rows": 20,
+          "fraud_count": 20
+        },
+        "60": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "61": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "62": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "63": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "64": {
+          "total_rows": 18,
+          "fraud_count": 18
+        },
+        "65": {
+          "total_rows": 20,
+          "fraud_count": 20
+        },
+        "66": {
+          "total_rows": 24,
+          "fraud_count": 24
+        },
+        "67": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "68": {
+          "total_rows": 18,
+          "fraud_count": 18
+        },
+        "69": {
+          "total_rows": 20,
+          "fraud_count": 20
+        },
+        "70": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "71": {
+          "total_rows": 20,
+          "fraud_count": 20
+        },
+        "72": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "73": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "74": {
+          "total_rows": 22,
+          "fraud_count": 22
+        },
+        "75": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "76": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "77": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "78": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "79": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "80": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "81": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "82": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "83": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "84": {
+          "total_rows": 16,
+          "fraud_count": 16
+        },
+        "85": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "86": {
+          "total_rows": 18,
+          "fraud_count": 18
+        },
+        "87": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "88": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "89": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "90": {
+          "total_rows": 16,
+          "fraud_count": 16
+        },
+        "91": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "92": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "93": {
+          "total_rows": 4444,
+          "fraud_count": 16
+        },
+        "94": {
+          "total_rows": 10372,
+          "fraud_count": 12
+        },
+        "95": {
+          "total_rows": 6858,
+          "fraud_count": 14
+        },
+        "96": {
+          "total_rows": 6350,
+          "fraud_count": 4
+        },
+        "97": {
+          "total_rows": 685,
+          "fraud_count": 10
+        },
+        "98": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "99": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "100": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "101": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "102": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "103": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "104": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "105": {
+          "total_rows": 18,
+          "fraud_count": 18
+        },
+        "106": {
+          "total_rows": 18,
+          "fraud_count": 18
+        },
+        "107": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "108": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "109": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "110": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "111": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "112": {
+          "total_rows": 2,
+          "fraud_count": 2
+        },
+        "113": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "114": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "115": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "116": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "117": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "118": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "119": {
+          "total_rows": 5740,
+          "fraud_count": 10
+        },
+        "120": {
+          "total_rows": 3144,
+          "fraud_count": 12
+        },
+        "121": {
+          "total_rows": 1074,
+          "fraud_count": 14
+        },
+        "122": {
+          "total_rows": 414,
+          "fraud_count": 14
+        },
+        "123": {
+          "total_rows": 52,
+          "fraud_count": 6
+        },
+        "124": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "125": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "126": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "127": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "128": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "129": {
+          "total_rows": 21986,
+          "fraud_count": 6
+        },
+        "130": {
+          "total_rows": 32890,
+          "fraud_count": 6
+        },
+        "131": {
+          "total_rows": 36375,
+          "fraud_count": 16
+        },
+        "132": {
+          "total_rows": 35936,
+          "fraud_count": 10
+        },
+        "133": {
+          "total_rows": 35147,
+          "fraud_count": 10
+        },
+        "134": {
+          "total_rows": 32391,
+          "fraud_count": 10
+        },
+        "135": {
+          "total_rows": 27556,
+          "fraud_count": 8
+        },
+        "136": {
+          "total_rows": 30340,
+          "fraud_count": 10
+        },
+        "137": {
+          "total_rows": 32559,
+          "fraud_count": 12
+        },
+        "138": {
+          "total_rows": 31422,
+          "fraud_count": 4
+        },
+        "139": {
+          "total_rows": 46054,
+          "fraud_count": 4
+        },
+        "140": {
+          "total_rows": 37012,
+          "fraud_count": 14
+        },
+        "141": {
+          "total_rows": 16434,
+          "fraud_count": 8
+        },
+        "142": {
+          "total_rows": 12189,
+          "fraud_count": 8
+        },
+        "143": {
+          "total_rows": 7609,
+          "fraud_count": 16
+        },
+        "144": {
+          "total_rows": 3523,
+          "fraud_count": 10
+        },
+        "145": {
+          "total_rows": 1117,
+          "fraud_count": 14
+        },
+        "146": {
+          "total_rows": 522,
+          "fraud_count": 10
+        },
+        "147": {
+          "total_rows": 84,
+          "fraud_count": 6
+        },
+        "148": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "149": {
+          "total_rows": 22,
+          "fraud_count": 22
+        },
+        "150": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "151": {
+          "total_rows": 18,
+          "fraud_count": 18
+        },
+        "152": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "153": {
+          "total_rows": 19475,
+          "fraud_count": 10
+        },
+        "154": {
+          "total_rows": 29241,
+          "fraud_count": 10
+        },
+        "155": {
+          "total_rows": 29927,
+          "fraud_count": 8
+        },
+        "156": {
+          "total_rows": 27603,
+          "fraud_count": 18
+        },
+        "157": {
+          "total_rows": 29764,
+          "fraud_count": 16
+        },
+        "158": {
+          "total_rows": 27839,
+          "fraud_count": 8
+        },
+        "159": {
+          "total_rows": 27561,
+          "fraud_count": 10
+        },
+        "160": {
+          "total_rows": 27765,
+          "fraud_count": 26
+        },
+        "161": {
+          "total_rows": 33049,
+          "fraud_count": 14
+        },
+        "162": {
+          "total_rows": 40622,
+          "fraud_count": 10
+        },
+        "163": {
+          "total_rows": 46352,
+          "fraud_count": 8
+        },
+        "164": {
+          "total_rows": 39102,
+          "fraud_count": 14
+        },
+        "165": {
+          "total_rows": 16542,
+          "fraud_count": 4
+        },
+        "166": {
+          "total_rows": 12176,
+          "fraud_count": 6
+        },
+        "167": {
+          "total_rows": 7946,
+          "fraud_count": 6
+        },
+        "168": {
+          "total_rows": 3824,
+          "fraud_count": 2
+        },
+        "169": {
+          "total_rows": 1464,
+          "fraud_count": 10
+        },
+        "170": {
+          "total_rows": 529,
+          "fraud_count": 16
+        },
+        "171": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "172": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "173": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "174": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "175": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "176": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "177": {
+          "total_rows": 17336,
+          "fraud_count": 18
+        },
+        "178": {
+          "total_rows": 28204,
+          "fraud_count": 14
+        },
+        "179": {
+          "total_rows": 30534,
+          "fraud_count": 8
+        },
+        "180": {
+          "total_rows": 31481,
+          "fraud_count": 10
+        },
+        "181": {
+          "total_rows": 31749,
+          "fraud_count": 11
+        },
+        "182": {
+          "total_rows": 31900,
+          "fraud_count": 8
+        },
+        "183": {
+          "total_rows": 31199,
+          "fraud_count": 16
+        },
+        "184": {
+          "total_rows": 32175,
+          "fraud_count": 8
+        },
+        "185": {
+          "total_rows": 37323,
+          "fraud_count": 16
+        },
+        "186": {
+          "total_rows": 43747,
+          "fraud_count": 17
+        },
+        "187": {
+          "total_rows": 49083,
+          "fraud_count": 10
+        },
+        "188": {
+          "total_rows": 39079,
+          "fraud_count": 10
+        },
+        "189": {
+          "total_rows": 17674,
+          "fraud_count": 10
+        },
+        "190": {
+          "total_rows": 12669,
+          "fraud_count": 8
+        },
+        "191": {
+          "total_rows": 9111,
+          "fraud_count": 12
+        },
+        "192": {
+          "total_rows": 4314,
+          "fraud_count": 10
+        },
+        "193": {
+          "total_rows": 1511,
+          "fraud_count": 8
+        },
+        "194": {
+          "total_rows": 671,
+          "fraud_count": 12
+        },
+        "195": {
+          "total_rows": 141,
+          "fraud_count": 10
+        },
+        "196": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "197": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "198": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "199": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "200": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "201": {
+          "total_rows": 17963,
+          "fraud_count": 8
+        },
+        "202": {
+          "total_rows": 31949,
+          "fraud_count": 2
+        },
+        "203": {
+          "total_rows": 36176,
+          "fraud_count": 8
+        },
+        "204": {
+          "total_rows": 36856,
+          "fraud_count": 6
+        },
+        "205": {
+          "total_rows": 33549,
+          "fraud_count": 16
+        },
+        "206": {
+          "total_rows": 29777,
+          "fraud_count": 12
+        },
+        "207": {
+          "total_rows": 28288,
+          "fraud_count": 6
+        },
+        "208": {
+          "total_rows": 29058,
+          "fraud_count": 21
+        },
+        "209": {
+          "total_rows": 30372,
+          "fraud_count": 6
+        },
+        "210": {
+          "total_rows": 33004,
+          "fraud_count": 8
+        },
+        "211": {
+          "total_rows": 36889,
+          "fraud_count": 14
+        },
+        "212": {
+          "total_rows": 34047,
+          "fraud_count": 40
+        },
+        "213": {
+          "total_rows": 14775,
+          "fraud_count": 8
+        },
+        "214": {
+          "total_rows": 10746,
+          "fraud_count": 12
+        },
+        "215": {
+          "total_rows": 7975,
+          "fraud_count": 10
+        },
+        "216": {
+          "total_rows": 4130,
+          "fraud_count": 6
+        },
+        "217": {
+          "total_rows": 3347,
+          "fraud_count": 16
+        },
+        "218": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "219": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "220": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "221": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "222": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "223": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "224": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "225": {
+          "total_rows": 18366,
+          "fraud_count": 12
+        },
+        "226": {
+          "total_rows": 27522,
+          "fraud_count": 12
+        },
+        "227": {
+          "total_rows": 30871,
+          "fraud_count": 14
+        },
+        "228": {
+          "total_rows": 30965,
+          "fraud_count": 16
+        },
+        "229": {
+          "total_rows": 28304,
+          "fraud_count": 8
+        },
+        "230": {
+          "total_rows": 26034,
+          "fraud_count": 17
+        },
+        "231": {
+          "total_rows": 26968,
+          "fraud_count": 17
+        },
+        "232": {
+          "total_rows": 27482,
+          "fraud_count": 10
+        },
+        "233": {
+          "total_rows": 14703,
+          "fraud_count": 12
+        },
+        "234": {
+          "total_rows": 34053,
+          "fraud_count": 14
+        },
+        "235": {
+          "total_rows": 47491,
+          "fraud_count": 10
+        },
+        "236": {
+          "total_rows": 37109,
+          "fraud_count": 10
+        },
+        "237": {
+          "total_rows": 16003,
+          "fraud_count": 12
+        },
+        "238": {
+          "total_rows": 10920,
+          "fraud_count": 14
+        },
+        "239": {
+          "total_rows": 8554,
+          "fraud_count": 10
+        },
+        "240": {
+          "total_rows": 4189,
+          "fraud_count": 14
+        },
+        "241": {
+          "total_rows": 1865,
+          "fraud_count": 18
+        },
+        "242": {
+          "total_rows": 637,
+          "fraud_count": 8
+        },
+        "243": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "244": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "245": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "246": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "247": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "248": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "249": {
+          "total_rows": 23209,
+          "fraud_count": 28
+        },
+        "250": {
+          "total_rows": 31854,
+          "fraud_count": 22
+        },
+        "251": {
+          "total_rows": 35269,
+          "fraud_count": 10
+        },
+        "252": {
+          "total_rows": 35590,
+          "fraud_count": 2
+        },
+        "253": {
+          "total_rows": 33311,
+          "fraud_count": 10
+        },
+        "254": {
+          "total_rows": 29553,
+          "fraud_count": 10
+        },
+        "255": {
+          "total_rows": 28840,
+          "fraud_count": 8
+        },
+        "256": {
+          "total_rows": 28570,
+          "fraud_count": 8
+        },
+        "257": {
+          "total_rows": 26843,
+          "fraud_count": 6
+        },
+        "258": {
+          "total_rows": 27662,
+          "fraud_count": 8
+        },
+        "259": {
+          "total_rows": 43328,
+          "fraud_count": 10
+        },
+        "260": {
+          "total_rows": 33674,
+          "fraud_count": 12
+        },
+        "261": {
+          "total_rows": 14420,
+          "fraud_count": 20
+        },
+        "262": {
+          "total_rows": 11125,
+          "fraud_count": 22
+        },
+        "263": {
+          "total_rows": 8021,
+          "fraud_count": 6
+        },
+        "264": {
+          "total_rows": 4042,
+          "fraud_count": 8
+        },
+        "265": {
+          "total_rows": 1581,
+          "fraud_count": 12
+        },
+        "266": {
+          "total_rows": 767,
+          "fraud_count": 10
+        },
+        "267": {
+          "total_rows": 77,
+          "fraud_count": 8
+        },
+        "268": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "269": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "270": {
+          "total_rows": 16,
+          "fraud_count": 16
+        },
+        "271": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "272": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "273": {
+          "total_rows": 7871,
+          "fraud_count": 20
+        },
+        "274": {
+          "total_rows": 19202,
+          "fraud_count": 20
+        },
+        "275": {
+          "total_rows": 24797,
+          "fraud_count": 10
+        },
+        "276": {
+          "total_rows": 26383,
+          "fraud_count": 10
+        },
+        "277": {
+          "total_rows": 25925,
+          "fraud_count": 14
+        },
+        "278": {
+          "total_rows": 25737,
+          "fraud_count": 4
+        },
+        "279": {
+          "total_rows": 25925,
+          "fraud_count": 22
+        },
+        "280": {
+          "total_rows": 25956,
+          "fraud_count": 4
+        },
+        "281": {
+          "total_rows": 27778,
+          "fraud_count": 18
+        },
+        "282": {
+          "total_rows": 31118,
+          "fraud_count": 18
+        },
+        "283": {
+          "total_rows": 36644,
+          "fraud_count": 8
+        },
+        "284": {
+          "total_rows": 33449,
+          "fraud_count": 16
+        },
+        "285": {
+          "total_rows": 14266,
+          "fraud_count": 16
+        },
+        "286": {
+          "total_rows": 11333,
+          "fraud_count": 8
+        },
+        "287": {
+          "total_rows": 6889,
+          "fraud_count": 10
+        },
+        "288": {
+          "total_rows": 4018,
+          "fraud_count": 10
+        },
+        "289": {
+          "total_rows": 1437,
+          "fraud_count": 12
+        },
+        "290": {
+          "total_rows": 487,
+          "fraud_count": 8
+        },
+        "291": {
+          "total_rows": 44,
+          "fraud_count": 10
+        },
+        "292": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "293": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "294": {
+          "total_rows": 18,
+          "fraud_count": 18
+        },
+        "295": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "296": {
+          "total_rows": 22,
+          "fraud_count": 22
+        },
+        "297": {
+          "total_rows": 20609,
+          "fraud_count": 8
+        },
+        "298": {
+          "total_rows": 29579,
+          "fraud_count": 4
+        },
+        "299": {
+          "total_rows": 31940,
+          "fraud_count": 10
+        },
+        "300": {
+          "total_rows": 31176,
+          "fraud_count": 8
+        },
+        "301": {
+          "total_rows": 30881,
+          "fraud_count": 4
+        },
+        "302": {
+          "total_rows": 29127,
+          "fraud_count": 8
+        },
+        "303": {
+          "total_rows": 24714,
+          "fraud_count": 14
+        },
+        "304": {
+          "total_rows": 26697,
+          "fraud_count": 2
+        },
+        "305": {
+          "total_rows": 34595,
+          "fraud_count": 14
+        },
+        "306": {
+          "total_rows": 43615,
+          "fraud_count": 12
+        },
+        "307": {
+          "total_rows": 46968,
+          "fraud_count": 16
+        },
+        "308": {
+          "total_rows": 36983,
+          "fraud_count": 6
+        },
+        "309": {
+          "total_rows": 15147,
+          "fraud_count": 8
+        },
+        "310": {
+          "total_rows": 11393,
+          "fraud_count": 10
+        },
+        "311": {
+          "total_rows": 9863,
+          "fraud_count": 16
+        },
+        "312": {
+          "total_rows": 3266,
+          "fraud_count": 10
+        },
+        "313": {
+          "total_rows": 1305,
+          "fraud_count": 10
+        },
+        "314": {
+          "total_rows": 512,
+          "fraud_count": 6
+        },
+        "315": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "316": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "317": {
+          "total_rows": 20,
+          "fraud_count": 20
+        },
+        "318": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "319": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "320": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "321": {
+          "total_rows": 17768,
+          "fraud_count": 8
+        },
+        "322": {
+          "total_rows": 27147,
+          "fraud_count": 16
+        },
+        "323": {
+          "total_rows": 29884,
+          "fraud_count": 10
+        },
+        "324": {
+          "total_rows": 29430,
+          "fraud_count": 10
+        },
+        "325": {
+          "total_rows": 27901,
+          "fraud_count": 10
+        },
+        "326": {
+          "total_rows": 26655,
+          "fraud_count": 14
+        },
+        "327": {
+          "total_rows": 25183,
+          "fraud_count": 10
+        },
+        "328": {
+          "total_rows": 26877,
+          "fraud_count": 18
+        },
+        "329": {
+          "total_rows": 32161,
+          "fraud_count": 6
+        },
+        "330": {
+          "total_rows": 36682,
+          "fraud_count": 10
+        },
+        "331": {
+          "total_rows": 40186,
+          "fraud_count": 6
+        },
+        "332": {
+          "total_rows": 36156,
+          "fraud_count": 6
+        },
+        "333": {
+          "total_rows": 14553,
+          "fraud_count": 8
+        },
+        "334": {
+          "total_rows": 12016,
+          "fraud_count": 4
+        },
+        "335": {
+          "total_rows": 10456,
+          "fraud_count": 4
+        },
+        "336": {
+          "total_rows": 2932,
+          "fraud_count": 18
+        },
+        "337": {
+          "total_rows": 320,
+          "fraud_count": 10
+        },
+        "338": {
+          "total_rows": 529,
+          "fraud_count": 4
+        },
+        "339": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "340": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "341": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "342": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "343": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "344": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "345": {
+          "total_rows": 14670,
+          "fraud_count": 12
+        },
+        "346": {
+          "total_rows": 26073,
+          "fraud_count": 6
+        },
+        "347": {
+          "total_rows": 30222,
+          "fraud_count": 0
+        },
+        "348": {
+          "total_rows": 29467,
+          "fraud_count": 8
+        },
+        "349": {
+          "total_rows": 29552,
+          "fraud_count": 18
+        },
+        "350": {
+          "total_rows": 28245,
+          "fraud_count": 14
+        },
+        "351": {
+          "total_rows": 26927,
+          "fraud_count": 18
+        },
+        "352": {
+          "total_rows": 27139,
+          "fraud_count": 16
+        },
+        "353": {
+          "total_rows": 30420,
+          "fraud_count": 8
+        },
+        "354": {
+          "total_rows": 40696,
+          "fraud_count": 12
+        },
+        "355": {
+          "total_rows": 44787,
+          "fraud_count": 8
+        },
+        "356": {
+          "total_rows": 33528,
+          "fraud_count": 6
+        },
+        "357": {
+          "total_rows": 15096,
+          "fraud_count": 18
+        },
+        "358": {
+          "total_rows": 12050,
+          "fraud_count": 10
+        },
+        "359": {
+          "total_rows": 7991,
+          "fraud_count": 12
+        },
+        "360": {
+          "total_rows": 3508,
+          "fraud_count": 8
+        },
+        "361": {
+          "total_rows": 1441,
+          "fraud_count": 14
+        },
+        "362": {
+          "total_rows": 504,
+          "fraud_count": 20
+        },
+        "363": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "364": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "365": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "366": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "367": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "368": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "369": {
+          "total_rows": 14490,
+          "fraud_count": 6
+        },
+        "370": {
+          "total_rows": 25429,
+          "fraud_count": 18
+        },
+        "371": {
+          "total_rows": 28388,
+          "fraud_count": 6
+        },
+        "372": {
+          "total_rows": 29515,
+          "fraud_count": 8
+        },
+        "373": {
+          "total_rows": 28853,
+          "fraud_count": 12
+        },
+        "374": {
+          "total_rows": 27727,
+          "fraud_count": 14
+        },
+        "375": {
+          "total_rows": 26103,
+          "fraud_count": 10
+        },
+        "376": {
+          "total_rows": 20122,
+          "fraud_count": 4
+        },
+        "377": {
+          "total_rows": 18183,
+          "fraud_count": 10
+        },
+        "378": {
+          "total_rows": 37127,
+          "fraud_count": 4
+        },
+        "379": {
+          "total_rows": 41759,
+          "fraud_count": 16
+        },
+        "380": {
+          "total_rows": 37693,
+          "fraud_count": 14
+        },
+        "381": {
+          "total_rows": 14961,
+          "fraud_count": 4
+        },
+        "382": {
+          "total_rows": 11829,
+          "fraud_count": 8
+        },
+        "383": {
+          "total_rows": 7818,
+          "fraud_count": 14
+        },
+        "384": {
+          "total_rows": 3588,
+          "fraud_count": 6
+        },
+        "385": {
+          "total_rows": 1419,
+          "fraud_count": 8
+        },
+        "386": {
+          "total_rows": 633,
+          "fraud_count": 16
+        },
+        "387": {
+          "total_rows": 28,
+          "fraud_count": 28
+        },
+        "388": {
+          "total_rows": 18,
+          "fraud_count": 18
+        },
+        "389": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "390": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "391": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "392": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "393": {
+          "total_rows": 19269,
+          "fraud_count": 4
+        },
+        "394": {
+          "total_rows": 28959,
+          "fraud_count": 10
+        },
+        "395": {
+          "total_rows": 22797,
+          "fraud_count": 8
+        },
+        "396": {
+          "total_rows": 34075,
+          "fraud_count": 8
+        },
+        "397": {
+          "total_rows": 30348,
+          "fraud_count": 10
+        },
+        "398": {
+          "total_rows": 26656,
+          "fraud_count": 26
+        },
+        "399": {
+          "total_rows": 30223,
+          "fraud_count": 12
+        },
+        "400": {
+          "total_rows": 30910,
+          "fraud_count": 16
+        },
+        "401": {
+          "total_rows": 33468,
+          "fraud_count": 16
+        },
+        "402": {
+          "total_rows": 40218,
+          "fraud_count": 12
+        },
+        "403": {
+          "total_rows": 45155,
+          "fraud_count": 16
+        },
+        "404": {
+          "total_rows": 36726,
+          "fraud_count": 18
+        },
+        "405": {
+          "total_rows": 16604,
+          "fraud_count": 10
+        },
+        "406": {
+          "total_rows": 12023,
+          "fraud_count": 24
+        },
+        "407": {
+          "total_rows": 7937,
+          "fraud_count": 6
+        },
+        "408": {
+          "total_rows": 8256,
+          "fraud_count": 10
+        },
+        "409": {
+          "total_rows": 483,
+          "fraud_count": 20
+        },
+        "410": {
+          "total_rows": 20,
+          "fraud_count": 20
+        },
+        "411": {
+          "total_rows": 16,
+          "fraud_count": 16
+        },
+        "412": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "413": {
+          "total_rows": 289,
+          "fraud_count": 14
+        },
+        "414": {
+          "total_rows": 16,
+          "fraud_count": 16
+        },
+        "415": {
+          "total_rows": 16,
+          "fraud_count": 16
+        },
+        "416": {
+          "total_rows": 2182,
+          "fraud_count": 8
+        },
+        "417": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "418": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "419": {
+          "total_rows": 1257,
+          "fraud_count": 10
+        },
+        "420": {
+          "total_rows": 2620,
+          "fraud_count": 12
+        },
+        "421": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "422": {
+          "total_rows": 1259,
+          "fraud_count": 10
+        },
+        "423": {
+          "total_rows": 766,
+          "fraud_count": 6
+        },
+        "424": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "425": {
+          "total_rows": 28,
+          "fraud_count": 28
+        },
+        "426": {
+          "total_rows": 5139,
+          "fraud_count": 2
+        },
+        "427": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "428": {
+          "total_rows": 2792,
+          "fraud_count": 6
+        },
+        "429": {
+          "total_rows": 2357,
+          "fraud_count": 4
+        },
+        "430": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "431": {
+          "total_rows": 1685,
+          "fraud_count": 6
+        },
+        "432": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "433": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "434": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "435": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "436": {
+          "total_rows": 248,
+          "fraud_count": 16
+        },
+        "437": {
+          "total_rows": 16,
+          "fraud_count": 16
+        },
+        "438": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "439": {
+          "total_rows": 883,
+          "fraud_count": 12
+        },
+        "440": {
+          "total_rows": 18,
+          "fraud_count": 18
+        },
+        "441": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "442": {
+          "total_rows": 1222,
+          "fraud_count": 12
+        },
+        "443": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "444": {
+          "total_rows": 20,
+          "fraud_count": 20
+        },
+        "445": {
+          "total_rows": 64,
+          "fraud_count": 6
+        },
+        "446": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "447": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "448": {
+          "total_rows": 2548,
+          "fraud_count": 6
+        },
+        "449": {
+          "total_rows": 1194,
+          "fraud_count": 6
+        },
+        "450": {
+          "total_rows": 16,
+          "fraud_count": 16
+        },
+        "451": {
+          "total_rows": 3751,
+          "fraud_count": 4
+        },
+        "452": {
+          "total_rows": 308,
+          "fraud_count": 10
+        },
+        "453": {
+          "total_rows": 59,
+          "fraud_count": 8
+        },
+        "454": {
+          "total_rows": 39,
+          "fraud_count": 6
+        },
+        "455": {
+          "total_rows": 824,
+          "fraud_count": 10
+        },
+        "456": {
+          "total_rows": 18,
+          "fraud_count": 18
+        },
+        "457": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "458": {
+          "total_rows": 438,
+          "fraud_count": 6
+        },
+        "459": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "460": {
+          "total_rows": 59,
+          "fraud_count": 16
+        },
+        "461": {
+          "total_rows": 83,
+          "fraud_count": 16
+        },
+        "462": {
+          "total_rows": 16,
+          "fraud_count": 16
+        },
+        "463": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "464": {
+          "total_rows": 16,
+          "fraud_count": 16
+        },
+        "465": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "466": {
+          "total_rows": 984,
+          "fraud_count": 6
+        },
+        "467": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "468": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "469": {
+          "total_rows": 6016,
+          "fraud_count": 8
+        },
+        "470": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "471": {
+          "total_rows": 2620,
+          "fraud_count": 2
+        },
+        "472": {
+          "total_rows": 84,
+          "fraud_count": 8
+        },
+        "473": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "474": {
+          "total_rows": 2728,
+          "fraud_count": 8
+        },
+        "475": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "476": {
+          "total_rows": 3755,
+          "fraud_count": 8
+        },
+        "477": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "478": {
+          "total_rows": 1908,
+          "fraud_count": 6
+        },
+        "479": {
+          "total_rows": 904,
+          "fraud_count": 4
+        },
+        "480": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "481": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "482": {
+          "total_rows": 16,
+          "fraud_count": 16
+        },
+        "483": {
+          "total_rows": 317,
+          "fraud_count": 8
+        },
+        "484": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "485": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "486": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "487": {
+          "total_rows": 912,
+          "fraud_count": 14
+        },
+        "488": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "489": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "490": {
+          "total_rows": 3820,
+          "fraud_count": 10
+        },
+        "491": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "492": {
+          "total_rows": 5119,
+          "fraud_count": 6
+        },
+        "493": {
+          "total_rows": 1819,
+          "fraud_count": 8
+        },
+        "494": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "495": {
+          "total_rows": 3256,
+          "fraud_count": 16
+        },
+        "496": {
+          "total_rows": 873,
+          "fraud_count": 6
+        },
+        "497": {
+          "total_rows": 20,
+          "fraud_count": 20
+        },
+        "498": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "499": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "500": {
+          "total_rows": 6108,
+          "fraud_count": 4
+        },
+        "501": {
+          "total_rows": 28,
+          "fraud_count": 28
+        },
+        "502": {
+          "total_rows": 313,
+          "fraud_count": 12
+        },
+        "503": {
+          "total_rows": 1878,
+          "fraud_count": 10
+        },
+        "504": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "505": {
+          "total_rows": 936,
+          "fraud_count": 8
+        },
+        "506": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "507": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "508": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "509": {
+          "total_rows": 288,
+          "fraud_count": 14
+        },
+        "510": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "511": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "512": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "513": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "514": {
+          "total_rows": 8733,
+          "fraud_count": 14
+        },
+        "515": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "516": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "517": {
+          "total_rows": 1391,
+          "fraud_count": 6
+        },
+        "518": {
+          "total_rows": 3488,
+          "fraud_count": 8
+        },
+        "519": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "520": {
+          "total_rows": 3037,
+          "fraud_count": 12
+        }
+      }
+    },
+    "validation": {
+      "step_range": [
+        521,
+        595
+      ],
+      "total_rows": 162467,
+      "fraud_count": 790,
+      "fraud_prevalence": 0.004863,
+      "per_type": {
+        "TRANSFER": {
+          "total_rows": 14771,
+          "fraud_count": 395,
+          "fraud_prevalence": 0.026742
+        },
+        "CASH_OUT": {
+          "total_rows": 53167,
+          "fraud_count": 395,
+          "fraud_prevalence": 0.007429
+        },
+        "PAYMENT": {
+          "total_rows": 56586,
+          "fraud_count": 0,
+          "fraud_prevalence": 0.0
+        },
+        "CASH_IN": {
+          "total_rows": 36591,
+          "fraud_count": 0,
+          "fraud_prevalence": 0.0
+        },
+        "DEBIT": {
+          "total_rows": 1352,
+          "fraud_count": 0,
+          "fraud_prevalence": 0.0
+        }
+      },
+      "per_step": {
+        "521": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "522": {
+          "total_rows": 18631,
+          "fraud_count": 14
+        },
+        "523": {
+          "total_rows": 30,
+          "fraud_count": 30
+        },
+        "524": {
+          "total_rows": 2664,
+          "fraud_count": 4
+        },
+        "525": {
+          "total_rows": 8023,
+          "fraud_count": 2
+        },
+        "526": {
+          "total_rows": 2470,
+          "fraud_count": 12
+        },
+        "527": {
+          "total_rows": 2697,
+          "fraud_count": 6
+        },
+        "528": {
+          "total_rows": 937,
+          "fraud_count": 14
+        },
+        "529": {
+          "total_rows": 33,
+          "fraud_count": 6
+        },
+        "530": {
+          "total_rows": 409,
+          "fraud_count": 8
+        },
+        "531": {
+          "total_rows": 250,
+          "fraud_count": 14
+        },
+        "532": {
+          "total_rows": 95,
+          "fraud_count": 6
+        },
+        "533": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "534": {
+          "total_rows": 531,
+          "fraud_count": 12
+        },
+        "535": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "536": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "537": {
+          "total_rows": 18,
+          "fraud_count": 18
+        },
+        "538": {
+          "total_rows": 3120,
+          "fraud_count": 10
+        },
+        "539": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "540": {
+          "total_rows": 5476,
+          "fraud_count": 6
+        },
+        "541": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "542": {
+          "total_rows": 4475,
+          "fraud_count": 10
+        },
+        "543": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "544": {
+          "total_rows": 9358,
+          "fraud_count": 6
+        },
+        "545": {
+          "total_rows": 3562,
+          "fraud_count": 0
+        },
+        "546": {
+          "total_rows": 7771,
+          "fraud_count": 10
+        },
+        "547": {
+          "total_rows": 2261,
+          "fraud_count": 8
+        },
+        "548": {
+          "total_rows": 5689,
+          "fraud_count": 2
+        },
+        "549": {
+          "total_rows": 642,
+          "fraud_count": 12
+        },
+        "550": {
+          "total_rows": 4804,
+          "fraud_count": 8
+        },
+        "551": {
+          "total_rows": 949,
+          "fraud_count": 18
+        },
+        "552": {
+          "total_rows": 1517,
+          "fraud_count": 10
+        },
+        "553": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "554": {
+          "total_rows": 18,
+          "fraud_count": 18
+        },
+        "555": {
+          "total_rows": 144,
+          "fraud_count": 6
+        },
+        "556": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "557": {
+          "total_rows": 20,
+          "fraud_count": 20
+        },
+        "558": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "559": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "560": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "561": {
+          "total_rows": 16,
+          "fraud_count": 16
+        },
+        "562": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "563": {
+          "total_rows": 3284,
+          "fraud_count": 18
+        },
+        "564": {
+          "total_rows": 3546,
+          "fraud_count": 16
+        },
+        "565": {
+          "total_rows": 5425,
+          "fraud_count": 12
+        },
+        "566": {
+          "total_rows": 1421,
+          "fraud_count": 6
+        },
+        "567": {
+          "total_rows": 4356,
+          "fraud_count": 10
+        },
+        "568": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "569": {
+          "total_rows": 1182,
+          "fraud_count": 14
+        },
+        "570": {
+          "total_rows": 1965,
+          "fraud_count": 10
+        },
+        "571": {
+          "total_rows": 4256,
+          "fraud_count": 10
+        },
+        "572": {
+          "total_rows": 18,
+          "fraud_count": 18
+        },
+        "573": {
+          "total_rows": 3487,
+          "fraud_count": 8
+        },
+        "574": {
+          "total_rows": 2614,
+          "fraud_count": 4
+        },
+        "575": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "576": {
+          "total_rows": 877,
+          "fraud_count": 14
+        },
+        "577": {
+          "total_rows": 364,
+          "fraud_count": 12
+        },
+        "578": {
+          "total_rows": 269,
+          "fraud_count": 20
+        },
+        "579": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "580": {
+          "total_rows": 58,
+          "fraud_count": 10
+        },
+        "581": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "582": {
+          "total_rows": 775,
+          "fraud_count": 16
+        },
+        "583": {
+          "total_rows": 16,
+          "fraud_count": 16
+        },
+        "584": {
+          "total_rows": 281,
+          "fraud_count": 8
+        },
+        "585": {
+          "total_rows": 2047,
+          "fraud_count": 6
+        },
+        "586": {
+          "total_rows": 1581,
+          "fraud_count": 12
+        },
+        "587": {
+          "total_rows": 2740,
+          "fraud_count": 6
+        },
+        "588": {
+          "total_rows": 4894,
+          "fraud_count": 12
+        },
+        "589": {
+          "total_rows": 6245,
+          "fraud_count": 2
+        },
+        "590": {
+          "total_rows": 6584,
+          "fraud_count": 8
+        },
+        "591": {
+          "total_rows": 57,
+          "fraud_count": 12
+        },
+        "592": {
+          "total_rows": 5373,
+          "fraud_count": 10
+        },
+        "593": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "594": {
+          "total_rows": 6536,
+          "fraud_count": 10
+        },
+        "595": {
+          "total_rows": 5434,
+          "fraud_count": 12
+        }
+      }
+    },
+    "test": {
+      "step_range": [
+        596,
+        743
+      ],
+      "total_rows": 118146,
+      "fraud_count": 1642,
+      "fraud_prevalence": 0.013898,
+      "per_type": {
+        "TRANSFER": {
+          "total_rows": 11546,
+          "fraud_count": 821,
+          "fraud_prevalence": 0.071107
+        },
+        "CASH_OUT": {
+          "total_rows": 37196,
+          "fraud_count": 821,
+          "fraud_prevalence": 0.022072
+        },
+        "PAYMENT": {
+          "total_rows": 41219,
+          "fraud_count": 0,
+          "fraud_prevalence": 0.0
+        },
+        "CASH_IN": {
+          "total_rows": 27243,
+          "fraud_count": 0,
+          "fraud_prevalence": 0.0
+        },
+        "DEBIT": {
+          "total_rows": 942,
+          "fraud_count": 0,
+          "fraud_prevalence": 0.0
+        }
+      },
+      "per_step": {
+        "596": {
+          "total_rows": 9319,
+          "fraud_count": 8
+        },
+        "597": {
+          "total_rows": 2486,
+          "fraud_count": 6
+        },
+        "598": {
+          "total_rows": 934,
+          "fraud_count": 4
+        },
+        "599": {
+          "total_rows": 1816,
+          "fraud_count": 6
+        },
+        "600": {
+          "total_rows": 18,
+          "fraud_count": 18
+        },
+        "601": {
+          "total_rows": 865,
+          "fraud_count": 10
+        },
+        "602": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "603": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "604": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "605": {
+          "total_rows": 16,
+          "fraud_count": 16
+        },
+        "606": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "607": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "608": {
+          "total_rows": 1082,
+          "fraud_count": 16
+        },
+        "609": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "610": {
+          "total_rows": 1199,
+          "fraud_count": 12
+        },
+        "611": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "612": {
+          "total_rows": 2677,
+          "fraud_count": 12
+        },
+        "613": {
+          "total_rows": 45,
+          "fraud_count": 20
+        },
+        "614": {
+          "total_rows": 1278,
+          "fraud_count": 16
+        },
+        "615": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "616": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "617": {
+          "total_rows": 2680,
+          "fraud_count": 16
+        },
+        "618": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "619": {
+          "total_rows": 2800,
+          "fraud_count": 14
+        },
+        "620": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "621": {
+          "total_rows": 1121,
+          "fraud_count": 18
+        },
+        "622": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "623": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "624": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "625": {
+          "total_rows": 24,
+          "fraud_count": 24
+        },
+        "626": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "627": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "628": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "629": {
+          "total_rows": 20,
+          "fraud_count": 20
+        },
+        "630": {
+          "total_rows": 150,
+          "fraud_count": 4
+        },
+        "631": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "632": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "633": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "634": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "635": {
+          "total_rows": 16,
+          "fraud_count": 16
+        },
+        "636": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "637": {
+          "total_rows": 3390,
+          "fraud_count": 12
+        },
+        "638": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "639": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "640": {
+          "total_rows": 1398,
+          "fraud_count": 14
+        },
+        "641": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "642": {
+          "total_rows": 1141,
+          "fraud_count": 8
+        },
+        "643": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "644": {
+          "total_rows": 2267,
+          "fraud_count": 10
+        },
+        "645": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "646": {
+          "total_rows": 20,
+          "fraud_count": 20
+        },
+        "647": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "648": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "649": {
+          "total_rows": 263,
+          "fraud_count": 10
+        },
+        "650": {
+          "total_rows": 16,
+          "fraud_count": 16
+        },
+        "651": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "652": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "653": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "654": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "655": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "656": {
+          "total_rows": 1965,
+          "fraud_count": 16
+        },
+        "657": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "658": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "659": {
+          "total_rows": 2500,
+          "fraud_count": 10
+        },
+        "660": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "661": {
+          "total_rows": 4877,
+          "fraud_count": 8
+        },
+        "662": {
+          "total_rows": 2,
+          "fraud_count": 2
+        },
+        "663": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "664": {
+          "total_rows": 1125,
+          "fraud_count": 20
+        },
+        "665": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "666": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "667": {
+          "total_rows": 1400,
+          "fraud_count": 6
+        },
+        "668": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "669": {
+          "total_rows": 322,
+          "fraud_count": 8
+        },
+        "670": {
+          "total_rows": 1906,
+          "fraud_count": 12
+        },
+        "671": {
+          "total_rows": 18,
+          "fraud_count": 18
+        },
+        "672": {
+          "total_rows": 153,
+          "fraud_count": 8
+        },
+        "673": {
+          "total_rows": 445,
+          "fraud_count": 12
+        },
+        "674": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "675": {
+          "total_rows": 30,
+          "fraud_count": 10
+        },
+        "676": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "677": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "678": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "679": {
+          "total_rows": 72,
+          "fraud_count": 6
+        },
+        "680": {
+          "total_rows": 22,
+          "fraud_count": 22
+        },
+        "681": {
+          "total_rows": 4703,
+          "fraud_count": 4
+        },
+        "682": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "683": {
+          "total_rows": 2192,
+          "fraud_count": 8
+        },
+        "684": {
+          "total_rows": 4562,
+          "fraud_count": 8
+        },
+        "685": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "686": {
+          "total_rows": 4689,
+          "fraud_count": 16
+        },
+        "687": {
+          "total_rows": 8040,
+          "fraud_count": 8
+        },
+        "688": {
+          "total_rows": 7885,
+          "fraud_count": 8
+        },
+        "689": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "690": {
+          "total_rows": 4972,
+          "fraud_count": 12
+        },
+        "691": {
+          "total_rows": 4809,
+          "fraud_count": 12
+        },
+        "692": {
+          "total_rows": 6898,
+          "fraud_count": 20
+        },
+        "693": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "694": {
+          "total_rows": 2664,
+          "fraud_count": 24
+        },
+        "695": {
+          "total_rows": 2827,
+          "fraud_count": 10
+        },
+        "696": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "697": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "698": {
+          "total_rows": 65,
+          "fraud_count": 16
+        },
+        "699": {
+          "total_rows": 55,
+          "fraud_count": 16
+        },
+        "700": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "701": {
+          "total_rows": 18,
+          "fraud_count": 18
+        },
+        "702": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "703": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "704": {
+          "total_rows": 16,
+          "fraud_count": 16
+        },
+        "705": {
+          "total_rows": 2362,
+          "fraud_count": 10
+        },
+        "706": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "707": {
+          "total_rows": 309,
+          "fraud_count": 10
+        },
+        "708": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "709": {
+          "total_rows": 2313,
+          "fraud_count": 8
+        },
+        "710": {
+          "total_rows": 1788,
+          "fraud_count": 14
+        },
+        "711": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "712": {
+          "total_rows": 23,
+          "fraud_count": 12
+        },
+        "713": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "714": {
+          "total_rows": 681,
+          "fraud_count": 14
+        },
+        "715": {
+          "total_rows": 1879,
+          "fraud_count": 10
+        },
+        "716": {
+          "total_rows": 140,
+          "fraud_count": 8
+        },
+        "717": {
+          "total_rows": 632,
+          "fraud_count": 12
+        },
+        "718": {
+          "total_rows": 918,
+          "fraud_count": 16
+        },
+        "719": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "720": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "721": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "722": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "723": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "724": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "725": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "726": {
+          "total_rows": 22,
+          "fraud_count": 22
+        },
+        "727": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "728": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "729": {
+          "total_rows": 4,
+          "fraud_count": 4
+        },
+        "730": {
+          "total_rows": 28,
+          "fraud_count": 28
+        },
+        "731": {
+          "total_rows": 16,
+          "fraud_count": 16
+        },
+        "732": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "733": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "734": {
+          "total_rows": 8,
+          "fraud_count": 8
+        },
+        "735": {
+          "total_rows": 12,
+          "fraud_count": 12
+        },
+        "736": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "737": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "738": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "739": {
+          "total_rows": 10,
+          "fraud_count": 10
+        },
+        "740": {
+          "total_rows": 6,
+          "fraud_count": 6
+        },
+        "741": {
+          "total_rows": 22,
+          "fraud_count": 22
+        },
+        "742": {
+          "total_rows": 14,
+          "fraud_count": 14
+        },
+        "743": {
+          "total_rows": 8,
+          "fraud_count": 8
+        }
+      }
+    },
+    "prevalence_drift_ratio_test_vs_train": 14.62
+  },
+  "balance_error_and_drain_statistics": {
+    "fraud_transactions": {
+      "count": 8213,
+      "balance_error_orig": {
+        "mean": -10692.33,
+        "std": 265129.99,
+        "median": 0.0,
+        "pct_zero_error_within_1e4": 0.9945
+      },
+      "balance_error_dest": {
+        "mean": 732509.3,
+        "std": 1867634.28,
+        "median": 2231.46
+      },
+      "origin_drain_backend_rule": {
+        "drained_count": 8012,
+        "drained_ratio": 0.9755,
+        "definition": "type in ['TRANSFER', 'CASH_OUT'] AND old_balance_orig > 0 AND new_balance_orig == 0 AND amount >= old_balance_orig * 0.95. When old_balance_orig == 0, drain is strictly False."
+      }
+    },
+    "legitimate_transactions": {
+      "count": 6354407,
+      "balance_error_orig": {
+        "mean": -201338.56,
+        "std": 606928.84,
+        "median": -69049.31,
+        "pct_zero_error_within_1e4": 0.1934
+      },
+      "balance_error_dest": {
+        "mean": 54692.23,
+        "std": 436002.6,
+        "median": 3500.68
+      },
+      "origin_drain_backend_rule": {
+        "drained_count": 1180062,
+        "drained_ratio": 0.1857,
+        "definition": "type in ['TRANSFER', 'CASH_OUT'] AND old_balance_orig > 0 AND new_balance_orig == 0 AND amount >= old_balance_orig * 0.95. When old_balance_orig == 0, drain is strictly False."
+      }
+    }
+  },
+  "rules_performance_train_val": {
+    "train": {
+      "ORIGIN_ACCOUNT_DRAINED": {
+        "flag_rate": 0.185857,
+        "recall": 0.978,
+        "precision": 0.005,
+        "f1": 0.01,
+        "pr_auc": 0.0049,
+        "fpr": 0.1851,
+        "true_positives": 5654,
+        "false_positives": 1124732,
+        "true_negatives": 4951494,
+        "false_negatives": 127,
+        "total_triggers": 1130386,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 506592,
+            "frauds": 2881,
+            "triggers": 217126,
+            "flag_rate": 0.428601,
+            "recall": 0.965637,
+            "precision": 0.012813,
+            "fpr": 0.42553,
+            "true_positives": 2782,
+            "false_positives": 214344
+          },
+          "CASH_OUT": {
+            "total_rows": 2147137,
+            "frauds": 2900,
+            "triggers": 913260,
+            "flag_rate": 0.425338,
+            "recall": 0.990345,
+            "precision": 0.003145,
+            "fpr": 0.424574,
+            "true_positives": 2872,
+            "false_positives": 910388
+          },
+          "PAYMENT": {
+            "total_rows": 2053690,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 1335450,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 39138,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "LARGE_TRANSFER_AMOUNT": {
+        "flag_rate": 0.188905,
+        "recall": 0.6665,
+        "precision": 0.0034,
+        "f1": 0.0067,
+        "pr_auc": 0.0026,
+        "fpr": 0.1885,
+        "true_positives": 3853,
+        "false_positives": 1145067,
+        "true_negatives": 4931159,
+        "false_negatives": 1928,
+        "total_triggers": 1148920,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 506592,
+            "frauds": 2881,
+            "triggers": 390215,
+            "flag_rate": 0.770275,
+            "recall": 0.668518,
+            "precision": 0.004936,
+            "fpr": 0.770857,
+            "true_positives": 1926,
+            "false_positives": 388289
+          },
+          "CASH_OUT": {
+            "total_rows": 2147137,
+            "frauds": 2900,
+            "triggers": 758705,
+            "flag_rate": 0.353357,
+            "recall": 0.664483,
+            "precision": 0.00254,
+            "fpr": 0.352936,
+            "true_positives": 1927,
+            "false_positives": 756778
+          },
+          "PAYMENT": {
+            "total_rows": 2053690,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 1335450,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 39138,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "DEST_BALANCE_INCONSISTENCY": {
+        "flag_rate": 0.090141,
+        "recall": 0.5686,
+        "precision": 0.006,
+        "f1": 0.0119,
+        "pr_auc": 0.0038,
+        "fpr": 0.0897,
+        "true_positives": 3287,
+        "false_positives": 544949,
+        "true_negatives": 5531277,
+        "false_negatives": 2494,
+        "total_triggers": 548236,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 506592,
+            "frauds": 2881,
+            "triggers": 115039,
+            "flag_rate": 0.227084,
+            "recall": 0.999306,
+            "precision": 0.025026,
+            "fpr": 0.222667,
+            "true_positives": 2879,
+            "false_positives": 112160
+          },
+          "CASH_OUT": {
+            "total_rows": 2147137,
+            "frauds": 2900,
+            "triggers": 433197,
+            "flag_rate": 0.201756,
+            "recall": 0.14069,
+            "precision": 0.000942,
+            "fpr": 0.201838,
+            "true_positives": 408,
+            "false_positives": 432789
+          },
+          "PAYMENT": {
+            "total_rows": 2053690,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 1335450,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 39138,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "VERY_HIGH_AMOUNT_FOR_TYPE": {
+        "flag_rate": 0.110344,
+        "recall": 0.5298,
+        "precision": 0.0046,
+        "f1": 0.0091,
+        "pr_auc": 0.0029,
+        "fpr": 0.1099,
+        "true_positives": 3063,
+        "false_positives": 668053,
+        "true_negatives": 5408173,
+        "false_negatives": 2718,
+        "total_triggers": 671116,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 506592,
+            "frauds": 2881,
+            "triggers": 250163,
+            "flag_rate": 0.493816,
+            "recall": 0.477612,
+            "precision": 0.0055,
+            "fpr": 0.493908,
+            "true_positives": 1376,
+            "false_positives": 248787
+          },
+          "CASH_OUT": {
+            "total_rows": 2147137,
+            "frauds": 2900,
+            "triggers": 350601,
+            "flag_rate": 0.163288,
+            "recall": 0.581724,
+            "precision": 0.004812,
+            "fpr": 0.162722,
+            "true_positives": 1687,
+            "false_positives": 348914
+          },
+          "PAYMENT": {
+            "total_rows": 2053690,
+            "frauds": 0,
+            "triggers": 41759,
+            "flag_rate": 0.020334,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.020334,
+            "true_positives": 0,
+            "false_positives": 41759
+          },
+          "CASH_IN": {
+            "total_rows": 1335450,
+            "frauds": 0,
+            "triggers": 24915,
+            "flag_rate": 0.018657,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.018657,
+            "true_positives": 0,
+            "false_positives": 24915
+          },
+          "DEBIT": {
+            "total_rows": 39138,
+            "frauds": 0,
+            "triggers": 3678,
+            "flag_rate": 0.093975,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.093975,
+            "true_positives": 0,
+            "false_positives": 3678
+          }
+        }
+      },
+      "union_drain_or_amount": {
+        "flag_rate": 0.279486,
+        "recall": 0.9971,
+        "precision": 0.0034,
+        "f1": 0.0068,
+        "pr_auc": 0.0034,
+        "fpr": 0.2788,
+        "true_positives": 5764,
+        "false_positives": 1694072,
+        "true_negatives": 4382154,
+        "false_negatives": 17,
+        "total_triggers": 1699836,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 506592,
+            "frauds": 2881,
+            "triggers": 426537,
+            "flag_rate": 0.841973,
+            "recall": 1.0,
+            "precision": 0.006754,
+            "fpr": 0.84107,
+            "true_positives": 2881,
+            "false_positives": 423656
+          },
+          "CASH_OUT": {
+            "total_rows": 2147137,
+            "frauds": 2900,
+            "triggers": 1273299,
+            "flag_rate": 0.593022,
+            "recall": 0.994138,
+            "precision": 0.002264,
+            "fpr": 0.592479,
+            "true_positives": 2883,
+            "false_positives": 1270416
+          },
+          "PAYMENT": {
+            "total_rows": 2053690,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 1335450,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 39138,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "union_all_rules": {
+        "flag_rate": 0.3231,
+        "recall": 0.9979,
+        "precision": 0.0029,
+        "f1": 0.0059,
+        "pr_auc": 0.0029,
+        "fpr": 0.3225,
+        "true_positives": 5769,
+        "false_positives": 1959329,
+        "true_negatives": 4116897,
+        "false_negatives": 12,
+        "total_triggers": 1965098,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 506592,
+            "frauds": 2881,
+            "triggers": 442940,
+            "flag_rate": 0.874353,
+            "recall": 1.0,
+            "precision": 0.006504,
+            "fpr": 0.873634,
+            "true_positives": 2881,
+            "false_positives": 440059
+          },
+          "CASH_OUT": {
+            "total_rows": 2147137,
+            "frauds": 2900,
+            "triggers": 1451806,
+            "flag_rate": 0.676159,
+            "recall": 0.995862,
+            "precision": 0.001989,
+            "fpr": 0.675727,
+            "true_positives": 2888,
+            "false_positives": 1448918
+          },
+          "PAYMENT": {
+            "total_rows": 2053690,
+            "frauds": 0,
+            "triggers": 41759,
+            "flag_rate": 0.020334,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.020334,
+            "true_positives": 0,
+            "false_positives": 41759
+          },
+          "CASH_IN": {
+            "total_rows": 1335450,
+            "frauds": 0,
+            "triggers": 24915,
+            "flag_rate": 0.018657,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.018657,
+            "true_positives": 0,
+            "false_positives": 24915
+          },
+          "DEBIT": {
+            "total_rows": 39138,
+            "frauds": 0,
+            "triggers": 3678,
+            "flag_rate": 0.093975,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.093975,
+            "true_positives": 0,
+            "false_positives": 3678
+          }
+        }
+      },
+      "drain_ge_95pct_alone": {
+        "flag_rate": 0.185857,
+        "recall": 0.978,
+        "precision": 0.005,
+        "f1": 0.01,
+        "pr_auc": 0.0049,
+        "fpr": 0.1851,
+        "true_positives": 5654,
+        "false_positives": 1124732,
+        "true_negatives": 4951494,
+        "false_negatives": 127,
+        "total_triggers": 1130386,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 506592,
+            "frauds": 2881,
+            "triggers": 217126,
+            "flag_rate": 0.428601,
+            "recall": 0.965637,
+            "precision": 0.012813,
+            "fpr": 0.42553,
+            "true_positives": 2782,
+            "false_positives": 214344
+          },
+          "CASH_OUT": {
+            "total_rows": 2147137,
+            "frauds": 2900,
+            "triggers": 913260,
+            "flag_rate": 0.425338,
+            "recall": 0.990345,
+            "precision": 0.003145,
+            "fpr": 0.424574,
+            "true_positives": 2872,
+            "false_positives": 910388
+          },
+          "PAYMENT": {
+            "total_rows": 2053690,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 1335450,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 39138,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "amount_gt_200k_alone": {
+        "flag_rate": 0.188905,
+        "recall": 0.6665,
+        "precision": 0.0034,
+        "f1": 0.0067,
+        "pr_auc": 0.0026,
+        "fpr": 0.1885,
+        "true_positives": 3853,
+        "false_positives": 1145067,
+        "true_negatives": 4931159,
+        "false_negatives": 1928,
+        "total_triggers": 1148920,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 506592,
+            "frauds": 2881,
+            "triggers": 390215,
+            "flag_rate": 0.770275,
+            "recall": 0.668518,
+            "precision": 0.004936,
+            "fpr": 0.770857,
+            "true_positives": 1926,
+            "false_positives": 388289
+          },
+          "CASH_OUT": {
+            "total_rows": 2147137,
+            "frauds": 2900,
+            "triggers": 758705,
+            "flag_rate": 0.353357,
+            "recall": 0.664483,
+            "precision": 0.00254,
+            "fpr": 0.352936,
+            "true_positives": 1927,
+            "false_positives": 756778
+          },
+          "PAYMENT": {
+            "total_rows": 2053690,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 1335450,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 39138,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      }
+    },
+    "validation": {
+      "ORIGIN_ACCOUNT_DRAINED": {
+        "flag_rate": 0.198976,
+        "recall": 0.9848,
+        "precision": 0.0241,
+        "f1": 0.047,
+        "pr_auc": 0.0238,
+        "fpr": 0.1951,
+        "true_positives": 778,
+        "false_positives": 31549,
+        "true_negatives": 130128,
+        "false_negatives": 12,
+        "total_triggers": 32327,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 14771,
+            "frauds": 395,
+            "triggers": 6170,
+            "flag_rate": 0.41771,
+            "recall": 0.974684,
+            "precision": 0.062399,
+            "fpr": 0.402407,
+            "true_positives": 385,
+            "false_positives": 5785
+          },
+          "CASH_OUT": {
+            "total_rows": 53167,
+            "frauds": 395,
+            "triggers": 26157,
+            "flag_rate": 0.491978,
+            "recall": 0.994937,
+            "precision": 0.015025,
+            "fpr": 0.488213,
+            "true_positives": 393,
+            "false_positives": 25764
+          },
+          "PAYMENT": {
+            "total_rows": 56586,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 36591,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 1352,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "LARGE_TRANSFER_AMOUNT": {
+        "flag_rate": 0.172823,
+        "recall": 0.6532,
+        "precision": 0.0184,
+        "f1": 0.0357,
+        "pr_auc": 0.0137,
+        "fpr": 0.1705,
+        "true_positives": 516,
+        "false_positives": 27562,
+        "true_negatives": 134115,
+        "false_negatives": 274,
+        "total_triggers": 28078,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 14771,
+            "frauds": 395,
+            "triggers": 10809,
+            "flag_rate": 0.731772,
+            "recall": 0.655696,
+            "precision": 0.023962,
+            "fpr": 0.733862,
+            "true_positives": 259,
+            "false_positives": 10550
+          },
+          "CASH_OUT": {
+            "total_rows": 53167,
+            "frauds": 395,
+            "triggers": 17269,
+            "flag_rate": 0.324807,
+            "recall": 0.650633,
+            "precision": 0.014882,
+            "fpr": 0.322368,
+            "true_positives": 257,
+            "false_positives": 17012
+          },
+          "PAYMENT": {
+            "total_rows": 56586,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 36591,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 1352,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "DEST_BALANCE_INCONSISTENCY": {
+        "flag_rate": 0.051278,
+        "recall": 0.557,
+        "precision": 0.0528,
+        "f1": 0.0965,
+        "pr_auc": 0.0316,
+        "fpr": 0.0488,
+        "true_positives": 440,
+        "false_positives": 7891,
+        "true_negatives": 153786,
+        "false_negatives": 350,
+        "total_triggers": 8331,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 14771,
+            "frauds": 395,
+            "triggers": 2237,
+            "flag_rate": 0.151445,
+            "recall": 1.0,
+            "precision": 0.176576,
+            "fpr": 0.12813,
+            "true_positives": 395,
+            "false_positives": 1842
+          },
+          "CASH_OUT": {
+            "total_rows": 53167,
+            "frauds": 395,
+            "triggers": 6094,
+            "flag_rate": 0.11462,
+            "recall": 0.113924,
+            "precision": 0.007384,
+            "fpr": 0.114625,
+            "true_positives": 45,
+            "false_positives": 6049
+          },
+          "PAYMENT": {
+            "total_rows": 56586,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 36591,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 1352,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "VERY_HIGH_AMOUNT_FOR_TYPE": {
+        "flag_rate": 0.097269,
+        "recall": 0.5139,
+        "precision": 0.0257,
+        "f1": 0.0489,
+        "pr_auc": 0.0156,
+        "fpr": 0.0952,
+        "true_positives": 406,
+        "false_positives": 15397,
+        "true_negatives": 146280,
+        "false_negatives": 384,
+        "total_triggers": 15803,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 14771,
+            "frauds": 395,
+            "triggers": 6394,
+            "flag_rate": 0.432875,
+            "recall": 0.458228,
+            "precision": 0.028308,
+            "fpr": 0.432179,
+            "true_positives": 181,
+            "false_positives": 6213
+          },
+          "CASH_OUT": {
+            "total_rows": 53167,
+            "frauds": 395,
+            "triggers": 7209,
+            "flag_rate": 0.135592,
+            "recall": 0.56962,
+            "precision": 0.031211,
+            "fpr": 0.132343,
+            "true_positives": 225,
+            "false_positives": 6984
+          },
+          "PAYMENT": {
+            "total_rows": 56586,
+            "frauds": 0,
+            "triggers": 1485,
+            "flag_rate": 0.026243,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.026243,
+            "true_positives": 0,
+            "false_positives": 1485
+          },
+          "CASH_IN": {
+            "total_rows": 36591,
+            "frauds": 0,
+            "triggers": 640,
+            "flag_rate": 0.017491,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.017491,
+            "true_positives": 0,
+            "false_positives": 640
+          },
+          "DEBIT": {
+            "total_rows": 1352,
+            "frauds": 0,
+            "triggers": 75,
+            "flag_rate": 0.055473,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.055473,
+            "true_positives": 0,
+            "false_positives": 75
+          }
+        }
+      },
+      "union_drain_or_amount": {
+        "flag_rate": 0.278641,
+        "recall": 0.9975,
+        "precision": 0.0174,
+        "f1": 0.0342,
+        "pr_auc": 0.0174,
+        "fpr": 0.2751,
+        "true_positives": 788,
+        "false_positives": 44482,
+        "true_negatives": 117195,
+        "false_negatives": 2,
+        "total_triggers": 45270,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 14771,
+            "frauds": 395,
+            "triggers": 12041,
+            "flag_rate": 0.815178,
+            "recall": 1.0,
+            "precision": 0.032805,
+            "fpr": 0.8101,
+            "true_positives": 395,
+            "false_positives": 11646
+          },
+          "CASH_OUT": {
+            "total_rows": 53167,
+            "frauds": 395,
+            "triggers": 33229,
+            "flag_rate": 0.624993,
+            "recall": 0.994937,
+            "precision": 0.011827,
+            "fpr": 0.622224,
+            "true_positives": 393,
+            "false_positives": 32836
+          },
+          "PAYMENT": {
+            "total_rows": 56586,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 36591,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 1352,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "union_all_rules": {
+        "flag_rate": 0.308924,
+        "recall": 0.9975,
+        "precision": 0.0157,
+        "f1": 0.0309,
+        "pr_auc": 0.0157,
+        "fpr": 0.3056,
+        "true_positives": 788,
+        "false_positives": 49402,
+        "true_negatives": 112275,
+        "false_negatives": 2,
+        "total_triggers": 50190,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 14771,
+            "frauds": 395,
+            "triggers": 12384,
+            "flag_rate": 0.8384,
+            "recall": 1.0,
+            "precision": 0.031896,
+            "fpr": 0.833959,
+            "true_positives": 395,
+            "false_positives": 11989
+          },
+          "CASH_OUT": {
+            "total_rows": 53167,
+            "frauds": 395,
+            "triggers": 35606,
+            "flag_rate": 0.669701,
+            "recall": 0.994937,
+            "precision": 0.011037,
+            "fpr": 0.667267,
+            "true_positives": 393,
+            "false_positives": 35213
+          },
+          "PAYMENT": {
+            "total_rows": 56586,
+            "frauds": 0,
+            "triggers": 1485,
+            "flag_rate": 0.026243,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.026243,
+            "true_positives": 0,
+            "false_positives": 1485
+          },
+          "CASH_IN": {
+            "total_rows": 36591,
+            "frauds": 0,
+            "triggers": 640,
+            "flag_rate": 0.017491,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.017491,
+            "true_positives": 0,
+            "false_positives": 640
+          },
+          "DEBIT": {
+            "total_rows": 1352,
+            "frauds": 0,
+            "triggers": 75,
+            "flag_rate": 0.055473,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.055473,
+            "true_positives": 0,
+            "false_positives": 75
+          }
+        }
+      },
+      "drain_ge_95pct_alone": {
+        "flag_rate": 0.198976,
+        "recall": 0.9848,
+        "precision": 0.0241,
+        "f1": 0.047,
+        "pr_auc": 0.0238,
+        "fpr": 0.1951,
+        "true_positives": 778,
+        "false_positives": 31549,
+        "true_negatives": 130128,
+        "false_negatives": 12,
+        "total_triggers": 32327,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 14771,
+            "frauds": 395,
+            "triggers": 6170,
+            "flag_rate": 0.41771,
+            "recall": 0.974684,
+            "precision": 0.062399,
+            "fpr": 0.402407,
+            "true_positives": 385,
+            "false_positives": 5785
+          },
+          "CASH_OUT": {
+            "total_rows": 53167,
+            "frauds": 395,
+            "triggers": 26157,
+            "flag_rate": 0.491978,
+            "recall": 0.994937,
+            "precision": 0.015025,
+            "fpr": 0.488213,
+            "true_positives": 393,
+            "false_positives": 25764
+          },
+          "PAYMENT": {
+            "total_rows": 56586,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 36591,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 1352,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      },
+      "amount_gt_200k_alone": {
+        "flag_rate": 0.172823,
+        "recall": 0.6532,
+        "precision": 0.0184,
+        "f1": 0.0357,
+        "pr_auc": 0.0137,
+        "fpr": 0.1705,
+        "true_positives": 516,
+        "false_positives": 27562,
+        "true_negatives": 134115,
+        "false_negatives": 274,
+        "total_triggers": 28078,
+        "by_type": {
+          "TRANSFER": {
+            "total_rows": 14771,
+            "frauds": 395,
+            "triggers": 10809,
+            "flag_rate": 0.731772,
+            "recall": 0.655696,
+            "precision": 0.023962,
+            "fpr": 0.733862,
+            "true_positives": 259,
+            "false_positives": 10550
+          },
+          "CASH_OUT": {
+            "total_rows": 53167,
+            "frauds": 395,
+            "triggers": 17269,
+            "flag_rate": 0.324807,
+            "recall": 0.650633,
+            "precision": 0.014882,
+            "fpr": 0.322368,
+            "true_positives": 257,
+            "false_positives": 17012
+          },
+          "PAYMENT": {
+            "total_rows": 56586,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "CASH_IN": {
+            "total_rows": 36591,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          },
+          "DEBIT": {
+            "total_rows": 1352,
+            "frauds": 0,
+            "triggers": 0,
+            "flag_rate": 0.0,
+            "recall": 0.0,
+            "precision": 0.0,
+            "fpr": 0.0,
+            "true_positives": 0,
+            "false_positives": 0
+          }
+        }
+      }
+    }
+  },
+  "single_feature_pr_auc": {
+    "train": {
+      "amount": {
+        "pr_auc": 0.0137,
+        "direction": "+"
+      },
+      "old_balance_orig": {
+        "pr_auc": 0.0032,
+        "direction": "+"
+      },
+      "new_balance_orig": {
+        "pr_auc": 0.0016,
+        "direction": "-"
+      },
+      "old_balance_dest": {
+        "pr_auc": 0.0014,
+        "direction": "-"
+      },
+      "new_balance_dest": {
+        "pr_auc": 0.0011,
+        "direction": "-"
+      },
+      "balance_error_orig": {
+        "pr_auc": 0.0052,
+        "direction": "+"
+      },
+      "balance_error_dest": {
+        "pr_auc": 0.117,
+        "direction": "+"
+      },
+      "balance_delta_orig": {
+        "pr_auc": 0.4586,
+        "direction": "-"
+      },
+      "balance_delta_dest": {
+        "pr_auc": 0.0037,
+        "direction": "+"
+      },
+      "hour_of_day": {
+        "pr_auc": 0.005,
+        "direction": "-"
+      },
+      "type_TRANSFER": {
+        "pr_auc": 0.0033,
+        "direction": "+"
+      },
+      "type_CASH_OUT": {
+        "pr_auc": 0.0012,
+        "direction": "+"
+      },
+      "type_PAYMENT": {
+        "pr_auc": 0.001,
+        "direction": "+"
+      },
+      "type_CASH_IN": {
+        "pr_auc": 0.001,
+        "direction": "+"
+      },
+      "type_DEBIT": {
+        "pr_auc": 0.001,
+        "direction": "+"
+      }
+    },
+    "validation": {
+      "amount": {
+        "pr_auc": 0.0774,
+        "direction": "+"
+      },
+      "old_balance_orig": {
+        "pr_auc": 0.0144,
+        "direction": "+"
+      },
+      "new_balance_orig": {
+        "pr_auc": 0.0087,
+        "direction": "-"
+      },
+      "old_balance_dest": {
+        "pr_auc": 0.0066,
+        "direction": "-"
+      },
+      "new_balance_dest": {
+        "pr_auc": 0.0056,
+        "direction": "-"
+      },
+      "balance_error_orig": {
+        "pr_auc": 0.0242,
+        "direction": "+"
+      },
+      "balance_error_dest": {
+        "pr_auc": 0.141,
+        "direction": "+"
+      },
+      "balance_delta_orig": {
+        "pr_auc": 0.5804,
+        "direction": "-"
+      },
+      "balance_delta_dest": {
+        "pr_auc": 0.0261,
+        "direction": "+"
+      },
+      "hour_of_day": {
+        "pr_auc": 0.0197,
+        "direction": "-"
+      },
+      "type_TRANSFER": {
+        "pr_auc": 0.0158,
+        "direction": "+"
+      },
+      "type_CASH_OUT": {
+        "pr_auc": 0.0061,
+        "direction": "+"
+      },
+      "type_PAYMENT": {
+        "pr_auc": 0.0049,
+        "direction": "+"
+      },
+      "type_CASH_IN": {
+        "pr_auc": 0.0049,
+        "direction": "+"
+      },
+      "type_DEBIT": {
+        "pr_auc": 0.0049,
+        "direction": "+"
+      }
+    },
+    "sign_direction_methodology": "Evaluated strictly on TRAIN and VALIDATION (test numbers excluded). Direction sign ('+' / '-') indicates whether larger (+) or smaller (-) values correlate with fraud risk: pr_pos = PR-AUC(+x), pr_neg = PR-AUC(-x). Reported pr_auc = max(pr_pos, pr_neg)."
+  }
+}

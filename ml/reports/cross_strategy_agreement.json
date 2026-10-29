@@ -1,0 +1,983 @@
+{
+  "metadata": {
+    "evaluation_step": "Step 4 Cross-Strategy Explanation Agreement",
+    "k": 5,
+    "n_replicate_sets": 10,
+    "student_t_df": 9,
+    "student_t_critical_value": 2.262157,
+    "pre_specified_decision_rule": "Cross-strategy agreement is concluded to differ from retraining noise IF AND ONLY IF the 95% interval of between-strategy overlap lies strictly below the within-strategy retraining noise interval on the same rows."
+  },
+  "step0c_candidate_cohort": {
+    "cohort_name": "step0c_candidate_cohort",
+    "n_samples": 1699,
+    "k": 5,
+    "chance_baseline": 0.4545,
+    "within_strategy_retraining_noise": {
+      "by_strategy": {
+        "class_weight": {
+          "n_sets": 10,
+          "n_pairs": 45,
+          "mean_pairwise_overlap": 0.8643,
+          "sd_pairwise_overlap": 0.0162,
+          "bootstrap_sets_95ci": [
+            0.8518,
+            0.8759
+          ],
+          "mean_set_vs_set1_overlap": 0.863,
+          "sd_set_vs_set1_overlap": 0.017,
+          "student_t_95ci_vs_set1": [
+            0.8499,
+            0.8761
+          ]
+        },
+        "none": {
+          "n_sets": 10,
+          "n_pairs": 45,
+          "mean_pairwise_overlap": 0.8417,
+          "sd_pairwise_overlap": 0.0287,
+          "bootstrap_sets_95ci": [
+            0.8254,
+            0.8632
+          ],
+          "mean_set_vs_set1_overlap": 0.8395,
+          "sd_set_vs_set1_overlap": 0.0145,
+          "student_t_95ci_vs_set1": [
+            0.8284,
+            0.8506
+          ]
+        },
+        "smote_enn": {
+          "n_sets": 10,
+          "n_pairs": 45,
+          "mean_pairwise_overlap": 0.8635,
+          "sd_pairwise_overlap": 0.0217,
+          "bootstrap_sets_95ci": [
+            0.8502,
+            0.8764
+          ],
+          "mean_set_vs_set1_overlap": 0.8415,
+          "sd_set_vs_set1_overlap": 0.0194,
+          "student_t_95ci_vs_set1": [
+            0.8266,
+            0.8565
+          ]
+        }
+      },
+      "combined_retraining_noise_interval": [
+        0.8254,
+        0.8764
+      ],
+      "lowest_within_strategy_ci_lower_bound": 0.8254
+    },
+    "pairwise_between_strategy_agreement": {
+      "class_weight_vs_none": {
+        "strategy_1": "class_weight",
+        "strategy_2": "none",
+        "matched_10_sets_mean_overlap": 0.8389,
+        "matched_10_sets_sd": 0.0248,
+        "matched_10_sets_student_t_95ci": [
+          0.8211,
+          0.8566
+        ],
+        "set1_mean_overlap": 0.8281,
+        "set1_row_bootstrap_95ci": [
+          0.8219,
+          0.8346
+        ],
+        "per_set_mean_overlaps": [
+          0.8281,
+          0.806,
+          0.8373,
+          0.8463,
+          0.8423,
+          0.8053,
+          0.826,
+          0.8487,
+          0.8603,
+          0.8883
+        ],
+        "noise_lower_bound_strategy_1": 0.8518,
+        "noise_lower_bound_strategy_2": 0.8254,
+        "strictly_below_s1_noise": false,
+        "strictly_below_s2_noise": false,
+        "meets_prespecified_rule": false,
+        "verdict": "Fails pre-specified rule (overlaps retraining noise)"
+      },
+      "class_weight_vs_smote_enn": {
+        "strategy_1": "class_weight",
+        "strategy_2": "smote_enn",
+        "matched_10_sets_mean_overlap": 0.8477,
+        "matched_10_sets_sd": 0.0276,
+        "matched_10_sets_student_t_95ci": [
+          0.8279,
+          0.8675
+        ],
+        "set1_mean_overlap": 0.7927,
+        "set1_row_bootstrap_95ci": [
+          0.7868,
+          0.7987
+        ],
+        "per_set_mean_overlaps": [
+          0.7927,
+          0.8065,
+          0.8664,
+          0.834,
+          0.8616,
+          0.8644,
+          0.8686,
+          0.8625,
+          0.8696,
+          0.8506
+        ],
+        "noise_lower_bound_strategy_1": 0.8518,
+        "noise_lower_bound_strategy_2": 0.8502,
+        "strictly_below_s1_noise": false,
+        "strictly_below_s2_noise": false,
+        "meets_prespecified_rule": false,
+        "verdict": "Fails pre-specified rule (overlaps retraining noise)"
+      },
+      "none_vs_smote_enn": {
+        "strategy_1": "none",
+        "strategy_2": "smote_enn",
+        "matched_10_sets_mean_overlap": 0.8114,
+        "matched_10_sets_sd": 0.0167,
+        "matched_10_sets_student_t_95ci": [
+          0.7995,
+          0.8233
+        ],
+        "set1_mean_overlap": 0.8018,
+        "set1_row_bootstrap_95ci": [
+          0.7965,
+          0.8075
+        ],
+        "per_set_mean_overlaps": [
+          0.8018,
+          0.8025,
+          0.8247,
+          0.8095,
+          0.8075,
+          0.7806,
+          0.8108,
+          0.8074,
+          0.8278,
+          0.8414
+        ],
+        "noise_lower_bound_strategy_1": 0.8254,
+        "noise_lower_bound_strategy_2": 0.8502,
+        "strictly_below_s1_noise": true,
+        "strictly_below_s2_noise": true,
+        "meets_prespecified_rule": true,
+        "verdict": "Meets pre-specified rule (shift beyond retraining noise)"
+      }
+    },
+    "feature_swap_diagnostics": {
+      "class_weight_vs_none": [
+        {
+          "swap": "old_balance_dest -> new_balance_orig",
+          "frequency": 199,
+          "pct_of_cohort": 11.71
+        },
+        {
+          "swap": "old_balance_dest -> type_CASH_OUT",
+          "frequency": 198,
+          "pct_of_cohort": 11.65
+        },
+        {
+          "swap": "amount -> new_balance_orig",
+          "frequency": 187,
+          "pct_of_cohort": 11.01
+        },
+        {
+          "swap": "old_balance_dest -> type_TRANSFER",
+          "frequency": 163,
+          "pct_of_cohort": 9.59
+        },
+        {
+          "swap": "amount -> type_TRANSFER",
+          "frequency": 141,
+          "pct_of_cohort": 8.3
+        },
+        {
+          "swap": "amount -> type_CASH_OUT",
+          "frequency": 98,
+          "pct_of_cohort": 5.77
+        },
+        {
+          "swap": "old_balance_dest -> new_balance_dest",
+          "frequency": 87,
+          "pct_of_cohort": 5.12
+        },
+        {
+          "swap": "new_balance_dest -> type_CASH_OUT",
+          "frequency": 77,
+          "pct_of_cohort": 4.53
+        },
+        {
+          "swap": "hour_of_day -> type_CASH_OUT",
+          "frequency": 69,
+          "pct_of_cohort": 4.06
+        },
+        {
+          "swap": "type_CASH_OUT -> type_TRANSFER",
+          "frequency": 62,
+          "pct_of_cohort": 3.65
+        }
+      ],
+      "class_weight_vs_smote_enn": [
+        {
+          "swap": "old_balance_dest -> type_CASH_OUT",
+          "frequency": 285,
+          "pct_of_cohort": 16.77
+        },
+        {
+          "swap": "old_balance_dest -> type_TRANSFER",
+          "frequency": 243,
+          "pct_of_cohort": 14.3
+        },
+        {
+          "swap": "new_balance_orig -> type_CASH_OUT",
+          "frequency": 216,
+          "pct_of_cohort": 12.71
+        },
+        {
+          "swap": "amount -> type_CASH_OUT",
+          "frequency": 174,
+          "pct_of_cohort": 10.24
+        },
+        {
+          "swap": "new_balance_orig -> type_TRANSFER",
+          "frequency": 165,
+          "pct_of_cohort": 9.71
+        },
+        {
+          "swap": "amount -> type_TRANSFER",
+          "frequency": 129,
+          "pct_of_cohort": 7.59
+        },
+        {
+          "swap": "hour_of_day -> type_CASH_OUT",
+          "frequency": 123,
+          "pct_of_cohort": 7.24
+        },
+        {
+          "swap": "hour_of_day -> type_TRANSFER",
+          "frequency": 98,
+          "pct_of_cohort": 5.77
+        },
+        {
+          "swap": "new_balance_dest -> type_CASH_OUT",
+          "frequency": 91,
+          "pct_of_cohort": 5.36
+        },
+        {
+          "swap": "amount -> new_balance_dest",
+          "frequency": 85,
+          "pct_of_cohort": 5.0
+        }
+      ],
+      "none_vs_smote_enn": [
+        {
+          "swap": "new_balance_orig -> type_CASH_OUT",
+          "frequency": 283,
+          "pct_of_cohort": 16.66
+        },
+        {
+          "swap": "new_balance_orig -> type_TRANSFER",
+          "frequency": 210,
+          "pct_of_cohort": 12.36
+        },
+        {
+          "swap": "new_balance_orig -> amount",
+          "frequency": 134,
+          "pct_of_cohort": 7.89
+        },
+        {
+          "swap": "amount -> type_CASH_OUT",
+          "frequency": 128,
+          "pct_of_cohort": 7.53
+        },
+        {
+          "swap": "old_balance_dest -> type_CASH_OUT",
+          "frequency": 109,
+          "pct_of_cohort": 6.42
+        },
+        {
+          "swap": "new_balance_dest -> hour_of_day",
+          "frequency": 90,
+          "pct_of_cohort": 5.3
+        },
+        {
+          "swap": "hour_of_day -> type_CASH_OUT",
+          "frequency": 89,
+          "pct_of_cohort": 5.24
+        },
+        {
+          "swap": "old_balance_dest -> new_balance_dest",
+          "frequency": 78,
+          "pct_of_cohort": 4.59
+        },
+        {
+          "swap": "hour_of_day -> type_TRANSFER",
+          "frequency": 73,
+          "pct_of_cohort": 4.3
+        },
+        {
+          "swap": "old_balance_dest -> hour_of_day",
+          "frequency": 66,
+          "pct_of_cohort": 3.88
+        }
+      ]
+    },
+    "shap_rank_gaps": {
+      "class_weight": {
+        "mean_gap_rank_4_to_5": 0.321,
+        "mean_gap_rank_5_to_6": 0.1466
+      },
+      "none": {
+        "mean_gap_rank_4_to_5": 0.3196,
+        "mean_gap_rank_5_to_6": 0.2282
+      },
+      "smote_enn": {
+        "mean_gap_rank_4_to_5": 0.4167,
+        "mean_gap_rank_5_to_6": 0.237
+      }
+    },
+    "global_spearman_rank_correlations": {
+      "class_weight_vs_none": 0.9364,
+      "class_weight_vs_smote_enn": 0.8455,
+      "none_vs_smote_enn": 0.9364
+    },
+    "constant_explanation_baselines": {
+      "class_weight": {
+        "top_5_feature_indices": [
+          1,
+          0,
+          4,
+          5,
+          2
+        ],
+        "top_5_feature_names": [
+          "old_balance_orig",
+          "amount",
+          "new_balance_dest",
+          "hour_of_day",
+          "new_balance_orig"
+        ],
+        "top_5_source": "Global top-5 ranked by mean absolute SHAP attribution across cohort",
+        "constant_baseline_mean_overlap": 0.7767,
+        "constant_baseline_stable_rate": 0.7669
+      },
+      "none": {
+        "top_5_feature_indices": [
+          1,
+          0,
+          2,
+          4,
+          5
+        ],
+        "top_5_feature_names": [
+          "old_balance_orig",
+          "amount",
+          "new_balance_orig",
+          "new_balance_dest",
+          "hour_of_day"
+        ],
+        "top_5_source": "Global top-5 ranked by mean absolute SHAP attribution across cohort",
+        "constant_baseline_mean_overlap": 0.7646,
+        "constant_baseline_stable_rate": 0.7145
+      },
+      "smote_enn": {
+        "top_5_feature_indices": [
+          1,
+          0,
+          6,
+          4,
+          2
+        ],
+        "top_5_feature_names": [
+          "old_balance_orig",
+          "amount",
+          "type_TRANSFER",
+          "new_balance_dest",
+          "new_balance_orig"
+        ],
+        "top_5_source": "Global top-5 ranked by mean absolute SHAP attribution across cohort",
+        "constant_baseline_mean_overlap": 0.6855,
+        "constant_baseline_stable_rate": 0.4414
+      }
+    },
+    "pre_specified_conclusion": {
+      "all_pairwise_intervals_strictly_below_noise": false,
+      "verdict": "no evidence of strategy-induced explanation shift beyond retraining noise",
+      "margin_note": "Under Student-t intervals across 10 matched sets (t=2.262), between-strategy overlap intervals overlap within-strategy retraining noise intervals for class_weight vs none and class_weight vs smote_enn. Only none vs smote_enn lies strictly below none's noise lower bound. The margin between strategies is small."
+    }
+  },
+  "test_frauds_cohort": {
+    "cohort_name": "test_frauds_cohort",
+    "n_samples": 1642,
+    "k": 5,
+    "chance_baseline": 0.4545,
+    "within_strategy_retraining_noise": {
+      "by_strategy": {
+        "class_weight": {
+          "n_sets": 10,
+          "n_pairs": 45,
+          "mean_pairwise_overlap": 0.8649,
+          "sd_pairwise_overlap": 0.0166,
+          "bootstrap_sets_95ci": [
+            0.852,
+            0.8769
+          ],
+          "mean_set_vs_set1_overlap": 0.8629,
+          "sd_set_vs_set1_overlap": 0.0173,
+          "student_t_95ci_vs_set1": [
+            0.8496,
+            0.8763
+          ]
+        },
+        "none": {
+          "n_sets": 10,
+          "n_pairs": 45,
+          "mean_pairwise_overlap": 0.8429,
+          "sd_pairwise_overlap": 0.0291,
+          "bootstrap_sets_95ci": [
+            0.8262,
+            0.8645
+          ],
+          "mean_set_vs_set1_overlap": 0.8402,
+          "sd_set_vs_set1_overlap": 0.0145,
+          "student_t_95ci_vs_set1": [
+            0.8291,
+            0.8514
+          ]
+        },
+        "smote_enn": {
+          "n_sets": 10,
+          "n_pairs": 45,
+          "mean_pairwise_overlap": 0.8641,
+          "sd_pairwise_overlap": 0.0219,
+          "bootstrap_sets_95ci": [
+            0.8511,
+            0.8768
+          ],
+          "mean_set_vs_set1_overlap": 0.8426,
+          "sd_set_vs_set1_overlap": 0.0194,
+          "student_t_95ci_vs_set1": [
+            0.8277,
+            0.8575
+          ]
+        }
+      },
+      "combined_retraining_noise_interval": [
+        0.8262,
+        0.8769
+      ],
+      "lowest_within_strategy_ci_lower_bound": 0.8262
+    },
+    "pairwise_between_strategy_agreement": {
+      "class_weight_vs_none": {
+        "strategy_1": "class_weight",
+        "strategy_2": "none",
+        "matched_10_sets_mean_overlap": 0.8396,
+        "matched_10_sets_sd": 0.0246,
+        "matched_10_sets_student_t_95ci": [
+          0.822,
+          0.8572
+        ],
+        "set1_mean_overlap": 0.8269,
+        "set1_row_bootstrap_95ci": [
+          0.8205,
+          0.8334
+        ],
+        "per_set_mean_overlaps": [
+          0.8269,
+          0.8086,
+          0.84,
+          0.8471,
+          0.8412,
+          0.806,
+          0.8253,
+          0.8514,
+          0.8614,
+          0.8878
+        ],
+        "noise_lower_bound_strategy_1": 0.852,
+        "noise_lower_bound_strategy_2": 0.8262,
+        "strictly_below_s1_noise": false,
+        "strictly_below_s2_noise": false,
+        "meets_prespecified_rule": false,
+        "verdict": "Fails pre-specified rule (overlaps retraining noise)"
+      },
+      "class_weight_vs_smote_enn": {
+        "strategy_1": "class_weight",
+        "strategy_2": "smote_enn",
+        "matched_10_sets_mean_overlap": 0.8486,
+        "matched_10_sets_sd": 0.0281,
+        "matched_10_sets_student_t_95ci": [
+          0.8285,
+          0.8686
+        ],
+        "set1_mean_overlap": 0.7933,
+        "set1_row_bootstrap_95ci": [
+          0.7871,
+          0.7993
+        ],
+        "per_set_mean_overlaps": [
+          0.7933,
+          0.8057,
+          0.866,
+          0.8353,
+          0.8643,
+          0.8653,
+          0.8711,
+          0.8622,
+          0.8705,
+          0.8518
+        ],
+        "noise_lower_bound_strategy_1": 0.852,
+        "noise_lower_bound_strategy_2": 0.8511,
+        "strictly_below_s1_noise": false,
+        "strictly_below_s2_noise": false,
+        "meets_prespecified_rule": false,
+        "verdict": "Fails pre-specified rule (overlaps retraining noise)"
+      },
+      "none_vs_smote_enn": {
+        "strategy_1": "none",
+        "strategy_2": "smote_enn",
+        "matched_10_sets_mean_overlap": 0.8129,
+        "matched_10_sets_sd": 0.0166,
+        "matched_10_sets_student_t_95ci": [
+          0.801,
+          0.8247
+        ],
+        "set1_mean_overlap": 0.7993,
+        "set1_row_bootstrap_95ci": [
+          0.7934,
+          0.8045
+        ],
+        "per_set_mean_overlaps": [
+          0.7993,
+          0.8049,
+          0.8263,
+          0.8102,
+          0.8093,
+          0.7836,
+          0.8133,
+          0.81,
+          0.829,
+          0.8429
+        ],
+        "noise_lower_bound_strategy_1": 0.8262,
+        "noise_lower_bound_strategy_2": 0.8511,
+        "strictly_below_s1_noise": true,
+        "strictly_below_s2_noise": true,
+        "meets_prespecified_rule": true,
+        "verdict": "Meets pre-specified rule (shift beyond retraining noise)"
+      }
+    },
+    "feature_swap_diagnostics": {
+      "class_weight_vs_none": [
+        {
+          "swap": "old_balance_dest -> new_balance_orig",
+          "frequency": 203,
+          "pct_of_cohort": 12.36
+        },
+        {
+          "swap": "amount -> new_balance_orig",
+          "frequency": 188,
+          "pct_of_cohort": 11.45
+        },
+        {
+          "swap": "old_balance_dest -> type_CASH_OUT",
+          "frequency": 183,
+          "pct_of_cohort": 11.14
+        },
+        {
+          "swap": "old_balance_dest -> type_TRANSFER",
+          "frequency": 163,
+          "pct_of_cohort": 9.93
+        },
+        {
+          "swap": "amount -> type_TRANSFER",
+          "frequency": 140,
+          "pct_of_cohort": 8.53
+        },
+        {
+          "swap": "amount -> type_CASH_OUT",
+          "frequency": 91,
+          "pct_of_cohort": 5.54
+        },
+        {
+          "swap": "old_balance_dest -> new_balance_dest",
+          "frequency": 80,
+          "pct_of_cohort": 4.87
+        },
+        {
+          "swap": "new_balance_dest -> type_CASH_OUT",
+          "frequency": 69,
+          "pct_of_cohort": 4.2
+        },
+        {
+          "swap": "hour_of_day -> type_CASH_OUT",
+          "frequency": 63,
+          "pct_of_cohort": 3.84
+        },
+        {
+          "swap": "type_CASH_OUT -> type_TRANSFER",
+          "frequency": 62,
+          "pct_of_cohort": 3.78
+        }
+      ],
+      "class_weight_vs_smote_enn": [
+        {
+          "swap": "old_balance_dest -> type_CASH_OUT",
+          "frequency": 265,
+          "pct_of_cohort": 16.14
+        },
+        {
+          "swap": "old_balance_dest -> type_TRANSFER",
+          "frequency": 240,
+          "pct_of_cohort": 14.62
+        },
+        {
+          "swap": "new_balance_orig -> type_CASH_OUT",
+          "frequency": 216,
+          "pct_of_cohort": 13.15
+        },
+        {
+          "swap": "new_balance_orig -> type_TRANSFER",
+          "frequency": 164,
+          "pct_of_cohort": 9.99
+        },
+        {
+          "swap": "amount -> type_CASH_OUT",
+          "frequency": 159,
+          "pct_of_cohort": 9.68
+        },
+        {
+          "swap": "amount -> type_TRANSFER",
+          "frequency": 127,
+          "pct_of_cohort": 7.73
+        },
+        {
+          "swap": "hour_of_day -> type_CASH_OUT",
+          "frequency": 119,
+          "pct_of_cohort": 7.25
+        },
+        {
+          "swap": "hour_of_day -> type_TRANSFER",
+          "frequency": 95,
+          "pct_of_cohort": 5.79
+        },
+        {
+          "swap": "new_balance_dest -> type_CASH_OUT",
+          "frequency": 86,
+          "pct_of_cohort": 5.24
+        },
+        {
+          "swap": "amount -> new_balance_dest",
+          "frequency": 84,
+          "pct_of_cohort": 5.12
+        }
+      ],
+      "none_vs_smote_enn": [
+        {
+          "swap": "new_balance_orig -> type_CASH_OUT",
+          "frequency": 283,
+          "pct_of_cohort": 17.24
+        },
+        {
+          "swap": "new_balance_orig -> type_TRANSFER",
+          "frequency": 210,
+          "pct_of_cohort": 12.79
+        },
+        {
+          "swap": "new_balance_orig -> amount",
+          "frequency": 133,
+          "pct_of_cohort": 8.1
+        },
+        {
+          "swap": "amount -> type_CASH_OUT",
+          "frequency": 127,
+          "pct_of_cohort": 7.73
+        },
+        {
+          "swap": "old_balance_dest -> type_CASH_OUT",
+          "frequency": 107,
+          "pct_of_cohort": 6.52
+        },
+        {
+          "swap": "hour_of_day -> type_CASH_OUT",
+          "frequency": 89,
+          "pct_of_cohort": 5.42
+        },
+        {
+          "swap": "new_balance_dest -> hour_of_day",
+          "frequency": 82,
+          "pct_of_cohort": 4.99
+        },
+        {
+          "swap": "old_balance_dest -> new_balance_dest",
+          "frequency": 75,
+          "pct_of_cohort": 4.57
+        },
+        {
+          "swap": "hour_of_day -> type_TRANSFER",
+          "frequency": 71,
+          "pct_of_cohort": 4.32
+        },
+        {
+          "swap": "amount -> new_balance_dest",
+          "frequency": 64,
+          "pct_of_cohort": 3.9
+        }
+      ]
+    },
+    "shap_rank_gaps": {
+      "class_weight": {
+        "mean_gap_rank_4_to_5": 0.3241,
+        "mean_gap_rank_5_to_6": 0.1474
+      },
+      "none": {
+        "mean_gap_rank_4_to_5": 0.3238,
+        "mean_gap_rank_5_to_6": 0.2321
+      },
+      "smote_enn": {
+        "mean_gap_rank_4_to_5": 0.4202,
+        "mean_gap_rank_5_to_6": 0.2394
+      }
+    },
+    "global_spearman_rank_correlations": {
+      "class_weight_vs_none": 0.9364,
+      "class_weight_vs_smote_enn": 0.8455,
+      "none_vs_smote_enn": 0.9364
+    },
+    "constant_explanation_baselines": {
+      "class_weight": {
+        "top_5_feature_indices": [
+          1,
+          0,
+          4,
+          5,
+          2
+        ],
+        "top_5_feature_names": [
+          "old_balance_orig",
+          "amount",
+          "new_balance_dest",
+          "hour_of_day",
+          "new_balance_orig"
+        ],
+        "top_5_source": "Global top-5 ranked by mean absolute SHAP attribution across cohort",
+        "constant_baseline_mean_overlap": 0.7754,
+        "constant_baseline_stable_rate": 0.7619
+      },
+      "none": {
+        "top_5_feature_indices": [
+          1,
+          0,
+          2,
+          4,
+          5
+        ],
+        "top_5_feature_names": [
+          "old_balance_orig",
+          "amount",
+          "new_balance_orig",
+          "new_balance_dest",
+          "hour_of_day"
+        ],
+        "top_5_source": "Global top-5 ranked by mean absolute SHAP attribution across cohort",
+        "constant_baseline_mean_overlap": 0.765,
+        "constant_baseline_stable_rate": 0.7089
+      },
+      "smote_enn": {
+        "top_5_feature_indices": [
+          1,
+          0,
+          6,
+          4,
+          2
+        ],
+        "top_5_feature_names": [
+          "old_balance_orig",
+          "amount",
+          "type_TRANSFER",
+          "new_balance_dest",
+          "new_balance_orig"
+        ],
+        "top_5_source": "Global top-5 ranked by mean absolute SHAP attribution across cohort",
+        "constant_baseline_mean_overlap": 0.6884,
+        "constant_baseline_stable_rate": 0.4513
+      }
+    },
+    "pre_specified_conclusion": {
+      "all_pairwise_intervals_strictly_below_noise": false,
+      "verdict": "no evidence of strategy-induced explanation shift beyond retraining noise",
+      "margin_note": "Under Student-t intervals across 10 matched sets (t=2.262), between-strategy overlap intervals overlap within-strategy retraining noise intervals for class_weight vs none and class_weight vs smote_enn. Only none vs smote_enn lies strictly below none's noise lower bound. The margin between strategies is small."
+    }
+  },
+  "within_strategy_retraining_noise_decomposition": {
+    "by_strategy": {
+      "class_weight": {
+        "n_sets": 10,
+        "n_pairs": 45,
+        "mean_pairwise_overlap": 0.8643,
+        "sd_pairwise_overlap": 0.0162,
+        "bootstrap_sets_95ci": [
+          0.8518,
+          0.8759
+        ],
+        "mean_set_vs_set1_overlap": 0.863,
+        "sd_set_vs_set1_overlap": 0.017,
+        "student_t_95ci_vs_set1": [
+          0.8499,
+          0.8761
+        ]
+      },
+      "none": {
+        "n_sets": 10,
+        "n_pairs": 45,
+        "mean_pairwise_overlap": 0.8417,
+        "sd_pairwise_overlap": 0.0287,
+        "bootstrap_sets_95ci": [
+          0.8254,
+          0.8632
+        ],
+        "mean_set_vs_set1_overlap": 0.8395,
+        "sd_set_vs_set1_overlap": 0.0145,
+        "student_t_95ci_vs_set1": [
+          0.8284,
+          0.8506
+        ]
+      },
+      "smote_enn": {
+        "n_sets": 10,
+        "n_pairs": 45,
+        "mean_pairwise_overlap": 0.8635,
+        "sd_pairwise_overlap": 0.0217,
+        "bootstrap_sets_95ci": [
+          0.8502,
+          0.8764
+        ],
+        "mean_set_vs_set1_overlap": 0.8415,
+        "sd_set_vs_set1_overlap": 0.0194,
+        "student_t_95ci_vs_set1": [
+          0.8266,
+          0.8565
+        ]
+      }
+    },
+    "combined_retraining_noise_interval": [
+      0.8254,
+      0.8764
+    ],
+    "lowest_within_strategy_ci_lower_bound": 0.8254
+  },
+  "pairwise_between_strategy_agreement": {
+    "class_weight_vs_none": {
+      "strategy_1": "class_weight",
+      "strategy_2": "none",
+      "matched_10_sets_mean_overlap": 0.8389,
+      "matched_10_sets_sd": 0.0248,
+      "matched_10_sets_student_t_95ci": [
+        0.8211,
+        0.8566
+      ],
+      "set1_mean_overlap": 0.8281,
+      "set1_row_bootstrap_95ci": [
+        0.8219,
+        0.8346
+      ],
+      "per_set_mean_overlaps": [
+        0.8281,
+        0.806,
+        0.8373,
+        0.8463,
+        0.8423,
+        0.8053,
+        0.826,
+        0.8487,
+        0.8603,
+        0.8883
+      ],
+      "noise_lower_bound_strategy_1": 0.8518,
+      "noise_lower_bound_strategy_2": 0.8254,
+      "strictly_below_s1_noise": false,
+      "strictly_below_s2_noise": false,
+      "meets_prespecified_rule": false,
+      "verdict": "Fails pre-specified rule (overlaps retraining noise)"
+    },
+    "class_weight_vs_smote_enn": {
+      "strategy_1": "class_weight",
+      "strategy_2": "smote_enn",
+      "matched_10_sets_mean_overlap": 0.8477,
+      "matched_10_sets_sd": 0.0276,
+      "matched_10_sets_student_t_95ci": [
+        0.8279,
+        0.8675
+      ],
+      "set1_mean_overlap": 0.7927,
+      "set1_row_bootstrap_95ci": [
+        0.7868,
+        0.7987
+      ],
+      "per_set_mean_overlaps": [
+        0.7927,
+        0.8065,
+        0.8664,
+        0.834,
+        0.8616,
+        0.8644,
+        0.8686,
+        0.8625,
+        0.8696,
+        0.8506
+      ],
+      "noise_lower_bound_strategy_1": 0.8518,
+      "noise_lower_bound_strategy_2": 0.8502,
+      "strictly_below_s1_noise": false,
+      "strictly_below_s2_noise": false,
+      "meets_prespecified_rule": false,
+      "verdict": "Fails pre-specified rule (overlaps retraining noise)"
+    },
+    "none_vs_smote_enn": {
+      "strategy_1": "none",
+      "strategy_2": "smote_enn",
+      "matched_10_sets_mean_overlap": 0.8114,
+      "matched_10_sets_sd": 0.0167,
+      "matched_10_sets_student_t_95ci": [
+        0.7995,
+        0.8233
+      ],
+      "set1_mean_overlap": 0.8018,
+      "set1_row_bootstrap_95ci": [
+        0.7965,
+        0.8075
+      ],
+      "per_set_mean_overlaps": [
+        0.8018,
+        0.8025,
+        0.8247,
+        0.8095,
+        0.8075,
+        0.7806,
+        0.8108,
+        0.8074,
+        0.8278,
+        0.8414
+      ],
+      "noise_lower_bound_strategy_1": 0.8254,
+      "noise_lower_bound_strategy_2": 0.8502,
+      "strictly_below_s1_noise": true,
+      "strictly_below_s2_noise": true,
+      "meets_prespecified_rule": true,
+      "verdict": "Meets pre-specified rule (shift beyond retraining noise)"
+    }
+  },
+  "pre_specified_conclusion": {
+    "all_pairwise_intervals_strictly_below_noise": false,
+    "verdict": "no evidence of strategy-induced explanation shift beyond retraining noise",
+    "margin_note": "Under Student-t intervals across 10 matched sets (t=2.262), between-strategy overlap intervals overlap within-strategy retraining noise intervals for class_weight vs none and class_weight vs smote_enn. Only none vs smote_enn lies strictly below none's noise lower bound. The margin between strategies is small."
+  }
+}

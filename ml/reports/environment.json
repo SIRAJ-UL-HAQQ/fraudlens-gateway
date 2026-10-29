@@ -1,0 +1,14 @@
+{
+  "python_version": "3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "packages": {
+    "numpy": "2.4.6",
+    "pandas": "3.0.5",
+    "scipy": "1.18.1",
+    "scikit-learn": "1.9.0",
+    "xgboost": "3.2.0",
+    "shap": "0.51.0",
+    "imbalanced-learn": "0.14.2",
+    "optuna": "5.0.0"
+  }
+}

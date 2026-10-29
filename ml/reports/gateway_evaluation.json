@@ -237,34 +237,34 @@
       "variant_C": {
         "decisions": {
           "high_risk": {
-            "count": 696,
+            "count": 697,
             "true_positives": 636,
-            "false_positives": 60,
+            "false_positives": 61,
             "frauds": 636,
-            "legitimate": 60,
-            "per_1000_tx": 4.284,
-            "fraud_rate": 0.913793,
-            "fraud_rate_pct": 91.379
+            "legitimate": 61,
+            "per_1000_tx": 4.29,
+            "fraud_rate": 0.912482,
+            "fraud_rate_pct": 91.248
           },
           "analyst_review": {
-            "count": 1622,
+            "count": 2721,
             "true_positives": 115,
-            "false_positives": 1507,
+            "false_positives": 2606,
             "frauds": 115,
-            "legitimate": 1507,
-            "per_1000_tx": 9.984,
-            "fraud_rate": 0.0709,
-            "fraud_rate_pct": 7.09
+            "legitimate": 2606,
+            "per_1000_tx": 16.748,
+            "fraud_rate": 0.042264,
+            "fraud_rate_pct": 4.226
           },
           "low_risk": {
-            "count": 160149,
+            "count": 159049,
             "true_positives": 39,
-            "false_positives": 160110,
+            "false_positives": 159010,
             "frauds": 39,
-            "legitimate": 160110,
-            "per_1000_tx": 985.732,
-            "fraud_rate": 0.000244,
-            "fraud_rate_pct": 0.024
+            "legitimate": 159010,
+            "per_1000_tx": 978.962,
+            "fraud_rate": 0.000245,
+            "fraud_rate_pct": 0.025
           }
         },
         "metrics": {
@@ -282,16 +282,16 @@
             93.32,
             96.37
           ],
-          "analyst_review_queue_total": 1622,
-          "analyst_review_queue_rate_per_hour": 21.63,
-          "legit_in_review_rate": 0.009321,
-          "legit_in_review_rate_pct": 0.9321
+          "analyst_review_queue_total": 2721,
+          "analyst_review_queue_rate_per_hour": 36.28,
+          "legit_in_review_rate": 0.016119,
+          "legit_in_review_rate_pct": 1.6119
         },
         "queue_by_cause": {
           "score_band": {
-            "total": 70,
+            "total": 69,
             "frauds": 14,
-            "legitimate": 56
+            "legitimate": 55
           },
           "unstable_explanation": {
             "total": 122,
@@ -299,26 +299,26 @@
             "legitimate": 21
           },
           "rule_flag": {
-            "total": 1430,
+            "total": 2530,
             "frauds": 0,
-            "legitimate": 1430
+            "legitimate": 2530
           },
           "total_queue": {
-            "total": 1622,
+            "total": 2721,
             "frauds": 115,
-            "legitimate": 1507
+            "legitimate": 2606
           }
         },
         "candidate_high_flow": {
           "candidate_high_total": {
-            "total": 818,
+            "total": 819,
             "frauds": 737,
-            "legitimate": 81
+            "legitimate": 82
           },
           "routed_high_risk_stable": {
-            "total": 696,
+            "total": 697,
             "frauds": 636,
-            "legitimate": 60
+            "legitimate": 61
           },
           "routed_analyst_review_unstable": {
             "total": 122,
@@ -714,23 +714,23 @@
             "fraud_rate_pct": 94.269
           },
           "analyst_review": {
-            "count": 1022,
+            "count": 1332,
             "true_positives": 292,
-            "false_positives": 730,
+            "false_positives": 1040,
             "frauds": 292,
-            "legitimate": 730,
-            "per_1000_tx": 8.65,
-            "fraud_rate": 0.285714,
-            "fraud_rate_pct": 28.571
+            "legitimate": 1040,
+            "per_1000_tx": 11.274,
+            "fraud_rate": 0.219219,
+            "fraud_rate_pct": 21.922
           },
           "low_risk": {
-            "count": 115763,
+            "count": 115453,
             "true_positives": 67,
-            "false_positives": 115696,
+            "false_positives": 115386,
             "frauds": 67,
-            "legitimate": 115696,
-            "per_1000_tx": 979.83,
-            "fraud_rate": 0.000579,
+            "legitimate": 115386,
+            "per_1000_tx": 977.206,
+            "fraud_rate": 0.00058,
             "fraud_rate_pct": 0.058
           }
         },
@@ -749,10 +749,10 @@
             94.85,
             96.77
           ],
-          "analyst_review_queue_total": 1022,
-          "analyst_review_queue_rate_per_hour": 6.91,
-          "legit_in_review_rate": 0.006266,
-          "legit_in_review_rate_pct": 0.6266
+          "analyst_review_queue_total": 1332,
+          "analyst_review_queue_rate_per_hour": 9.0,
+          "legit_in_review_rate": 0.008927,
+          "legit_in_review_rate_pct": 0.8927
         },
         "queue_by_cause": {
           "score_band": {
@@ -766,14 +766,14 @@
             "legitimate": 16
           },
           "rule_flag": {
-            "total": 684,
+            "total": 994,
             "frauds": 0,
-            "legitimate": 684
+            "legitimate": 994
           },
           "total_queue": {
-            "total": 1022,
+            "total": 1332,
             "frauds": 292,
-            "legitimate": 730
+            "legitimate": 1040
           }
         },
         "candidate_high_flow": {
@@ -984,6 +984,7 @@
   },
   "informative_analysis_of_unstable": {
     "validation": {
+      "cohort_name": "rule_boosted_candidates",
       "total_candidate_high": 881,
       "stable_cohort": {
         "n": 743,
@@ -1030,12 +1031,13 @@
       "auroc_mean_overlap_predicting_fp": {
         "auroc": 0.5815,
         "bootstrap_95ci": [
-          0.5231,
-          0.6361
+          0.5226,
+          0.6412
         ]
       },
       "score_margin_control_restricted_thigh": {
         "scope": "Restricted strictly to candidate rows with score >= t_high (pure ML candidates)",
+        "mathematical_equivalence": "Re-routing candidate rows with lowest scores to Analyst Review is mathematically equivalent to raising t_high to max(score_in_control)",
         "n": 122,
         "candidates_at_or_above_thigh": 818,
         "max_score_in_control": 0.993799,
@@ -1051,21 +1053,270 @@
         "fp_gain_vs_unstable": 45
       },
       "score_margin_control_unrestricted_labeled": {
-        "scope": "Unrestricted (all candidate High rows, including rule-boosted rows with score < t_high)",
+        "scope": "Unrestricted (all candidate rows including rule-boosted rows below t_high)",
         "n": 138,
         "true_positives": 44,
         "false_positives": 94,
         "false_positive_share_pct": 68.12,
-        "note": "Includes rule-boosted rows from review band that have lower scores and higher FP rate"
+        "note": "Includes lower-scoring rule-boosted rows from review band with higher baseline FP rate"
+      },
+      "logistic_regression_score_adjusted": {
+        "formula": "is_false_positive ~ intercept + ml_score + mean_overlap",
+        "n_samples": 881,
+        "intercept": {
+          "coefficient": 149.5679,
+          "std_error": 11.2167,
+          "z_stat": 13.3344,
+          "p_value": 0.0,
+          "odds_ratio": 10686474581524.463
+        },
+        "ml_score": {
+          "coefficient": -149.2611,
+          "std_error": 11.1196,
+          "z_stat": -13.4233,
+          "p_value": 0.0,
+          "odds_ratio": 0.0
+        },
+        "mean_overlap": {
+          "coefficient": -4.1097,
+          "std_error": 1.6988,
+          "z_stat": -2.4192,
+          "p_value": 0.015556,
+          "odds_ratio": 0.0164
+        },
+        "conclusion": "mean_overlap is statistically significant"
       },
       "pre_specified_conclusion": {
         "condition_a_fp_share_ci_strictly_higher": true,
         "condition_b_auroc_ci_excludes_chance": true,
         "verdict": "evidence that explanation instability predicts false positive alert status",
         "plan_governing_split_note": "docs/analysis-plan.md does not pre-specify whether validation or test is the governing split; validation meets both criteria, but held-out test fails both"
+      },
+      "cohorts": {
+        "pure_ml_candidates": {
+          "cohort_name": "pure_ml_candidates_score_ge_thigh",
+          "total_candidate_high": 818,
+          "stable_cohort": {
+            "n": 696,
+            "true_positives": 636,
+            "false_positives": 60,
+            "precision": 0.913793,
+            "precision_pct": 91.38,
+            "precision_wilson_95ci": [
+              0.890604,
+              0.93244
+            ],
+            "false_positive_share": 0.086207,
+            "false_positive_share_pct": 8.62,
+            "false_positive_share_wilson_95ci": [
+              0.06756,
+              0.109396
+            ],
+            "false_positive_share_wilson_95ci_pct": [
+              6.76,
+              10.94
+            ]
+          },
+          "unstable_cohort": {
+            "n": 122,
+            "true_positives": 101,
+            "false_positives": 21,
+            "precision": 0.827869,
+            "precision_pct": 82.79,
+            "precision_wilson_95ci": [
+              0.75115,
+              0.88457
+            ],
+            "false_positive_share": 0.172131,
+            "false_positive_share_pct": 17.21,
+            "false_positive_share_wilson_95ci": [
+              0.11543,
+              0.24885
+            ],
+            "false_positive_share_wilson_95ci_pct": [
+              11.54,
+              24.88
+            ]
+          },
+          "auroc_mean_overlap_predicting_fp": {
+            "auroc": 0.6108,
+            "bootstrap_95ci": [
+              0.5416,
+              0.6753
+            ]
+          },
+          "score_margin_control_restricted_thigh": {
+            "scope": "Restricted strictly to candidate rows with score >= t_high (pure ML candidates)",
+            "mathematical_equivalence": "Re-routing candidate rows with lowest scores to Analyst Review is mathematically equivalent to raising t_high to max(score_in_control)",
+            "n": 122,
+            "candidates_at_or_above_thigh": 818,
+            "max_score_in_control": 0.993799,
+            "true_positives": 56,
+            "false_positives": 66,
+            "precision_pct": 45.9,
+            "false_positive_share_pct": 54.1,
+            "false_positive_share_wilson_95ci_pct": [
+              45.27,
+              62.68
+            ],
+            "unstable_fp_within_thigh": 21,
+            "fp_gain_vs_unstable": 45
+          },
+          "score_margin_control_unrestricted_labeled": {
+            "scope": "Unrestricted (all candidate rows including rule-boosted rows below t_high)",
+            "n": 122,
+            "true_positives": 56,
+            "false_positives": 66,
+            "false_positive_share_pct": 54.1,
+            "note": "Includes lower-scoring rule-boosted rows from review band with higher baseline FP rate"
+          },
+          "logistic_regression_score_adjusted": {
+            "formula": "is_false_positive ~ intercept + ml_score + mean_overlap",
+            "n_samples": 818,
+            "intercept": {
+              "coefficient": 212.2981,
+              "std_error": 18.017,
+              "z_stat": 11.7832,
+              "p_value": 0.0,
+              "odds_ratio": 10686474581524.463
+            },
+            "ml_score": {
+              "coefficient": -212.0393,
+              "std_error": 18.0626,
+              "z_stat": -11.7391,
+              "p_value": 0.0,
+              "odds_ratio": 0.0
+            },
+            "mean_overlap": {
+              "coefficient": -4.4667,
+              "std_error": 1.9948,
+              "z_stat": -2.2392,
+              "p_value": 0.025145,
+              "odds_ratio": 0.0115
+            },
+            "conclusion": "mean_overlap is statistically significant"
+          },
+          "pre_specified_conclusion": {
+            "condition_a_fp_share_ci_strictly_higher": true,
+            "condition_b_auroc_ci_excludes_chance": true,
+            "verdict": "evidence that explanation instability predicts false positive alert status",
+            "plan_governing_split_note": "docs/analysis-plan.md does not pre-specify whether validation or test is the governing split; validation meets both criteria, but held-out test fails both"
+          }
+        },
+        "rule_boosted_candidates": {
+          "cohort_name": "rule_boosted_candidates",
+          "total_candidate_high": 881,
+          "stable_cohort": {
+            "n": 743,
+            "true_positives": 649,
+            "false_positives": 94,
+            "precision": 0.873486,
+            "precision_pct": 87.35,
+            "precision_wilson_95ci": [
+              0.847646,
+              0.895483
+            ],
+            "false_positive_share": 0.126514,
+            "false_positive_share_pct": 12.65,
+            "false_positive_share_wilson_95ci": [
+              0.104517,
+              0.152354
+            ],
+            "false_positive_share_wilson_95ci_pct": [
+              10.45,
+              15.24
+            ]
+          },
+          "unstable_cohort": {
+            "n": 138,
+            "true_positives": 102,
+            "false_positives": 36,
+            "precision": 0.73913,
+            "precision_pct": 73.91,
+            "precision_wilson_95ci": [
+              0.660101,
+              0.805207
+            ],
+            "false_positive_share": 0.26087,
+            "false_positive_share_pct": 26.09,
+            "false_positive_share_wilson_95ci": [
+              0.194793,
+              0.339899
+            ],
+            "false_positive_share_wilson_95ci_pct": [
+              19.48,
+              33.99
+            ]
+          },
+          "auroc_mean_overlap_predicting_fp": {
+            "auroc": 0.5815,
+            "bootstrap_95ci": [
+              0.5226,
+              0.6412
+            ]
+          },
+          "score_margin_control_restricted_thigh": {
+            "scope": "Restricted strictly to candidate rows with score >= t_high (pure ML candidates)",
+            "mathematical_equivalence": "Re-routing candidate rows with lowest scores to Analyst Review is mathematically equivalent to raising t_high to max(score_in_control)",
+            "n": 122,
+            "candidates_at_or_above_thigh": 818,
+            "max_score_in_control": 0.993799,
+            "true_positives": 56,
+            "false_positives": 66,
+            "precision_pct": 45.9,
+            "false_positive_share_pct": 54.1,
+            "false_positive_share_wilson_95ci_pct": [
+              45.27,
+              62.68
+            ],
+            "unstable_fp_within_thigh": 21,
+            "fp_gain_vs_unstable": 45
+          },
+          "score_margin_control_unrestricted_labeled": {
+            "scope": "Unrestricted (all candidate rows including rule-boosted rows below t_high)",
+            "n": 138,
+            "true_positives": 44,
+            "false_positives": 94,
+            "false_positive_share_pct": 68.12,
+            "note": "Includes lower-scoring rule-boosted rows from review band with higher baseline FP rate"
+          },
+          "logistic_regression_score_adjusted": {
+            "formula": "is_false_positive ~ intercept + ml_score + mean_overlap",
+            "n_samples": 881,
+            "intercept": {
+              "coefficient": 149.5679,
+              "std_error": 11.2167,
+              "z_stat": 13.3344,
+              "p_value": 0.0,
+              "odds_ratio": 10686474581524.463
+            },
+            "ml_score": {
+              "coefficient": -149.2611,
+              "std_error": 11.1196,
+              "z_stat": -13.4233,
+              "p_value": 0.0,
+              "odds_ratio": 0.0
+            },
+            "mean_overlap": {
+              "coefficient": -4.1097,
+              "std_error": 1.6988,
+              "z_stat": -2.4192,
+              "p_value": 0.015556,
+              "odds_ratio": 0.0164
+            },
+            "conclusion": "mean_overlap is statistically significant"
+          },
+          "pre_specified_conclusion": {
+            "condition_a_fp_share_ci_strictly_higher": true,
+            "condition_b_auroc_ci_excludes_chance": true,
+            "verdict": "evidence that explanation instability predicts false positive alert status",
+            "plan_governing_split_note": "docs/analysis-plan.md does not pre-specify whether validation or test is the governing split; validation meets both criteria, but held-out test fails both"
+          }
+        }
       }
     },
     "test": {
+      "cohort_name": "rule_boosted_candidates",
       "total_candidate_high": 1696,
       "stable_cohort": {
         "n": 1397,
@@ -1112,12 +1363,13 @@
       "auroc_mean_overlap_predicting_fp": {
         "auroc": 0.5478,
         "bootstrap_95ci": [
-          0.4909,
-          0.602
+          0.4957,
+          0.6051
         ]
       },
       "score_margin_control_restricted_thigh": {
         "scope": "Restricted strictly to candidate rows with score >= t_high (pure ML candidates)",
+        "mathematical_equivalence": "Re-routing candidate rows with lowest scores to Analyst Review is mathematically equivalent to raising t_high to max(score_in_control)",
         "n": 284,
         "candidates_at_or_above_thigh": 1645,
         "max_score_in_control": 0.998458,
@@ -1133,18 +1385,266 @@
         "fp_gain_vs_unstable": 66
       },
       "score_margin_control_unrestricted_labeled": {
-        "scope": "Unrestricted (all candidate High rows, including rule-boosted rows with score < t_high)",
+        "scope": "Unrestricted (all candidate rows including rule-boosted rows below t_high)",
         "n": 299,
         "true_positives": 192,
         "false_positives": 107,
         "false_positive_share_pct": 35.79,
-        "note": "Includes rule-boosted rows from review band that have lower scores and higher FP rate"
+        "note": "Includes lower-scoring rule-boosted rows from review band with higher baseline FP rate"
+      },
+      "logistic_regression_score_adjusted": {
+        "formula": "is_false_positive ~ intercept + ml_score + mean_overlap",
+        "n_samples": 1696,
+        "intercept": {
+          "coefficient": 133.3258,
+          "std_error": 9.2004,
+          "z_stat": 14.4913,
+          "p_value": 0.0,
+          "odds_ratio": 10686474581524.463
+        },
+        "ml_score": {
+          "coefficient": -137.5673,
+          "std_error": 9.4524,
+          "z_stat": -14.5536,
+          "p_value": 0.0,
+          "odds_ratio": 0.0
+        },
+        "mean_overlap": {
+          "coefficient": 0.7883,
+          "std_error": 1.4825,
+          "z_stat": 0.5317,
+          "p_value": 0.59492,
+          "odds_ratio": 2.1996
+        },
+        "conclusion": "mean_overlap provides no statistically significant signal once score is controlled"
       },
       "pre_specified_conclusion": {
         "condition_a_fp_share_ci_strictly_higher": false,
         "condition_b_auroc_ci_excludes_chance": false,
         "verdict": "no evidence that explanation instability predicts false positive alert status",
         "plan_governing_split_note": "docs/analysis-plan.md does not pre-specify whether validation or test is the governing split; validation meets both criteria, but held-out test fails both"
+      },
+      "cohorts": {
+        "pure_ml_candidates": {
+          "cohort_name": "pure_ml_candidates_score_ge_thigh",
+          "total_candidate_high": 1645,
+          "stable_cohort": {
+            "n": 1361,
+            "true_positives": 1283,
+            "false_positives": 78,
+            "precision": 0.942689,
+            "precision_pct": 94.27,
+            "precision_wilson_95ci": [
+              0.929049,
+              0.953837
+            ],
+            "false_positive_share": 0.057311,
+            "false_positive_share_pct": 5.73,
+            "false_positive_share_wilson_95ci": [
+              0.046163,
+              0.070951
+            ],
+            "false_positive_share_wilson_95ci_pct": [
+              4.62,
+              7.1
+            ]
+          },
+          "unstable_cohort": {
+            "n": 284,
+            "true_positives": 268,
+            "false_positives": 16,
+            "precision": 0.943662,
+            "precision_pct": 94.37,
+            "precision_wilson_95ci": [
+              0.910454,
+              0.965028
+            ],
+            "false_positive_share": 0.056338,
+            "false_positive_share_pct": 5.63,
+            "false_positive_share_wilson_95ci": [
+              0.034972,
+              0.089546
+            ],
+            "false_positive_share_wilson_95ci_pct": [
+              3.5,
+              8.95
+            ]
+          },
+          "auroc_mean_overlap_predicting_fp": {
+            "auroc": 0.5324,
+            "bootstrap_95ci": [
+              0.4736,
+              0.5837
+            ]
+          },
+          "score_margin_control_restricted_thigh": {
+            "scope": "Restricted strictly to candidate rows with score >= t_high (pure ML candidates)",
+            "mathematical_equivalence": "Re-routing candidate rows with lowest scores to Analyst Review is mathematically equivalent to raising t_high to max(score_in_control)",
+            "n": 284,
+            "candidates_at_or_above_thigh": 1645,
+            "max_score_in_control": 0.998458,
+            "true_positives": 202,
+            "false_positives": 82,
+            "precision_pct": 71.13,
+            "false_positive_share_pct": 28.87,
+            "false_positive_share_wilson_95ci_pct": [
+              23.91,
+              34.4
+            ],
+            "unstable_fp_within_thigh": 16,
+            "fp_gain_vs_unstable": 66
+          },
+          "score_margin_control_unrestricted_labeled": {
+            "scope": "Unrestricted (all candidate rows including rule-boosted rows below t_high)",
+            "n": 284,
+            "true_positives": 202,
+            "false_positives": 82,
+            "false_positive_share_pct": 28.87,
+            "note": "Includes lower-scoring rule-boosted rows from review band with higher baseline FP rate"
+          },
+          "logistic_regression_score_adjusted": {
+            "formula": "is_false_positive ~ intercept + ml_score + mean_overlap",
+            "n_samples": 1645,
+            "intercept": {
+              "coefficient": 197.3669,
+              "std_error": 14.1083,
+              "z_stat": 13.9894,
+              "p_value": 0.0,
+              "odds_ratio": 10686474581524.463
+            },
+            "ml_score": {
+              "coefficient": -203.0603,
+              "std_error": 14.5016,
+              "z_stat": -14.0026,
+              "p_value": 0.0,
+              "odds_ratio": 0.0
+            },
+            "mean_overlap": {
+              "coefficient": 2.1033,
+              "std_error": 1.6978,
+              "z_stat": 1.2388,
+              "p_value": 0.21541,
+              "odds_ratio": 8.1932
+            },
+            "conclusion": "mean_overlap provides no statistically significant signal once score is controlled"
+          },
+          "pre_specified_conclusion": {
+            "condition_a_fp_share_ci_strictly_higher": false,
+            "condition_b_auroc_ci_excludes_chance": false,
+            "verdict": "no evidence that explanation instability predicts false positive alert status",
+            "plan_governing_split_note": "docs/analysis-plan.md does not pre-specify whether validation or test is the governing split; validation meets both criteria, but held-out test fails both"
+          }
+        },
+        "rule_boosted_candidates": {
+          "cohort_name": "rule_boosted_candidates",
+          "total_candidate_high": 1696,
+          "stable_cohort": {
+            "n": 1397,
+            "true_positives": 1303,
+            "false_positives": 94,
+            "precision": 0.932713,
+            "precision_pct": 93.27,
+            "precision_wilson_95ci": [
+              0.918354,
+              0.944699
+            ],
+            "false_positive_share": 0.067287,
+            "false_positive_share_pct": 6.73,
+            "false_positive_share_wilson_95ci": [
+              0.055301,
+              0.081646
+            ],
+            "false_positive_share_wilson_95ci_pct": [
+              5.53,
+              8.16
+            ]
+          },
+          "unstable_cohort": {
+            "n": 299,
+            "true_positives": 272,
+            "false_positives": 27,
+            "precision": 0.909699,
+            "precision_pct": 90.97,
+            "precision_wilson_95ci": [
+              0.871806,
+              0.937198
+            ],
+            "false_positive_share": 0.090301,
+            "false_positive_share_pct": 9.03,
+            "false_positive_share_wilson_95ci": [
+              0.062802,
+              0.128194
+            ],
+            "false_positive_share_wilson_95ci_pct": [
+              6.28,
+              12.82
+            ]
+          },
+          "auroc_mean_overlap_predicting_fp": {
+            "auroc": 0.5478,
+            "bootstrap_95ci": [
+              0.4957,
+              0.6051
+            ]
+          },
+          "score_margin_control_restricted_thigh": {
+            "scope": "Restricted strictly to candidate rows with score >= t_high (pure ML candidates)",
+            "mathematical_equivalence": "Re-routing candidate rows with lowest scores to Analyst Review is mathematically equivalent to raising t_high to max(score_in_control)",
+            "n": 284,
+            "candidates_at_or_above_thigh": 1645,
+            "max_score_in_control": 0.998458,
+            "true_positives": 202,
+            "false_positives": 82,
+            "precision_pct": 71.13,
+            "false_positive_share_pct": 28.87,
+            "false_positive_share_wilson_95ci_pct": [
+              23.91,
+              34.4
+            ],
+            "unstable_fp_within_thigh": 16,
+            "fp_gain_vs_unstable": 66
+          },
+          "score_margin_control_unrestricted_labeled": {
+            "scope": "Unrestricted (all candidate rows including rule-boosted rows below t_high)",
+            "n": 299,
+            "true_positives": 192,
+            "false_positives": 107,
+            "false_positive_share_pct": 35.79,
+            "note": "Includes lower-scoring rule-boosted rows from review band with higher baseline FP rate"
+          },
+          "logistic_regression_score_adjusted": {
+            "formula": "is_false_positive ~ intercept + ml_score + mean_overlap",
+            "n_samples": 1696,
+            "intercept": {
+              "coefficient": 133.3258,
+              "std_error": 9.2004,
+              "z_stat": 14.4913,
+              "p_value": 0.0,
+              "odds_ratio": 10686474581524.463
+            },
+            "ml_score": {
+              "coefficient": -137.5673,
+              "std_error": 9.4524,
+              "z_stat": -14.5536,
+              "p_value": 0.0,
+              "odds_ratio": 0.0
+            },
+            "mean_overlap": {
+              "coefficient": 0.7883,
+              "std_error": 1.4825,
+              "z_stat": 0.5317,
+              "p_value": 0.59492,
+              "odds_ratio": 2.1996
+            },
+            "conclusion": "mean_overlap provides no statistically significant signal once score is controlled"
+          },
+          "pre_specified_conclusion": {
+            "condition_a_fp_share_ci_strictly_higher": false,
+            "condition_b_auroc_ci_excludes_chance": false,
+            "verdict": "no evidence that explanation instability predicts false positive alert status",
+            "plan_governing_split_note": "docs/analysis-plan.md does not pre-specify whether validation or test is the governing split; validation meets both criteria, but held-out test fails both"
+          }
+        }
       }
     }
   },
@@ -1383,7 +1883,7 @@
       },
       {
         "variant": "variant_C",
-        "validation_queue": 1622,
+        "validation_queue": 2721,
         "combined_recall": 0.950633,
         "combined_recall_pct": 95.06
       },
@@ -1413,7 +1913,7 @@
       },
       {
         "variant": "variant_C",
-        "validation_queue": 1622,
+        "validation_queue": 2721,
         "combined_recall": 0.950633,
         "combined_recall_pct": 95.06
       }

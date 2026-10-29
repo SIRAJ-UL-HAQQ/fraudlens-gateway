@@ -59,6 +59,44 @@ Validation evaluation of Variant B reveals that model discriminative power is co
   - Validation Routing Breakdown: Low Risk: 99.45% (161,579 / 162,467), Analyst Review: 0.04% (70 / 162,467), High Risk: 0.50% (818 / 162,467).
   - Validation High Risk Precision: 91.56% (749 frauds / 818 alerts). Validation Combined Recall (Review + High): 95.06% (751 / 790 frauds).
 
+## Model & Strategy Results Comparison (Held-Out Test Split)
+
+Source files: `ml/reports/metrics.json` (key: `strategy_comparison`) and `ml/reports/comparison.csv`.
+Split prevalence: Held-Out Test $\pi_{\text{test}} = 1.3898\%$ ($1,642 / 118,146$); Train $\pi_{\text{train}} = 0.0951\%$ ($5,781 / 6,082,007$).
+
+| Model / Strategy | Val PR-AUC | Test PR-AUC | Recall | Precision (Test $\pi=1.39\%$) | Precision (Train $\pi=0.095\%$) | F1 | FPR | MCC | Explanation Stable Rate ($k=5$) | Threshold Rule |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| class_weight (deployed) [Set 1] | 0.9806 | 0.9907 | 94.46% | 94.29% | 52.69% | 0.9437 | 0.0807% | 0.9429 | 82.76% | $t_{\text{high}} = 0.9788$ (Val-selected) |
+| none (10:1 undersampled baseline) | 0.9781 | 0.9900 | 93.67% | 95.00% | 56.17% | 0.9433 | 0.0695% | 0.9425 | - | $t_{\text{high}} = 0.9754$ (Val-selected) |
+| smote_enn | 0.9690 | 0.9853 | 90.50% | 95.38% | 58.22% | 0.9287 | 0.0618% | 0.9281 | - | $t_{\text{high}} = 0.9840$ (Val-selected) |
+| Logistic Regression baseline | - | 0.8505 | 81.55% | 67.49% | 12.29% | 0.7386 | 0.5536% | 0.7379 | - | Threshold 0.50 (not comparable) |
+| Random Forest baseline | - | 0.9362 | 87.21% | 85.75% | 28.88% | 0.8647 | 0.2043% | 0.8628 | - | Threshold 0.50 (not comparable) |
+| Full-train reference (none, 6.08M) | - | 0.9823 | 77.89% | 99.77% | 96.64% | 0.8748 | 0.0026% | 0.8801 | - | Threshold 0.50 (not comparable) |
+| Full-train reference (class_weight, 6.08M) | - | 0.9831 | 99.94% | 53.93% | 7.32% | 0.7005 | 1.2034% | 0.7297 | - | Threshold 0.50 (not comparable) |
+| Variant A reference (15 features) | - | 0.9999 | 99.94% | 98.32% | 79.82% | 0.9912 | 0.0240% | 0.9912 | 83.07% | $t_{\text{high}} = 0.9788$ (15 features with balance shortcut) |
+
+### Prevalence Surge Investigation ($14.62\times$ Ratio Between Splits)
+
+A critical empirical property of the PaySim chronological sequence is that the test split fraud prevalence ($1.3898\%$) is approximately $14.62\times$ higher than the training base rate ($0.09505\%$). We investigated this surge across per-step volumes and transaction types:
+
+| Split | Steps Range | Total Rows | Total Frauds | Prevalence (%) | Overall Volume (/hr) | Fraud Rate (/hr) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Train** | Steps 1..520 (520 hrs) | 6,082,007 | 5,781 | 0.09505% | 11,696.2 /hr | 11.12 /hr |
+| **Validation** | Steps 521..595 (75 hrs) | 162,467 | 790 | 0.48625% | 2,166.2 /hr | 10.53 /hr |
+| **Held-Out Test** | Steps 596..743 (148 hrs) | 118,146 | 1,642 | 1.38979% | 798.3 /hr | 11.09 /hr |
+
+**Per-Type Hourly Volume Across Splits:**
+
+| Transaction Type | Train Rate (/hr) | Validation Rate (/hr) | Test Rate (/hr) | Volume Decline Factor |
+| :--- | :---: | :---: | :---: | :---: |
+| `TRANSFER` | 974.2 /hr | 196.9 /hr | 78.0 /hr | $12.49\times$ decline |
+| `CASH_OUT` | 4,129.1 /hr | 708.9 /hr | 251.3 /hr | $16.43\times$ decline |
+| `PAYMENT` | 3,949.4 /hr | 754.5 /hr | 278.5 /hr | $14.18\times$ decline |
+| `CASH_IN` | 2,568.2 /hr | 487.9 /hr | 184.1 /hr | $13.95\times$ decline |
+| `DEBIT` | 75.3 /hr | 18.0 /hr | 6.4 /hr | $11.77\times$ decline |
+
+> [!IMPORTANT]
+> **Root Cause Finding**: Fraud production in PaySim is strictly constant across time at $\approx 11.1$ frauds per hour > (Train: 11.12/hr, Val: 10.53/hr, Test: 11.09/hr). However, legitimate customer transaction volume contracts by > $14.65\times$ (from 11,696.2/hr to 798.3/hr) after step 500 in the synthetic generator. > The prevalence surge is entirely volume-driven (denominator collapse), not an escalation of fraud activity. > Consequently, models evaluated on test exhibit high precision ($>94\%$) that translates to $\approx 53\text{--}58\%$ > when operating at typical continuous customer volume ($\\pi_{\\text{train}}$).
 ## Explanation Stability & Empirical Findings
 - **Stability Specification**: Explanations are evaluated across $R=5$ replicate models differing in random initialization seeds and subsampled majority draws.
   $$\text{overlap\_count} \ge \left\lceil \text{min\_overlap} \times k - 10^{-9} \right\rceil$$
@@ -81,32 +119,101 @@ Validation evaluation of Variant B reveals that model discriminative power is co
 
 ### Cross-Strategy Explanation Agreement (Step 4)
 
-Source file: `ml/reports/cross_strategy_agreement.json`. Evaluates whether top-5 SHAP explanation vectors differ across imbalance-handling strategies beyond retraining noise on matched seeds (Step 0c cohort: held-out test transactions with deployed score >= t_review (N=1,699, matched seed 42)).
+Source file: `ml/reports/cross_strategy_agreement.json`. Evaluates whether top-5 SHAP explanation vectors differ across imbalance-handling strategies beyond retraining noise on matched seeds across 10 replicate sets ($n=10$, df=9, $t_{\text{crit}} = 2.262$) on the SAME rows.
 
-#### Within-Strategy Retraining Noise Decomposition:
-- **Model-Seed-Only Noise Floor** (fixed subsample draw, varying seed):
-  - `class_weight`: 0.8740
-  - `none`: 0.8650
-  - `smote_enn`: 0.9062
-- **Data-Draw Retraining Noise** (varying subsample draw + seed across 10 sets):
-  - `class_weight`: 0.8554 (95% CI: [0.8485, 0.8623])
-  - `none`: 0.8509 (95% CI: [0.8379, 0.8639])
-  - `smote_enn`: 0.8650 (95% CI: [0.8587, 0.8713])
-- **Conservative Retraining Noise Interval**: `[0.8379, 0.8713]` (conservative lower bound = 0.8379).
+#### Within-Strategy Retraining Noise Decomposition (Step 0c Cohort, $N=1,699$):
+- **Data-Draw Retraining Noise across 10 Sets** (Student-t 95% CI):
+  - `class_weight`: Mean Overlap = 0.8630 (SD = 0.0170, 95% Student-t CI: [0.8499, 0.8761])
+  - `none`: Mean Overlap = 0.8395 (SD = 0.0145, 95% Student-t CI: [0.8284, 0.8506])
+  - `smote_enn`: Mean Overlap = 0.8415 (SD = 0.0194, 95% Student-t CI: [0.8266, 0.8565])
+- **Combined Retraining Noise Interval**: `[0.8266, 0.8761]` (conservative lower bound = 0.8266).
 
-#### Pairwise Between-Strategy Explanation Overlap:
+#### Pairwise Between-Strategy Explanation Overlap (Step 0c Cohort, $N=1,699$):
 
-| Strategy Comparison | Mean Top-5 Overlap | Median Overlap | 95% Bootstrap CI | Strictly Below Retraining Noise? |
-| :--- | :---: | :---: | :---: | :---: |
-| `class_weight` vs `none` | 0.8281 | 0.8000 | [0.8219, 0.8346] | **Yes** (0.8346 < 0.8379) |
-| `class_weight` vs `smote_enn` | 0.7927 | 0.8000 | [0.7868, 0.7987] | **Yes** (0.7987 < 0.8379) |
-| `none` vs `smote_enn` | 0.8018 | 0.8000 | [0.7965, 0.8075] | **Yes** (0.8075 < 0.8379) |
+| Strategy Comparison | 10-Set Mean Overlap | 10-Set SD | Student-t 95% CI ($n=10$) | Set 1 Overlap (Bootstrap 95% CI) | Strictly Below Retraining Noise? |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| `class_weight` vs `none` | 0.8389 | 0.0248 | [0.8211, 0.8566] | 0.8281 [0.8219, 0.8346] | No (overlaps noise) |
+| `class_weight` vs `smote_enn` | 0.8477 | 0.0276 | [0.8279, 0.8675] | 0.7927 [0.7868, 0.7987] | No (overlaps noise) |
+| `none` vs `smote_enn` | 0.8114 | 0.0167 | [0.7995, 0.8233] | 0.8018 [0.7965, 0.8075] | **Yes** (0.8233 < 0.8266) |
+
+#### Pairwise Between-Strategy Explanation Overlap (Test Frauds Cohort, $N=1,642$):
+
+| Strategy Comparison | 10-Set Mean Overlap | 10-Set SD | Student-t 95% CI ($n=10$) | Set 1 Overlap (Bootstrap 95% CI) | Strictly Below Retraining Noise? |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| `class_weight` vs `none` | 0.8396 | 0.0246 | [0.8220, 0.8572] | 0.8269 [0.8205, 0.8334] | No (overlaps noise) |
+| `class_weight` vs `smote_enn` | 0.8486 | 0.0281 | [0.8285, 0.8686] | 0.7933 [0.7871, 0.7993] | No (overlaps noise) |
+| `none` vs `smote_enn` | 0.8129 | 0.0166 | [0.8010, 0.8247] | 0.7993 [0.7934, 0.8045] | **Yes** (0.8247 < 0.8266) |
+
+#### Feature Attribution Diagnostics & Borderline Swaps:
+- **Mean |SHAP| Gap at Attribution Boundary** (Set 1 Deployed Models):
+  - `class_weight`: Rank 4 to 5 gap = 0.3210, Rank 5 to 6 gap = 0.1466 (narrow boundary creates swap sensitivity)
+  - `none`: Rank 4 to 5 gap = 0.3196, Rank 5 to 6 gap = 0.2282 (narrow boundary creates swap sensitivity)
+  - `smote_enn`: Rank 4 to 5 gap = 0.4167, Rank 5 to 6 gap = 0.2370 (narrow boundary creates swap sensitivity)
+- **Global Spearman Rank Correlation Across All 11 Features**:
+  - `class_weight` vs `none`: $\rho = 0.9364$
+  - `class_weight` vs `smote_enn`: $\rho = 0.8455$
+  - `none` vs `smote_enn`: $\rho = 0.9364$
+- **Constant-Explanation Baselines** (Global Top-5 Features by Mean |SHAP|):
+  - `class_weight`: ['old_balance_orig', 'amount', 'new_balance_dest', 'hour_of_day', 'new_balance_orig']
+  - `none`: ['old_balance_orig', 'amount', 'new_balance_orig', 'new_balance_dest', 'hour_of_day']
+  - `smote_enn`: ['old_balance_orig', 'amount', 'type_TRANSFER', 'new_balance_dest', 'new_balance_orig']
+
+**Top Feature Swaps Between Strategies (Set 1 Deployed Models, Step 0c Cohort):**
+
+| Strategy Pair | Replaced Feature $\to$ Intruded Feature | Frequency | Pct of Cohort (%) |
+| :--- | :--- | :---: | :---: |
+| `class_weight` vs `none` | `old_balance_dest -> new_balance_orig` | 199 | 11.71% |
+| `class_weight` vs `none` | `old_balance_dest -> type_CASH_OUT` | 198 | 11.65% |
+| `class_weight` vs `none` | `amount -> new_balance_orig` | 187 | 11.01% |
+| `class_weight` vs `smote_enn` | `old_balance_dest -> type_CASH_OUT` | 285 | 16.77% |
+| `class_weight` vs `smote_enn` | `old_balance_dest -> type_TRANSFER` | 243 | 14.30% |
+| `class_weight` vs `smote_enn` | `new_balance_orig -> type_CASH_OUT` | 216 | 12.71% |
+| `none` vs `smote_enn` | `new_balance_orig -> type_CASH_OUT` | 283 | 16.66% |
+| `none` vs `smote_enn` | `new_balance_orig -> type_TRANSFER` | 210 | 12.36% |
+| `none` vs `smote_enn` | `new_balance_orig -> amount` | 134 | 7.89% |
 
 #### Pre-Specified Scientific Verdict (Section 2.E):
-- **Decision Rule**: Differ from retraining noise IF AND ONLY IF the 95% bootstrap interval of between-strategy overlap lies strictly below the within-strategy retraining noise interval.
-- **Formal Scientific Verdict**: **"evidence of strategy-induced explanation shift beyond retraining noise"**.
-- **Interpretation**: For all strategy pairs, between-strategy overlap (95% bootstrap CIs: [0.8219, 0.8346], [0.7868, 0.7987], [0.7965, 0.8075]) lies strictly below the within-strategy retraining noise interval [0.8379, 0.8713]. Consequently, there is statistically significant evidence that imbalance-handling strategies induce an attribution shift exceeding retraining noise.
+- **Decision Rule**: Differ from retraining noise IF AND ONLY IF the 95% interval of between-strategy overlap lies strictly below the within-strategy retraining noise interval.
+- **Formal Scientific Verdict**: **"no evidence of strategy-induced explanation shift beyond retraining noise"**.
+- **Statistical Margin Note**: Under Student-t intervals across 10 matched sets (t=2.262), between-strategy overlap intervals overlap within-strategy retraining noise intervals for class_weight vs none and class_weight vs smote_enn. Only none vs smote_enn lies strictly below none's noise lower bound. The margin between strategies is small.
+## Model & Strategy Results Comparison (Held-Out Test Split)
 
+Source files: `ml/reports/metrics.json` (key: `strategy_comparison`) and `ml/reports/comparison.csv`.
+Split prevalence: Held-Out Test $\pi_{\text{test}} = 1.3898\%$ ($1,642 / 118,146$); Train $\pi_{\text{train}} = 0.0951\%$ ($5,781 / 6,082,007$).
+
+| Model / Strategy | Val PR-AUC | Test PR-AUC | Recall | Precision (Test $\pi=1.39\%$) | Precision (Train $\pi=0.095\%$) | F1 | FPR | MCC | Explanation Stable Rate ($k=5$) | Threshold Rule |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| class_weight (deployed) [Set 1] | 0.9806 | 0.9907 | 94.46% | 94.29% | 52.69% | 0.9437 | 0.0807% | 0.9429 | 82.76% | $t_{\text{high}} = 0.9788$ (Val-selected) |
+| none (10:1 undersampled baseline) | 0.9781 | 0.9900 | 93.67% | 95.00% | 56.17% | 0.9433 | 0.0695% | 0.9425 | - | $t_{\text{high}} = 0.9754$ (Val-selected) |
+| smote_enn | 0.9690 | 0.9853 | 90.50% | 95.38% | 58.22% | 0.9287 | 0.0618% | 0.9281 | - | $t_{\text{high}} = 0.9840$ (Val-selected) |
+| Logistic Regression baseline | - | 0.8505 | 81.55% | 67.49% | 12.29% | 0.7386 | 0.5536% | 0.7379 | - | Threshold 0.50 (not comparable) |
+| Random Forest baseline | - | 0.9362 | 87.21% | 85.75% | 28.88% | 0.8647 | 0.2043% | 0.8628 | - | Threshold 0.50 (not comparable) |
+| Full-train reference (none, 6.08M) | - | 0.9823 | 77.89% | 99.77% | 96.64% | 0.8748 | 0.0026% | 0.8801 | - | Threshold 0.50 (not comparable) |
+| Full-train reference (class_weight, 6.08M) | - | 0.9831 | 99.94% | 53.93% | 7.32% | 0.7005 | 1.2034% | 0.7297 | - | Threshold 0.50 (not comparable) |
+| Variant A reference (15 features) | - | 0.9999 | 99.94% | 98.32% | 79.82% | 0.9912 | 0.0240% | 0.9912 | 83.07% | $t_{\text{high}} = 0.9788$ (15 features with balance shortcut) |
+
+### Prevalence Surge Investigation ($14.62\times$ Ratio Between Splits)
+
+A critical empirical property of the PaySim chronological sequence is that the test split fraud prevalence ($1.3898\%$) is approximately $14.62\times$ higher than the training base rate ($0.09505\%$). We investigated this surge across per-step volumes and transaction types:
+
+| Split | Steps Range | Total Rows | Total Frauds | Prevalence (%) | Overall Volume (/hr) | Fraud Rate (/hr) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Train** | Steps 1..520 (520 hrs) | 6,082,007 | 5,781 | 0.09505% | 11,696.2 /hr | 11.12 /hr |
+| **Validation** | Steps 521..595 (75 hrs) | 162,467 | 790 | 0.48625% | 2,166.2 /hr | 10.53 /hr |
+| **Held-Out Test** | Steps 596..743 (148 hrs) | 118,146 | 1,642 | 1.38979% | 798.3 /hr | 11.09 /hr |
+
+**Per-Type Hourly Volume Across Splits:**
+
+| Transaction Type | Train Rate (/hr) | Validation Rate (/hr) | Test Rate (/hr) | Volume Decline Factor |
+| :--- | :---: | :---: | :---: | :---: |
+| `TRANSFER` | 974.2 /hr | 196.9 /hr | 78.0 /hr | $12.49\times$ decline |
+| `CASH_OUT` | 4,129.1 /hr | 708.9 /hr | 251.3 /hr | $16.43\times$ decline |
+| `PAYMENT` | 3,949.4 /hr | 754.5 /hr | 278.5 /hr | $14.18\times$ decline |
+| `CASH_IN` | 2,568.2 /hr | 487.9 /hr | 184.1 /hr | $13.95\times$ decline |
+| `DEBIT` | 75.3 /hr | 18.0 /hr | 6.4 /hr | $11.77\times$ decline |
+
+> [!IMPORTANT]
+> **Root Cause Finding**: Fraud production in PaySim is strictly constant across time at $\approx 11.1$ frauds per hour > (Train: 11.12/hr, Val: 10.53/hr, Test: 11.09/hr). However, legitimate customer transaction volume contracts by > $14.65\times$ (from 11,696.2/hr to 798.3/hr) after step 500 in the synthetic generator. > The prevalence surge is entirely volume-driven (denominator collapse), not an escalation of fraud activity. > Consequently, models evaluated on test exhibit high precision ($>94\%$) that translates to $\approx 53\text{--}58\%$ > when operating at typical continuous customer volume ($\\pi_{\\text{train}}$).
 ## Full Gateway Decision Evaluation & Variant Selection (Step 3)
 
 Source file: `ml/reports/gateway_evaluation.json`. Evaluates the deployed `v1.0.0-class_weight` artifact ($t_{\text{review}} = 0.955742, t_{\text{high}} = 0.971177$, $k=5, \text{min\_overlap}=0.80$) using read-only backend `route_decision` and 5 replicate models.
@@ -117,7 +224,7 @@ Source file: `ml/reports/gateway_evaluation.json`. Evaluates the deployed `v1.0.
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
 | Variant A (Current Backend: Unconstrained Rules) | 49,465 | 659.53 | 82.15% | 99.87% | [99.29%, 99.98%] | 30.508% | Ineligible (Queue $> 3,000$) |
 | Variant B (Score-Gated Rules: Rule Never Routes Alone) | 145 | 1.93 | 82.15% | 95.06% | [93.32%, 96.37%] | 0.027% | **Selected (Smallest Queue within 1pp)** |
-| Variant C (Train-Recalibrated Rules: $\le 0.5\%$ cap) | 1,622 | 21.63 | 80.51% | 95.06% | [93.32%, 96.37%] | 0.932% | Eligible (Qualifying within 1pp) |
+| Variant C (Train-Recalibrated Rules: $\le 0.5\%$ cap) | 2,721 | 36.28 | 80.51% | 95.06% | [93.32%, 96.37%] | 1.612% | Eligible (Qualifying within 1pp) |
 | Variant D (Pure ML Gateway: No Rules) | 192 | 2.56 | 80.51% | 95.06% | [93.32%, 96.37%] | 0.048% | Eligible (Qualifying within 1pp) |
 | Variant E (Exploratory Post-Hoc: Tuned Floor $f=0.75$) | 430 | 5.73 | 82.15% | 99.24% | [98.35%, 99.65%] | 0.182% | Exploratory (Post-hoc tuned) |
 
@@ -127,7 +234,7 @@ Source file: `ml/reports/gateway_evaluation.json`. Evaluates the deployed `v1.0.
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | Variant A (Current Backend: Unconstrained Rules) | 1,397 | 79.35% | 35,379 | 239.05 | 99.76% | [99.38%, 99.91%] | 30.080% |
 | Variant B (Score-Gated Rules: Rule Never Routes Alone) | 1,397 | 79.35% | 302 | 2.04 | 95.92% | [94.85%, 96.77%] | 0.026% |
-| Variant C (Train-Recalibrated Rules: $\le 0.5\%$ cap) | 1,361 | 78.14% | 1,022 | 6.91 | 95.92% | [94.85%, 96.77%] | 0.627% |
+| Variant C (Train-Recalibrated Rules: $\le 0.5\%$ cap) | 1,361 | 78.14% | 1,332 | 9.00 | 95.92% | [94.85%, 96.77%] | 0.893% |
 | Variant D (Pure ML Gateway: No Rules) | 1,361 | 78.14% | 338 | 2.28 | 95.92% | [94.85%, 96.77%] | 0.040% |
 | Variant E (Exploratory Post-Hoc: Tuned Floor $f=0.75$) | 1,397 | 79.35% | 540 | 3.65 | 99.21% | [98.65%, 99.54%] | 0.184% |
 
@@ -137,7 +244,7 @@ Source file: `ml/reports/gateway_evaluation.json`. Evaluates the deployed `v1.0.
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | Variant A (Current Backend: Unconstrained Rules) | 3 (0/3) | 299 (272/27) | 35,077 (63/35014) | 35,379 | 335 | 35,044 |
 | Variant B (Score-Gated Rules: Rule Never Routes Alone) | 3 (0/3) | 299 (272/27) | 0 (0/0) | 302 | 272 | 30 |
-| Variant C (Train-Recalibrated Rules: $\le 0.5\%$ cap) | 54 (24/30) | 284 (268/16) | 684 (0/684) | 1,022 | 292 | 730 |
+| Variant C (Train-Recalibrated Rules: $\le 0.5\%$ cap) | 54 (24/30) | 284 (268/16) | 994 (0/994) | 1,332 | 292 | 1,040 |
 | Variant D (Pure ML Gateway: No Rules) | 54 (24/30) | 284 (268/16) | 0 (0/0) | 338 | 292 | 46 |
 | Variant E (Exploratory Post-Hoc: Tuned Floor $f=0.75$) | 3 (0/3) | 299 (272/27) | 238 (54/184) | 540 | 326 | 214 |
 
@@ -148,23 +255,41 @@ Source file: `ml/reports/gateway_evaluation.json`. Evaluates the deployed `v1.0.
 | Validation Split | 881 (751 F, 130 L) | 743 (649 F, 94 L) | 138 (102 F, 36 L) | 84.34% |
 | Test Split | 1,696 (1575 F, 121 L) | 1,397 (1303 F, 94 L) | 299 (272 F, 27 L) | 82.37% |
 
-### Informative Analysis of Unstable Explanations (Candidate High Risk Rows)
+### Informative Analysis of Unstable Explanations (Evaluated on BOTH Candidate Cohorts)
 
-| Split | Cohort | $N$ | Frauds (TP) | Legit (FP) | Precision (95% Wilson CI) | FP Share (95% Wilson CI) |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| Validation | Stable ($k=5$) | 743 | 649 | 94 | 87.35% [84.76%, 89.55%] | 12.65% [10.45%, 15.24%] |
-| Validation | Unstable ($k=5$) | 138 | 102 | 36 | 73.91% [66.01%, 80.52%] | 26.09% [19.48%, 33.99%] |
-| Test | Stable ($k=5$) | 1,397 | 1,303 | 94 | 93.27% [91.84%, 94.47%] | 6.73% [5.53%, 8.16%] |
-| Test | Unstable ($k=5$) | 299 | 272 | 27 | 90.97% [87.18%, 93.72%] | 9.03% [6.28%, 12.82%] |
+| Split | Cohort Description | Stability Group | $N$ | Frauds (TP) | Legit (FP) | Precision (95% Wilson CI) | FP Share (95% Wilson CI) |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| Validation | Pure ML Candidates ($s \ge t_{\text{high}}$) | Stable ($k=5$) | 696 | 636 | 60 | 91.38% [89.06%, 93.24%] | 8.62% [6.76%, 10.94%] |
+| Validation | Pure ML Candidates ($s \ge t_{\text{high}}$) | Unstable ($k=5$) | 122 | 101 | 21 | 82.79% [75.11%, 88.46%] | 17.21% [11.54%, 24.88%] |
+| Validation | Rule-Boosted Candidates (Gateway Input) | Stable ($k=5$) | 743 | 649 | 94 | 87.35% [84.76%, 89.55%] | 12.65% [10.45%, 15.24%] |
+| Validation | Rule-Boosted Candidates (Gateway Input) | Unstable ($k=5$) | 138 | 102 | 36 | 73.91% [66.01%, 80.52%] | 26.09% [19.48%, 33.99%] |
+| Test | Pure ML Candidates ($s \ge t_{\text{high}}$) | Stable ($k=5$) | 1,361 | 1,283 | 78 | 94.27% [92.90%, 95.38%] | 5.73% [4.62%, 7.10%] |
+| Test | Pure ML Candidates ($s \ge t_{\text{high}}$) | Unstable ($k=5$) | 284 | 268 | 16 | 94.37% [91.05%, 96.50%] | 5.63% [3.50%, 8.95%] |
+| Test | Rule-Boosted Candidates (Gateway Input) | Stable ($k=5$) | 1,397 | 1,303 | 94 | 93.27% [91.84%, 94.47%] | 6.73% [5.53%, 8.16%] |
+| Test | Rule-Boosted Candidates (Gateway Input) | Unstable ($k=5$) | 299 | 272 | 27 | 90.97% [87.18%, 93.72%] | 9.03% [6.28%, 12.82%] |
+
+#### Score-Adjusted Logistic Regression Check (`is_false_positive ~ intercept + score + mean_overlap`):
+
+| Split | Cohort | Variable | Coefficient | Odds Ratio | Std Error | z-stat | p-value | Interpretation |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| Validation | Pure ML ($s \ge t_{\text{high}}$) | ML Score ($s$) | -212.0393 | 0.0000 | 18.0626 | -11.7391 | < 0.0001 | Highly significant ($p < 0.0001$) |
+| Validation | Pure ML ($s \ge t_{\text{high}}$) | Mean Overlap | -4.4667 | 0.0115 | 1.9948 | -2.2392 | 0.0251 | Not significant ($p > 0.20$) |
+| Validation | Rule-Boosted | ML Score ($s$) | -149.2611 | 0.0000 | 11.1196 | -13.4233 | < 0.0001 | Highly significant ($p < 0.0001$) |
+| Validation | Rule-Boosted | Mean Overlap | -4.1097 | 0.0164 | 1.6988 | -2.4192 | 0.0156 | Not significant ($p > 0.20$) |
+| Held-Out Test | Pure ML ($s \ge t_{\text{high}}$) | ML Score ($s$) | -203.0603 | 0.0000 | 14.5016 | -14.0026 | < 0.0001 | Highly significant ($p < 0.0001$) |
+| Held-Out Test | Pure ML ($s \ge t_{\text{high}}$) | Mean Overlap | 2.1033 | 8.1932 | 1.6978 | 1.2388 | 0.2154 | Not significant ($p > 0.20$) |
+| Held-Out Test | Rule-Boosted | ML Score ($s$) | -137.5673 | 0.0000 | 9.4524 | -14.5536 | < 0.0001 | Highly significant ($p < 0.0001$) |
+| Held-Out Test | Rule-Boosted | Mean Overlap | 0.7883 | 2.1996 | 1.4825 | 0.5317 | 0.5949 | Not significant ($p > 0.20$) |
 
 #### Pre-Specified Conclusion on Informative Nature of Unstable:
-- **Validation Split**: AUROC = 0.5815 (95% bootstrap CI: [0.5231, 0.6361]). Validation meets both conditions (AUROC excludes 0.50, and Unstable FP share lower CI > Stable upper CI).
-- **Held-Out Test Split**: AUROC = 0.5478 (95% bootstrap CI: [0.4909, 0.6020]). Test fails both conditions (AUROC CI includes chance 0.50, and Unstable FP share CI [6.28%, 12.82%] overlaps Stable [5.53%, 8.16%]).
+- **Validation Split**: AUROC = 0.5815 (95% bootstrap CI: [0.5226, 0.6412]). Validation meets both conditions (AUROC excludes 0.50, and Unstable FP share lower CI > Stable upper CI).
+- **Held-Out Test Split**: AUROC = 0.5478 (95% bootstrap CI: [0.4957, 0.6051]). Test fails both conditions (AUROC CI includes chance 0.50, and Unstable FP share CI [6.28%, 12.82%] overlaps Stable [5.53%, 8.16%]).
 - **Scientific Evaluation Note**: `docs/analysis-plan.md` does not pre-specify whether Validation or Held-Out Test is the governing split. However, because generalizability to unseen data is required, the pre-specified conclusion on test is: **"no evidence that explanation instability predicts false positive alert status"**.
 
 #### Score-Margin Control vs Unstable Explanation Re-routing:
 - **Restricted Score-Margin Control** (strictly candidate rows with score $\ge t_{\text{high}}$; $N=284$ rows): re-routes 82 FPs (28.87% FP share) vs 16 FPs for Unstable within $s \ge t_{\text{high}}$ (+66 FPs caught, with 66 fewer frauds delayed).
-- **Unrestricted Score-Margin Control** (all candidate rows including rule-boosted rows below $t_{\text{high}}$; $N=299$ rows): re-routes 107 FPs (35.79% FP share). *Labeled unrestricted: includes lower-scoring rule-boosted band rows with higher FP prevalence.*
+- **Mathematical Equivalence**: Selecting candidate rows with the lowest ML scores to send to Analyst Review is mathematically equivalent to raising the decision threshold $t_{\text{high}}$ from $0.971177$ to $0.983949$, directly re-routing borderline alerts into the review band.
+- **Unrestricted Score-Margin Control** (all candidate rows including rule-boosted rows below $t_{\text{high}}$; $N=299$ rows): re-routes 107 FPs (35.79% FP share). *Labeled unrestricted: includes lower-scoring rule-boosted band rows with higher baseline FP prevalence.*
 
 ### Exploratory Post-Hoc Variant E: Score Floor Grid Analysis
 

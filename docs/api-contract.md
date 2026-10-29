@@ -30,10 +30,14 @@
 - **Naming**: The API strictly uses `snake_case` (`old_balance_orig`, `new_balance_orig`, `old_balance_dest`, `new_balance_dest`). PaySim's raw columnar names (`oldbalanceOrg`, `newbalanceOrig`, etc.) are mapped in a single ML ingestion function and never exposed across the network boundary.
 - **Amounts and Balances**: `amount >= 0.0` (PaySim contains real zero-amount transactions), and all balance fields are $\ge 0.0$. Negative values are rejected with `HTTP 422 Unprocessable Entity`.
 
-### Tri-State Gateway Risk Routing
-1. **Low Risk**: Model score below review threshold and no heuristic rules triggered.
-2. **High Risk**: High risk score or critical heuristic rule triggered, with **Stable** explanation.
-3. **Analyst Review**: Borderline score OR High Risk prediction where SHAP explanation stability is **Unstable** across imbalance-handling strategies.
+### Tri-State Gateway Risk Routing (Variant B: Score-Gated Rules)
+The gateway evaluates calibrated risk thresholds ($0 < T_{rev} < T_{high} < 1$) dynamically loaded from the deployed ML artifact manifest, combined with heuristic safety rules and SHAP explanation stability:
+1. **Candidate High Risk**: Triggered if `risk_score >= threshold_high`, OR (`rule_flags` present AND `risk_score >= threshold_review`).
+   - If SHAP explanation is **Stable** $\to$ **High Risk**.
+   - If SHAP explanation is **Unstable** $\to$ routed to **Analyst Review** for manual investigation.
+2. **Analyst Review**: In addition to unstable candidate alerts, any borderline transaction without rule triggers where `threshold_review <= risk_score < threshold_high` routes to **Analyst Review**.
+3. **Low Risk**: Model score below review threshold (`risk_score < threshold_review`).
+   - *Score-Gated Rules Semantics*: A rule flag alone with `risk_score < threshold_review` is recorded in `rule_flags` and persisted in the audit trail, but **does not** escalate the gateway decision; the transaction routes to **Low Risk**. Everything else with `risk_score < threshold_review` routes to **Low Risk**. Threshold comparisons use unrounded scores with $\ge$.
 
 ### Append-Only Audit Trail
 Analyst reviews (`POST /api/v1/transactions/{id}/review`) append new review records to an immutable audit log. Transaction history is never overwritten. `TransactionDetail` exposes the full review log and a computed `latest_review`.

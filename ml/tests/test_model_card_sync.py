@@ -174,6 +174,11 @@ def test_strategy_comparison_table_cells_match_metrics_json():
                 f"Cell Threshold mismatch for {key}: markdown '{cells[10]}' vs metrics.json "
                 f"key `strategy_comparison.{key}.threshold_high` '{expected_thresh}'"
             )
+        elif key == "variant_A_reference":
+            expected_thresh = "$t_{\\text{high}} = 0.9981$ (Stage 1 Val-selected, 15 features)"
+            assert cells[10] == expected_thresh, (
+                f"Cell Threshold mismatch for {key}: markdown '{cells[10]}' vs expected '{expected_thresh}'"
+            )
 
 
 

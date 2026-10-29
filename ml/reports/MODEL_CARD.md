@@ -66,14 +66,14 @@ Split prevalence: Held-Out Test $\pi_{\text{test}} = 1.3898\%$ ($1,642 / 118,146
 
 | Model / Strategy | Val PR-AUC | Test PR-AUC | Recall | Precision (Test $\pi=1.39\%$) | Precision (Train $\pi=0.095\%$) | F1 | FPR | MCC | Explanation Stable Rate ($k=5$) | Threshold Rule |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| class_weight (deployed) [Set 1] | 0.9806 | 0.9907 | 94.46% | 94.29% | 52.69% | 0.9437 | 0.0807% | 0.9429 | 82.76% | $t_{\text{high}} = 0.9788$ (Val-selected) |
-| none (10:1 undersampled baseline) | 0.9781 | 0.9900 | 93.67% | 95.00% | 56.17% | 0.9433 | 0.0695% | 0.9425 | - | $t_{\text{high}} = 0.9754$ (Val-selected) |
-| smote_enn | 0.9690 | 0.9853 | 90.50% | 95.38% | 58.22% | 0.9287 | 0.0618% | 0.9281 | - | $t_{\text{high}} = 0.9840$ (Val-selected) |
+| class_weight (deployed) [Set 1] | 0.9806 | 0.9907 | 94.46% | 94.29% | 52.69% | 0.9437 | 0.0807% | 0.9429 | 82.76% | $t_{\text{high}} = 0.9712$ (Val-selected) |
+| none (10:1 undersampled baseline) | 0.9781 | 0.9900 | 93.67% | 95.00% | 56.17% | 0.9433 | 0.0695% | 0.9425 | - | $t_{\text{high}} = 0.8688$ (Val-selected) |
+| smote_enn | 0.9690 | 0.9853 | 90.50% | 95.38% | 58.22% | 0.9287 | 0.0618% | 0.9281 | - | $t_{\text{high}} = 0.9940$ (Val-selected) |
 | Logistic Regression baseline | - | 0.8505 | 81.55% | 67.49% | 12.29% | 0.7386 | 0.5536% | 0.7379 | - | Threshold 0.50 (not comparable) |
 | Random Forest baseline | - | 0.9362 | 87.21% | 85.75% | 28.88% | 0.8647 | 0.2043% | 0.8628 | - | Threshold 0.50 (not comparable) |
 | Full-train reference (none, 6.08M) | - | 0.9823 | 77.89% | 99.77% | 96.64% | 0.8748 | 0.0026% | 0.8801 | - | Threshold 0.50 (not comparable) |
 | Full-train reference (class_weight, 6.08M) | - | 0.9831 | 99.94% | 53.93% | 7.32% | 0.7005 | 1.2034% | 0.7297 | - | Threshold 0.50 (not comparable) |
-| Variant A reference (15 features) | - | 0.9999 | 99.94% | 98.32% | 79.82% | 0.9912 | 0.0240% | 0.9912 | 83.07% | $t_{\text{high}} = 0.9788$ (15 features with balance shortcut) |
+| Variant A reference (15 features) | - | 0.9999 | 99.94% | 98.32% | 79.82% | 0.9912 | 0.0240% | 0.9912 | 83.07% | $t_{\text{high}} = 0.9712$ (15 features with balance shortcut) |
 
 ### Prevalence Surge Investigation ($14.62\times$ Ratio Between Splits)
 
@@ -123,26 +123,26 @@ Source file: `ml/reports/cross_strategy_agreement.json`. Evaluates whether top-5
 
 #### Within-Strategy Retraining Noise Decomposition (Step 0c Cohort, $N=1,699$):
 - **Data-Draw Retraining Noise across 10 Sets** (Student-t 95% CI):
-  - `class_weight`: Mean Overlap = 0.8630 (SD = 0.0170, 95% Student-t CI: [0.8499, 0.8761])
-  - `none`: Mean Overlap = 0.8395 (SD = 0.0145, 95% Student-t CI: [0.8284, 0.8506])
-  - `smote_enn`: Mean Overlap = 0.8415 (SD = 0.0194, 95% Student-t CI: [0.8266, 0.8565])
-- **Combined Retraining Noise Interval**: `[0.8266, 0.8761]` (conservative lower bound = 0.8266).
+  - `class_weight`: 45-Pair Mean Overlap = 0.8643 (SD = 0.0162, Bootstrap 95% CI over 10 sets: [0.8518, 0.8759])
+  - `none`: 45-Pair Mean Overlap = 0.8417 (SD = 0.0287, Bootstrap 95% CI over 10 sets: [0.8254, 0.8632])
+  - `smote_enn`: 45-Pair Mean Overlap = 0.8635 (SD = 0.0217, Bootstrap 95% CI over 10 sets: [0.8502, 0.8764])
+- **Combined Retraining Noise Interval**: `[0.8254, 0.8764]` (conservative lower bound = 0.8254).
 
 #### Pairwise Between-Strategy Explanation Overlap (Step 0c Cohort, $N=1,699$):
 
-| Strategy Comparison | 10-Set Mean Overlap | 10-Set SD | Student-t 95% CI ($n=10$) | Set 1 Overlap (Bootstrap 95% CI) | Strictly Below Retraining Noise? |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| `class_weight` vs `none` | 0.8389 | 0.0248 | [0.8211, 0.8566] | 0.8281 [0.8219, 0.8346] | No (overlaps noise) |
-| `class_weight` vs `smote_enn` | 0.8477 | 0.0276 | [0.8279, 0.8675] | 0.7927 [0.7868, 0.7987] | No (overlaps noise) |
-| `none` vs `smote_enn` | 0.8114 | 0.0167 | [0.7995, 0.8233] | 0.8018 [0.7965, 0.8075] | **Yes** (0.8233 < 0.8266) |
+| Strategy Comparison | 10-Set Mean Overlap | 10-Set SD | Student-t 95% CI ($n=10$) | Set 1 Overlap (Bootstrap 95% CI) | Strictly Below Retraining Noise? | Per-Pair Verdict |
+| :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| `class_weight` vs `none` | 0.8389 | 0.0248 | [0.8211, 0.8566] | 0.8281 [0.8219, 0.8346] | No (overlaps noise) | Fails rule (no shift beyond noise) |
+| `class_weight` vs `smote_enn` | 0.8477 | 0.0276 | [0.8279, 0.8675] | 0.7927 [0.7868, 0.7987] | No (overlaps noise) | Fails rule (no shift beyond noise) |
+| `none` vs `smote_enn` | 0.8114 | 0.0167 | [0.7995, 0.8233] | 0.8018 [0.7965, 0.8075] | **Yes** | Meets rule (shift beyond noise) |
 
 #### Pairwise Between-Strategy Explanation Overlap (Test Frauds Cohort, $N=1,642$):
 
-| Strategy Comparison | 10-Set Mean Overlap | 10-Set SD | Student-t 95% CI ($n=10$) | Set 1 Overlap (Bootstrap 95% CI) | Strictly Below Retraining Noise? |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| `class_weight` vs `none` | 0.8396 | 0.0246 | [0.8220, 0.8572] | 0.8269 [0.8205, 0.8334] | No (overlaps noise) |
-| `class_weight` vs `smote_enn` | 0.8486 | 0.0281 | [0.8285, 0.8686] | 0.7933 [0.7871, 0.7993] | No (overlaps noise) |
-| `none` vs `smote_enn` | 0.8129 | 0.0166 | [0.8010, 0.8247] | 0.7993 [0.7934, 0.8045] | **Yes** (0.8247 < 0.8266) |
+| Strategy Comparison | 10-Set Mean Overlap | 10-Set SD | Student-t 95% CI ($n=10$) | Set 1 Overlap (Bootstrap 95% CI) | Strictly Below Retraining Noise? | Per-Pair Verdict |
+| :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| `class_weight` vs `none` | 0.8396 | 0.0246 | [0.8220, 0.8572] | 0.8269 [0.8205, 0.8334] | No (overlaps noise) | Fails rule (no shift beyond noise) |
+| `class_weight` vs `smote_enn` | 0.8486 | 0.0281 | [0.8285, 0.8686] | 0.7933 [0.7871, 0.7993] | No (overlaps noise) | Fails rule (no shift beyond noise) |
+| `none` vs `smote_enn` | 0.8129 | 0.0166 | [0.8010, 0.8247] | 0.7993 [0.7934, 0.8045] | **Yes** | Meets rule (shift beyond noise) |
 
 #### Feature Attribution Diagnostics & Borderline Swaps:
 - **Mean |SHAP| Gap at Attribution Boundary** (Set 1 Deployed Models):
@@ -153,10 +153,10 @@ Source file: `ml/reports/cross_strategy_agreement.json`. Evaluates whether top-5
   - `class_weight` vs `none`: $\rho = 0.9364$
   - `class_weight` vs `smote_enn`: $\rho = 0.8455$
   - `none` vs `smote_enn`: $\rho = 0.9364$
-- **Constant-Explanation Baselines** (Global Top-5 Features by Mean |SHAP|):
-  - `class_weight`: ['old_balance_orig', 'amount', 'new_balance_dest', 'hour_of_day', 'new_balance_orig']
-  - `none`: ['old_balance_orig', 'amount', 'new_balance_orig', 'new_balance_dest', 'hour_of_day']
-  - `smote_enn`: ['old_balance_orig', 'amount', 'type_TRANSFER', 'new_balance_dest', 'new_balance_orig']
+- **Constant-Explanation Baselines** (Global Top-5 Features by Mean |SHAP| Attributions):
+  - `class_weight`: [`old_balance_orig`, `amount`, `new_balance_dest`, `hour_of_day`, `new_balance_orig`] (Source: Global top-5 ranked by mean absolute SHAP attribution across cohort) | Mean Overlap = 0.7767 (77.67%) | Stable Rate ($k=5$) = 0.7669 (76.69%)
+  - `none`: [`old_balance_orig`, `amount`, `new_balance_orig`, `new_balance_dest`, `hour_of_day`] (Source: Global top-5 ranked by mean absolute SHAP attribution across cohort) | Mean Overlap = 0.7646 (76.46%) | Stable Rate ($k=5$) = 0.7145 (71.45%)
+  - `smote_enn`: [`old_balance_orig`, `amount`, `type_TRANSFER`, `new_balance_dest`, `new_balance_orig`] (Source: Global top-5 ranked by mean absolute SHAP attribution across cohort) | Mean Overlap = 0.6855 (68.55%) | Stable Rate ($k=5$) = 0.4414 (44.14%)
 
 **Top Feature Swaps Between Strategies (Set 1 Deployed Models, Step 0c Cohort):**
 
@@ -183,14 +183,14 @@ Split prevalence: Held-Out Test $\pi_{\text{test}} = 1.3898\%$ ($1,642 / 118,146
 
 | Model / Strategy | Val PR-AUC | Test PR-AUC | Recall | Precision (Test $\pi=1.39\%$) | Precision (Train $\pi=0.095\%$) | F1 | FPR | MCC | Explanation Stable Rate ($k=5$) | Threshold Rule |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| class_weight (deployed) [Set 1] | 0.9806 | 0.9907 | 94.46% | 94.29% | 52.69% | 0.9437 | 0.0807% | 0.9429 | 82.76% | $t_{\text{high}} = 0.9788$ (Val-selected) |
-| none (10:1 undersampled baseline) | 0.9781 | 0.9900 | 93.67% | 95.00% | 56.17% | 0.9433 | 0.0695% | 0.9425 | - | $t_{\text{high}} = 0.9754$ (Val-selected) |
-| smote_enn | 0.9690 | 0.9853 | 90.50% | 95.38% | 58.22% | 0.9287 | 0.0618% | 0.9281 | - | $t_{\text{high}} = 0.9840$ (Val-selected) |
+| class_weight (deployed) [Set 1] | 0.9806 | 0.9907 | 94.46% | 94.29% | 52.69% | 0.9437 | 0.0807% | 0.9429 | 82.76% | $t_{\text{high}} = 0.9712$ (Val-selected) |
+| none (10:1 undersampled baseline) | 0.9781 | 0.9900 | 93.67% | 95.00% | 56.17% | 0.9433 | 0.0695% | 0.9425 | - | $t_{\text{high}} = 0.8688$ (Val-selected) |
+| smote_enn | 0.9690 | 0.9853 | 90.50% | 95.38% | 58.22% | 0.9287 | 0.0618% | 0.9281 | - | $t_{\text{high}} = 0.9940$ (Val-selected) |
 | Logistic Regression baseline | - | 0.8505 | 81.55% | 67.49% | 12.29% | 0.7386 | 0.5536% | 0.7379 | - | Threshold 0.50 (not comparable) |
 | Random Forest baseline | - | 0.9362 | 87.21% | 85.75% | 28.88% | 0.8647 | 0.2043% | 0.8628 | - | Threshold 0.50 (not comparable) |
 | Full-train reference (none, 6.08M) | - | 0.9823 | 77.89% | 99.77% | 96.64% | 0.8748 | 0.0026% | 0.8801 | - | Threshold 0.50 (not comparable) |
 | Full-train reference (class_weight, 6.08M) | - | 0.9831 | 99.94% | 53.93% | 7.32% | 0.7005 | 1.2034% | 0.7297 | - | Threshold 0.50 (not comparable) |
-| Variant A reference (15 features) | - | 0.9999 | 99.94% | 98.32% | 79.82% | 0.9912 | 0.0240% | 0.9912 | 83.07% | $t_{\text{high}} = 0.9788$ (15 features with balance shortcut) |
+| Variant A reference (15 features) | - | 0.9999 | 99.94% | 98.32% | 79.82% | 0.9912 | 0.0240% | 0.9912 | 83.07% | $t_{\text{high}} = 0.9712$ (15 features with balance shortcut) |
 
 ### Prevalence Surge Investigation ($14.62\times$ Ratio Between Splits)
 

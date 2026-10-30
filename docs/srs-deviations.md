@@ -13,7 +13,7 @@ This document formally records all architectural and implementation deviations f
 
 ### 1.2. Actual Implementation (Variant B: Score-Gated Rules)
 - A heuristic rule trigger raises a transaction to candidate **High Risk** only when the calibrated machine learning score meets or exceeds the review threshold (`risk_score >= threshold_review`).
-- A heuristic rule trigger occurring on a transaction with low ML score (`risk_score < threshold_review`) is strictly recorded in `rule_flags` and persisted in the append-only database audit log, but **does not alter the gateway decision**; the transaction is routed to **Low Risk**.
+- A heuristic rule trigger occurring on a transaction with low ML score (`risk_score < threshold_review`) is strictly recorded in `rule_flags` and persisted directly in the `transactions.rule_flags` JSON/JSONB column (table `transactions`, column `rule_flags`), but **does not alter the gateway decision**; the transaction is routed to **Low Risk**.
 - Pure machine learning routing applies: Candidate High Risk (`risk_score >= threshold_high` OR `has_rules and risk_score >= threshold_review`) with Stable explanation $\to$ **High Risk**; with Unstable explanation $\to$ **Analyst Review**; borderline band (`threshold_review <= risk_score < threshold_high` without rules) $\to$ **Analyst Review**; all other transactions $\to$ **Low Risk**.
 
 ### 1.3. Rationale and Empirical Evidence

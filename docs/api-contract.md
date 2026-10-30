@@ -37,7 +37,7 @@ The gateway evaluates calibrated risk thresholds ($0 < T_{rev} < T_{high} < 1$) 
    - If SHAP explanation is **Unstable** $\to$ routed to **Analyst Review** for manual investigation.
 2. **Analyst Review**: In addition to unstable candidate alerts, any borderline transaction without rule triggers where `threshold_review <= risk_score < threshold_high` routes to **Analyst Review**.
 3. **Low Risk**: Model score below review threshold (`risk_score < threshold_review`).
-   - *Score-Gated Rules Semantics*: A rule flag alone with `risk_score < threshold_review` is recorded in `rule_flags` and persisted in the audit trail, but **does not** escalate the gateway decision; the transaction routes to **Low Risk**. Everything else with `risk_score < threshold_review` routes to **Low Risk**. Threshold comparisons use unrounded scores with $\ge$.
+   - *Score-Gated Rules Semantics*: A rule flag alone with `risk_score < threshold_review` is recorded in `rule_flags` and persisted in the `transactions` table under the `rule_flags` JSON/JSONB column, but **does not** escalate the gateway decision; the transaction routes to **Low Risk**. Everything else with `risk_score < threshold_review` routes to **Low Risk**. Threshold comparisons use unrounded scores with $\ge$.
 
 ### Append-Only Audit Trail
 Analyst reviews (`POST /api/v1/transactions/{id}/review`) append new review records to an immutable audit log. Transaction history is never overwritten. `TransactionDetail` exposes the full review log and a computed `latest_review`.

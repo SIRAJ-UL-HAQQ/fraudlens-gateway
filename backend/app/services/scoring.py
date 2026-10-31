@@ -256,24 +256,28 @@ class ScoringService:
         rule_flags: list[str],
         explanation_status: ExplanationStatus,
     ) -> GatewayDecision:
-        """Route transaction using calibrated thresholds, heuristic flags, and explanation stability."""
-        has_rules = len(rule_flags) > 0
-        candidate_high_risk = False
+        """Route transaction using Gateway Routing Variant B.
 
-        if (
+        Candidate High Risk:
+          - risk_score >= threshold_high, OR
+          - (rule_flags present AND risk_score >= threshold_review)
+
+        Decisions:
+          - Candidate High Risk with Stable explanation -> High Risk
+          - Candidate High Risk with Unstable explanation -> Analyst Review
+          - threshold_review <= risk_score < threshold_high (without rule flag) -> Analyst Review
+          - Rule flag with risk_score < threshold_review -> Low Risk (flag is recorded, does not route alone)
+          - Everything else -> Low Risk
+        """
+        has_rules = len(rule_flags) > 0
+        candidate_high_risk = (
             risk_score >= self.threshold_high
-            or has_rules
-            and risk_score >= self.threshold_review
-        ):
-            candidate_high_risk = True
+            or (has_rules and risk_score >= self.threshold_review)
+        )
 
         if candidate_high_risk:
             if explanation_status == ExplanationStatus.STABLE:
                 return GatewayDecision.HIGH_RISK
-            else:
-                return GatewayDecision.ANALYST_REVIEW
-
-        if has_rules and risk_score < self.threshold_review:
             return GatewayDecision.ANALYST_REVIEW
 
         if self.threshold_review <= risk_score < self.threshold_high:

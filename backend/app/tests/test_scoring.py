@@ -69,20 +69,20 @@ def test_decision_matrix_all_cells(scoring_svc: ScoringService):
         == GatewayDecision.ANALYST_REVIEW
     )
 
-    # 5. Rules present, score < review (0.20 < 0.40), Stable -> Analyst Review
+    # 5. Rules present, score < review (0.20 < 0.40), Stable -> Low Risk (Variant B: rule does not route alone)
     assert (
         scoring_svc.route_decision(
             0.20, ["LARGE_TRANSFER_AMOUNT"], ExplanationStatus.STABLE
         )
-        == GatewayDecision.ANALYST_REVIEW
+        == GatewayDecision.LOW_RISK
     )
 
-    # 6. Rules present, score < review (0.20 < 0.40), Unstable -> Analyst Review
+    # 6. Rules present, score < review (0.20 < 0.40), Unstable -> Low Risk (Variant B: rule does not route alone)
     assert (
         scoring_svc.route_decision(
             0.20, ["LARGE_TRANSFER_AMOUNT"], ExplanationStatus.UNSTABLE
         )
-        == GatewayDecision.ANALYST_REVIEW
+        == GatewayDecision.LOW_RISK
     )
 
     # 7. Review <= score < high (0.40 <= 0.55 < 0.70), no rules, Stable -> Analyst Review
@@ -108,6 +108,97 @@ def test_decision_matrix_all_cells(scoring_svc: ScoringService):
         scoring_svc.route_decision(0.15, [], ExplanationStatus.UNSTABLE)
         == GatewayDecision.LOW_RISK
     )
+
+
+@pytest.mark.parametrize(
+    "score,rule_flags,explanation_status,expected_decision",
+    [
+        # Below review (< 0.40): rules never escalate alone -> Low Risk
+        (0.30, [], ExplanationStatus.STABLE, GatewayDecision.LOW_RISK),
+        (0.30, [], ExplanationStatus.UNSTABLE, GatewayDecision.LOW_RISK),
+        (0.30, ["ORIGIN_ACCOUNT_DRAINED"], ExplanationStatus.STABLE, GatewayDecision.LOW_RISK),
+        (0.30, ["ORIGIN_ACCOUNT_DRAINED"], ExplanationStatus.UNSTABLE, GatewayDecision.LOW_RISK),
+        # Exact review boundary (== 0.40):
+        # Without rules -> in review band [0.40, 0.70) -> Analyst Review
+        (0.40, [], ExplanationStatus.STABLE, GatewayDecision.ANALYST_REVIEW),
+        (0.40, [], ExplanationStatus.UNSTABLE, GatewayDecision.ANALYST_REVIEW),
+        # With rules -> candidate High Risk (has_rules and score >= review):
+        (0.40, ["ORIGIN_ACCOUNT_DRAINED"], ExplanationStatus.STABLE, GatewayDecision.HIGH_RISK),
+        (0.40, ["ORIGIN_ACCOUNT_DRAINED"], ExplanationStatus.UNSTABLE, GatewayDecision.ANALYST_REVIEW),
+        # Intermediate band (0.40 < 0.55 < 0.70):
+        (0.55, [], ExplanationStatus.STABLE, GatewayDecision.ANALYST_REVIEW),
+        (0.55, [], ExplanationStatus.UNSTABLE, GatewayDecision.ANALYST_REVIEW),
+        (0.55, ["LARGE_TRANSFER_AMOUNT"], ExplanationStatus.STABLE, GatewayDecision.HIGH_RISK),
+        (0.55, ["LARGE_TRANSFER_AMOUNT"], ExplanationStatus.UNSTABLE, GatewayDecision.ANALYST_REVIEW),
+        # Exact high boundary (== 0.70): candidate High Risk
+        (0.70, [], ExplanationStatus.STABLE, GatewayDecision.HIGH_RISK),
+        (0.70, [], ExplanationStatus.UNSTABLE, GatewayDecision.ANALYST_REVIEW),
+        (0.70, ["ORIGIN_ACCOUNT_DRAINED"], ExplanationStatus.STABLE, GatewayDecision.HIGH_RISK),
+        (0.70, ["ORIGIN_ACCOUNT_DRAINED"], ExplanationStatus.UNSTABLE, GatewayDecision.ANALYST_REVIEW),
+        # Above high (> 0.70): candidate High Risk
+        (0.85, [], ExplanationStatus.STABLE, GatewayDecision.HIGH_RISK),
+        (0.85, [], ExplanationStatus.UNSTABLE, GatewayDecision.ANALYST_REVIEW),
+        (0.85, ["ORIGIN_ACCOUNT_DRAINED"], ExplanationStatus.STABLE, GatewayDecision.HIGH_RISK),
+        (0.85, ["ORIGIN_ACCOUNT_DRAINED"], ExplanationStatus.UNSTABLE, GatewayDecision.ANALYST_REVIEW),
+    ],
+)
+def test_variant_b_truth_table_exhaustive(
+    scoring_svc: ScoringService,
+    score: float,
+    rule_flags: list[str],
+    explanation_status: ExplanationStatus,
+    expected_decision: GatewayDecision,
+):
+    """Exhaustive truth table test covering 20 score-boundary, rule, and stability vectors."""
+    actual = scoring_svc.route_decision(score, rule_flags, explanation_status)
+    assert actual == expected_decision
+
+
+@pytest.mark.parametrize(
+    "score,status,expected_no_rules",
+    [
+        (0.10, ExplanationStatus.STABLE, GatewayDecision.LOW_RISK),
+        (0.10, ExplanationStatus.UNSTABLE, GatewayDecision.LOW_RISK),
+        (0.40, ExplanationStatus.STABLE, GatewayDecision.ANALYST_REVIEW),
+        (0.40, ExplanationStatus.UNSTABLE, GatewayDecision.ANALYST_REVIEW),
+        (0.55, ExplanationStatus.STABLE, GatewayDecision.ANALYST_REVIEW),
+        (0.55, ExplanationStatus.UNSTABLE, GatewayDecision.ANALYST_REVIEW),
+        (0.70, ExplanationStatus.STABLE, GatewayDecision.HIGH_RISK),
+        (0.70, ExplanationStatus.UNSTABLE, GatewayDecision.ANALYST_REVIEW),
+        (0.95, ExplanationStatus.STABLE, GatewayDecision.HIGH_RISK),
+        (0.95, ExplanationStatus.UNSTABLE, GatewayDecision.ANALYST_REVIEW),
+    ],
+)
+def test_variant_b_properties_unchanged_rows(
+    scoring_svc: ScoringService,
+    score: float,
+    status: ExplanationStatus,
+    expected_no_rules: GatewayDecision,
+):
+    """Property 2: Rows without rule flags route identically before and after the change."""
+    assert scoring_svc.route_decision(score, [], status) == expected_no_rules
+
+
+@pytest.mark.parametrize(
+    "score,rules,status",
+    [
+        (0.00, ["ORIGIN_ACCOUNT_DRAINED"], ExplanationStatus.STABLE),
+        (0.15, ["LARGE_TRANSFER_AMOUNT"], ExplanationStatus.UNSTABLE),
+        (0.3999, ["ORIGIN_ACCOUNT_DRAINED", "LARGE_TRANSFER_AMOUNT"], ExplanationStatus.STABLE),
+        (0.3999, ["DEST_BALANCE_INCONSISTENCY"], ExplanationStatus.UNSTABLE),
+    ],
+)
+def test_variant_b_property_rule_below_review_never_escalates(
+    scoring_svc: ScoringService,
+    score: float,
+    rules: list[str],
+    status: ExplanationStatus,
+):
+    """Property 1: A rule flag with score < review_threshold never yields Analyst Review or High Risk."""
+    dec = scoring_svc.route_decision(score, rules, status)
+    assert dec == GatewayDecision.LOW_RISK
+    assert dec != GatewayDecision.ANALYST_REVIEW
+    assert dec != GatewayDecision.HIGH_RISK
 
 
 def test_invalid_model_path_raises_at_startup():

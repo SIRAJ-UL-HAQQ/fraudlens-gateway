@@ -1,5 +1,5 @@
 # Stage 1: Build virtual environment
-FROM python:3.13.5-slim AS builder
+FROM python:3.15.0-slim AS builder
 
 WORKDIR /build
 
@@ -22,7 +22,7 @@ RUN sed 's/xgboost==/xgboost-cpu==/' requirements.txt > requirements-docker.txt 
     && pip install --no-cache-dir -r requirements-docker.txt -c constraints-docker.txt
 
 # Stage 2: Runtime image
-FROM python:3.13.5-slim AS runtime
+FROM python:3.15.0-slim AS runtime
 
 WORKDIR /app
 

@@ -35,7 +35,6 @@ for p in [str(REPO_ROOT), str(BACKEND_DIR)]:
 
 from app.core.config import settings
 from app.models.schemas import (
-    ExplanationStatus,
     GatewayDecision,
     TransactionIn,
     TransactionType,
@@ -353,20 +352,24 @@ def _route_single_transaction(
     """Route a single transaction under the specified variant logic."""
     t_rev = scoring_service.threshold_review
     t_high = scoring_service.threshold_high
-    exp_status = ExplanationStatus.STABLE if is_stable else ExplanationStatus.UNSTABLE
 
     eff_rules, is_cand, allow_below_rev = _filter_rules_for_variant(
         variant_name, s, flags_std, flags_recal, t_rev, t_high, variant_e_floor
     )
-    dec = scoring_service.route_decision(s, eff_rules, exp_status)
 
+    # Decouple evaluation logic from scoring_service's deployed routing variant (Variant B).
+    # Explicitly implement the exact rules for each evaluated variant:
     if is_cand:
+        dec = GatewayDecision.HIGH_RISK if is_stable else GatewayDecision.ANALYST_REVIEW
         cause = "high_risk_stable" if is_stable else "unstable_explanation"
     elif allow_below_rev and len(eff_rules) > 0 and s < t_rev:
+        dec = GatewayDecision.ANALYST_REVIEW
         cause = "rule_flag"
     elif t_rev <= s < t_high:
+        dec = GatewayDecision.ANALYST_REVIEW
         cause = "score_band"
     else:
+        dec = GatewayDecision.LOW_RISK
         cause = "low_risk"
 
     return (dec, cause)
@@ -1157,7 +1160,7 @@ def main() -> None:
         variant_e_data, selection_rule_summary,
     )
 
-    with open(output_json_path, "w", encoding="utf-8") as f:
+    with open(output_json_path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(full_report, f, indent=2)
 
     print(f"\nSuccessfully wrote comprehensive evaluation to {output_json_path}!", flush=True)

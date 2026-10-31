@@ -38,6 +38,24 @@ def dummy_scoring_service():
     return service
 
 
+def route_variant_a(
+    service: ScoringService,
+    score: float,
+    rule_flags: list[str],
+    explanation_status: ExplanationStatus,
+) -> GatewayDecision:
+    """Variant A: Full rule safety net. Any rule escalates to Review or High Risk."""
+    has_rules = len(rule_flags) > 0
+    candidate_high = (score >= service.threshold_high) or (has_rules and score >= service.threshold_review)
+    if candidate_high:
+        return GatewayDecision.HIGH_RISK if explanation_status == ExplanationStatus.STABLE else GatewayDecision.ANALYST_REVIEW
+    if has_rules and score < service.threshold_review:
+        return GatewayDecision.ANALYST_REVIEW
+    if service.threshold_review <= score < service.threshold_high:
+        return GatewayDecision.ANALYST_REVIEW
+    return GatewayDecision.LOW_RISK
+
+
 def route_variant_b(
     service: ScoringService,
     score: float,
@@ -96,12 +114,15 @@ def test_variant_a_vs_variant_b_rule_only(dummy_scoring_service):
     status = ExplanationStatus.STABLE
 
     # Variant A routes rule-only directly to ANALYST_REVIEW
-    dec_a = service.route_decision(low_score, rules, status)
+    dec_a = route_variant_a(service, low_score, rules, status)
     assert dec_a == GatewayDecision.ANALYST_REVIEW
 
     # Variant B gates rules by ML score: score < t_review routes to LOW_RISK
     dec_b = route_variant_b(service, low_score, rules, status)
     assert dec_b == GatewayDecision.LOW_RISK
+
+    # Backend scoring_service natively routes Variant B
+    assert service.route_decision(low_score, rules, status) == GatewayDecision.LOW_RISK
 
     # Direct divergence proof
     assert dec_a != dec_b

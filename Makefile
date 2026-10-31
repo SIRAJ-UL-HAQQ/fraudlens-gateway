@@ -32,4 +32,4 @@ benchmark:
 	python scripts/benchmark_latency.py
 
 test-postgres:
-	REQUIRE_POSTGRES=1 TEST_DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/fraudlens_test PYTHONPATH=backend python -m pytest backend/app/tests/test_repository.py -k "postgres" -v
+	REQUIRE_POSTGRES=1 TEST_DATABASE_URL=$${TEST_DATABASE_URL:?TEST_DATABASE_URL is required} PYTHONPATH=backend python -m pytest backend/app/tests/test_repository.py -k "postgres" -v

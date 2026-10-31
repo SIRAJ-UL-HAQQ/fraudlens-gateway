@@ -1,19 +1,29 @@
-.PHONY: test openapi run smoke lint seed benchmark test-postgres
+.PHONY: up down test lint smoke logs openapi run seed benchmark test-postgres
+
+up:
+	docker compose up -d --build --wait
+
+down:
+	docker compose down -v
 
 test:
-	cd backend && python -m pytest app/tests -v --tb=short
+	PYTHONPATH=backend:. pytest backend/app/tests ml/tests -v
+
+lint:
+	ruff check backend/ ml/
+	cd frontend && npm run lint
+
+smoke:
+	bash scripts/smoke_test.sh
+
+logs:
+	docker compose logs -f
 
 openapi:
-	python scripts/generate_openapi.py
+	PYTHONPATH=backend python scripts/generate_openapi.py
 
 run:
 	cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-
-smoke:
-	bash scripts/smoke_test.sh http://localhost:8000
-
-lint:
-	ruff check backend/
 
 seed:
 	python scripts/seed_demo.py
@@ -22,4 +32,4 @@ benchmark:
 	python scripts/benchmark_latency.py
 
 test-postgres:
-	cd backend && REQUIRE_POSTGRES=1 python -m pytest app/tests/test_repository.py -k "postgres" -v
+	REQUIRE_POSTGRES=1 TEST_DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/fraudlens_test PYTHONPATH=backend python -m pytest backend/app/tests/test_repository.py -k "postgres" -v

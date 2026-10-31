@@ -1,35 +1,79 @@
-version: '3.8'
-
 services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-fraudlens}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-fraudlens_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fraudlens} -d ${POSTGRES_DB:-fraudlens_db}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - fraudlens-net
+
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: fraudlens_backend
-    ports:
-      - "8000:8000"
-    environment:
-      - ENVIRONMENT=production
-      - DATABASE_URL=sqlite:///./fraudlens.db
-      - FRAUD_THRESHOLD_HIGH=0.80
-      - FRAUD_THRESHOLD_REVIEW=0.50
-    volumes:
-      - ./backend/app:/app/app
-      - ./ml/models:/app/ml/models
+      context: .
+      dockerfile: backend/Dockerfile
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      APP_ENV: dev
+      PROJECT_NAME: "FraudLens Gateway"
+      API_V1_STR: /api/v1
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-fraudlens}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB:-fraudlens_db}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?JWT_SECRET_KEY is required}
+      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+      JWT_EXPIRES_IN_SECONDS: ${JWT_EXPIRES_IN_SECONDS:-3600}
+      ANALYST_USERNAME: ${ANALYST_USERNAME:-analyst_1}
+      ANALYST_PASSWORD: ${ANALYST_PASSWORD:?ANALYST_PASSWORD is required}
+      MODEL_PATH: ${MODEL_PATH:-}
+      METRICS_PATH: ${METRICS_PATH:-ml/reports/metrics.json}
+      FRAUD_THRESHOLD_HIGH: ${FRAUD_THRESHOLD_HIGH:-0.70}
+      FRAUD_THRESHOLD_REVIEW: ${FRAUD_THRESHOLD_REVIEW:-0.40}
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./ml/models:/app/ml/models:ro
+      # Research benchmark metrics are opt-in (uncomment to mount local reports):
+      # - ./ml/reports:/app/ml/reports:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 10s
+      timeout: 3s
+      start_period: 15s
+      retries: 3
+    networks:
+      - fraudlens-net
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: fraudlens_frontend
-    ports:
-      - "5173:5173"
-    environment:
-      - VITE_API_BASE_URL=http://localhost:8000/api/v1
-    depends_on:
-      - backend
     restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-5173}:5173"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:5173/"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - fraudlens-net
 
 volumes:
-  db_data:
+  postgres_data:
+
+networks:
+  fraudlens-net:
+    driver: bridge

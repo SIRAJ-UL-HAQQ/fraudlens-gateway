@@ -17,8 +17,17 @@ Welcome to the FraudLens Gateway repository. We follow strict engineering practi
 4. **API Contract Integrity**:
    - `backend/app/models/schemas.py` and `docs/api-contract.md` are the dual sources of truth.
    - Any API schema change requires updating both documents, the tests, and the frontend client together.
-5. **Auto-Merge Policy**:
-   - Auto-merge is disabled. All pull requests require green CI builds and explicit human review.
+5. **Merge & Branch Policy**:
+   - **Squash Merging Only**: Only squash merging is permitted; standard merge commits and rebase merging are disabled.
+   - **Head Branch Cleanup**: Automatic deletion of head branches upon merge is enabled.
+   - **Auto-Merge Policy**: Auto-merge is disabled (`Allow auto-merge` unchecked). All pull requests require explicit human review after checks pass.
+6. **Required CI Status Checks on `main`**:
+   - The following four status checks must pass before merging to `main`:
+     - `backend` (lint, OpenAPI sync, pytest + coverage >= 85%)
+     - `ml` (lint, ML unit & stability tests)
+     - `frontend` (lint, production Vite build)
+     - `docker` (multi-stage image build, compose up, healthcheck, smoke test)
+   - *(Note: In GitHub repository settings under `Branches` > `Branch protection rules`, status checks only become selectable in the search list after the CI workflow has executed at least once).*
 
 ## Development Workflow
 

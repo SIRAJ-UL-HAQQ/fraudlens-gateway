@@ -69,7 +69,7 @@ fraudlens-gateway/
 │   ├── package.json
 │   └── Dockerfile
 ├── docs/
-│   ├── SRS_FraudLens_Gateway.tex
+│   ├── FraudLens_Gateway_SRS.tex
 │   ├── proposal.docx
 │   └── architecture-diagram.png
 ├── docker-compose.yml
@@ -161,7 +161,7 @@ We measure performance via:
 ---
 
 ## Documentation
-- **Software Requirements Specification (SRS):** [docs/SRS_FraudLens_Gateway.tex](docs/SRS_FraudLens_Gateway.tex)
+- **Software Requirements Specification (SRS):** [docs/FraudLens_Gateway_SRS.tex](docs/FraudLens_Gateway_SRS.tex)
 - **Project Proposal Document:** [docs/proposal.docx](docs/proposal.docx)
 - **System Architecture Visual:** [docs/architecture-diagram.png](docs/architecture-diagram.png)
 

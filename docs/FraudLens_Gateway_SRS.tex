@@ -1,0 +1,609 @@
+\documentclass[12pt, a4paper]{report}
+
+% -------------------------------------------------------------
+% PACKAGES & DOCUMENT SETUP
+% (typography matched to FraudLens_SRS_final: Helvetica / Nimbus Sans,
+%  black bold headings, 1-inch margins, single spacing, plain page numbers)
+% -------------------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{helvet}                          % Helvetica (Nimbus Sans) family
+\renewcommand{\familydefault}{\sfdefault}    % sans-serif as the document default
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{amsmath, amssymb}
+\usepackage[hidelinks]{hyperref}
+\usepackage[table]{xcolor}
+\usepackage{titlesec}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{microtype}
+
+% Neutral light-gray fill for table header rows (replaces the former navy fill)
+\definecolor{tableheadbg}{gray}{0.88}
+
+\hypersetup{
+    pdftitle={Software Requirements Specification - FraudLens Gateway},
+    pdfauthor={Syed Ramish Akhtar, Syed Arshman Ali Shah, Mair Nasir, Siraj Ul Haq}
+}
+
+% Page style: page number centred in the footer, no running header or rules
+\emergencystretch=1.5em
+\pagestyle{plain}
+
+% Heading formatting: black, bold, sans-serif; chapter number inline with title
+\titleformat{\chapter}[hang]
+  {\normalfont\Huge\bfseries}{\thechapter}{20pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{50pt}{40pt}
+\titleformat{\section}
+  {\normalfont\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries}{\thesubsubsection}{1em}{}
+
+\newcolumntype{R}[1]{>{\raggedright\arraybackslash}p{#1}}
+\setlist[itemize]{noitemsep, topsep=4pt}
+\setlist[enumerate]{noitemsep, topsep=4pt}
+
+% -------------------------------------------------------------
+% DOCUMENT START
+% -------------------------------------------------------------
+\begin{document}
+
+% -------------------------------------------------------------
+% TITLE / COVER PAGE
+% -------------------------------------------------------------
+\begin{titlepage}
+    \centering
+    \vspace*{2.5cm}
+
+    {\Large \textbf{Software Requirements Specification}}\\[0.8cm]
+    {\large for}\\[0.8cm]
+    {\LARGE \textbf{FraudLens Gateway}}\\[0.5cm]
+    {\large Explanation-Reliable Financial Fraud Detection under Class Imbalance}\\[0.3cm]
+    {\normalsize \textit{(Benchmarked and Operationalized on the PaySim Financial Mobile Money Dataset)}}\\[1.8cm]
+
+    {\large \textbf{Prepared by:}}\\[0.5cm]
+    \begin{tabular}{@{}l@{\hspace{1.5cm}}l@{}}
+        Roll No. & Name \\[4pt]
+        CS-24023 & Syed Ramish Akhtar \\[3pt]
+        CS-24025 & Syed Arshman Ali Shah \\[3pt]
+        CS-24026 & Mair Nasir \\[3pt]
+        CS-24034 & Siraj Ul Haq \\
+    \end{tabular}
+
+    \vfill
+
+    {\large \textbf{Course:} Software Engineering}\\[0.25cm]
+    {\large \textbf{Submitted to:} Dr. Fakhra Aftab}\\[0.25cm]
+    {\large \textbf{Department:} Department of Computer and Information Systems}\\[0.25cm]
+    {\large \textbf{Institution:} NED University of Engineering and Technology}\\[0.8cm]
+    {\large October 2026}
+    \vspace*{1.5cm}
+\end{titlepage}
+
+% -------------------------------------------------------------
+% TABLE OF CONTENTS
+% -------------------------------------------------------------
+\tableofcontents
+\newpage
+
+% -------------------------------------------------------------
+% CHAPTER 1: INTRODUCTION
+% -------------------------------------------------------------
+\chapter{Introduction}
+
+This document specifies the software requirements for \textbf{FraudLens Gateway}, a financial fraud detection system. Its main goal is not only to catch fraud accurately, but also to measure how reliable the explanation behind each fraud decision is. In finance, machine learning classifiers are often paired with post-hoc explanation tools, most commonly SHAP (SHapley Additive exPlanations). When the data is heavily imbalanced, as transaction data usually is, these explanations can change a lot from one training run or resampling method to the next. FraudLens Gateway deals with this by checking explanation stability as part of its real-time transaction triage.
+
+This chapter covers the purpose and scope of the document, who it is written for, the terms it uses, the conventions it follows, and the references behind the project.
+
+\section{Document Purpose}
+This Software Requirements Specification (SRS) lists the functional and non-functional requirements for FraudLens Gateway. It covers all four parts of the system:
+\begin{enumerate}
+    \item The offline machine learning training, resampling, and stability evaluation pipeline.
+    \item The real-time backend REST API (implemented using FastAPI).
+    \item The PostgreSQL database, including the append-only audit log.
+    \item The web dashboard for analysts, built with React and Tailwind CSS.
+\end{enumerate}
+
+The SRS gives the team a single baseline for development, testing, design review, and evaluation in the Software Engineering Lab course at NED University of Engineering and Technology. It defines what the system must deliver and also serves as a reference for constraints, interfaces, and how each requirement will be verified.
+
+\section{Product Scope}
+FraudLens Gateway is a real-time gateway that scores financial transactions and sorts them for review. When a bank or payment system sends a transaction to the gateway, FraudLens scores it using XGBoost as the main model, with Logistic Regression and Random Forest as baselines, and applies a rule-based layer on top. Instead of a plain approve or reject answer, each transaction gets one of three decisions: \textbf{Low Risk}, \textbf{High Risk}, or \textbf{Analyst Review}.
+
+The gateway also checks the SHAP explanation of each flagged transaction against stability profiles that were computed in advance for three class-imbalance strategies (no resampling, class weighting, and SMOTE/SMOTE-ENN). If a high-risk transaction has an unstable explanation, meaning its attribution depends more on the sampling method than on real feature behavior, the gateway sends it to a human analyst instead of blocking it automatically. The main benefits are:
+\begin{itemize}
+    \item \textbf{Human-in-the-Loop Triage:} Analysts only have to rely on explanations that have been checked for stability, so decisions are not automated on shaky evidence.
+    \item \textbf{Decision Auditability:} Every risk score, raw payload, SHAP attribution, stability result, and analyst outcome is stored in a permanent history.
+    \item \textbf{Honesty about Explanations:} The system shows the limits of post-hoc explainable AI (XAI) on heavily skewed data instead of assuming that every SHAP value is ground truth.
+\end{itemize}
+
+\section{Intended Audience and Document Overview}
+This SRS is written for several groups with different technical backgrounds:
+\begin{itemize}
+    \item \textbf{Course Instructor and Evaluator (Dr. Fakhra Aftab):} Checks the architecture, IEEE compliance, methodology, and whether the course objectives are met.
+    \item \textbf{Student Development Team (CS-24023, CS-24025, CS-24026, CS-24034):} Needs clear specifications, schema definitions, interface contracts, and non-functional targets to guide implementation.
+    \item \textbf{Fraud and Compliance Analysts (Simulated Client):} Need to understand the triage states, what the dashboard can do, how to run test transactions, and how audit exports work.
+    \item \textbf{System Administrators and DevOps Engineers:} Need to know about Docker containerization, minimum hardware, database schemas, and external network interfaces.
+\end{itemize}
+
+Readers new to the project should start with Chapter 1 (Introduction) and Chapter 2 (Overall Description) for context. After that, Chapter 3 (Specific Requirements) gives implementation-level detail, Chapter 4 (Other Non-Functional Requirements) covers quality expectations, and Appendix A (Data Dictionary) defines the attributes and constants.
+
+\section{Definitions, Acronyms and Abbreviations}
+The terms, acronyms, and abbreviations used in this document are defined below in alphabetical order:
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+\rowcolor{tableheadbg}
+\textbf{{Term / Acronym}} & \textbf{{Formal Definition and Operational Context}} \\
+\hline
+\textbf{API} & Application Programming Interface: A defined set of HTTP REST endpoints allowing external client systems to submit transactions and query gateway state. \\
+\hline
+\textbf{AUC} & Area Under the Curve: A scalar metric summarizing classifier performance across varying classification thresholds. \\
+\hline
+\textbf{DFD} & Data Flow Diagram: A graphical structured modeling notation depicting system processes, external entities, data stores, and transactional data flows. \\
+\hline
+\textbf{FN} & False Negative: A fraudulent transaction incorrectly classified by the gateway as Low Risk / Legitimate. \\
+\hline
+\textbf{FP} & False Positive: A legitimate transaction erroneously flagged by the gateway as High Risk / Fraudulent. \\
+\hline
+\textbf{JWT} & JSON Web Token: A compact, URL-safe means of representing signed claims between the React frontend and FastAPI backend. \\
+\hline
+\textbf{MCC} & Matthews Correlation Coefficient: A balanced metric for binary classification on imbalanced datasets, ranging from -1 to +1. \\
+\hline
+\textbf{ML} & Machine Learning: Algorithms that automatically learn decision boundaries and feature relationships from historical empirical data. \\
+\hline
+\textbf{PaySim} & PaySim Synthetic Financial Dataset: A financial transaction simulator based on real mobile money logs, providing realistic transaction types, balances, and fraud ground-truth. \\
+\hline
+\textbf{PR-AUC} & Precision-Recall Area Under the Curve: The standard evaluation metric for extremely skewed fraud detection benchmarks, prioritizing minority-class precision and recall. \\
+\hline
+\textbf{REST} & Representational State Transfer: An architectural style for networked systems using stateless HTTP verbs (GET, POST, PUT, DELETE) and JSON payloads. \\
+\hline
+\textbf{SHAP} & SHapley Additive exPlanations: A game-theoretic cooperative approach explaining individual predictions by allocating additive attribution values to each input feature. \\
+\hline
+\textbf{SMOTE} & Synthetic Minority Over-sampling Technique: An algorithmic oversampling approach generating synthetic examples along minority-class feature space line segments. \\
+\hline
+\textbf{SMOTE-ENN} & SMOTE combined with Edited Nearest Neighbours: An advanced hybrid resampling method synthesizing minority points and subsequently cleaning noisy boundary regions. \\
+\hline
+\textbf{SRS} & Software Requirements Specification: This formal IEEE-compliant requirements document. \\
+\hline
+\textbf{UI} & User Interface: The graphical web-based frontend presented to fraud analysts and administrators. \\
+\hline
+\textbf{XGBoost} & eXtreme Gradient Boosting: An optimized, scalable distributed gradient-boosted decision tree algorithm serving as the primary detection classifier. \\
+\hline
+\end{tabularx}
+\caption{Definitions, Acronyms and Abbreviations}
+\end{table}
+
+\section{Document Conventions}
+This specification follows the structure and formatting of the IEEE Recommended Practice for Software Requirements Specifications (IEEE Std 830-1998):
+\begin{itemize}
+    \item \textbf{Typography and Styling:} The document uses a sans-serif typeface (Helvetica/Arial), single spacing, and 1-inch margins on all sides. Chapter, section, and sub-section headings are bold black at decreasing sizes.
+    \item \textbf{Requirements Tagging:} Functional requirements are labeled \textbf{FR-X} (e.g., FR-1, FR-2) and non-functional requirements \textbf{NFR-X} (e.g., NFR-1, NFR-2), so each requirement can be traced in both directions.
+    \item \textbf{Normative Keyword Usage:} The words \textit{shall} (mandatory), \textit{should} (recommended), and \textit{may} (optional) are used as defined in RFC 2119.
+    \item \textbf{Figures and Tables:} Figures and tables are numbered within their chapters and each has a caption.
+\end{itemize}
+
+\section{References and Acknowledgments}
+This SRS draws on the following standards, papers, and documentation:
+\begin{enumerate}[label={[\arabic*]}]
+    \item IEEE Computer Society, ``IEEE Recommended Practice for Software Requirements Specifications,'' IEEE Std 830-1998, 1998.
+    \item U. Zafar and F. Wu, ``Methodological challenges in explainable AI for fraud detection: a systematic literature review,'' \textit{Artificial Intelligence Review}, vol. 59, article 115, 2026.
+    \item E. Lopez-Rojas, A. Elmir, and S. Axelsson, ``PaySim: A financial mobile money simulator for fraud detection,'' in \textit{The 28th European Modeling and Simulation Symposium (EMSS)}, Larnaca, Cyprus, 2016, pp. 249--255.
+    \item S. M. Lundberg and S.-I. Lee, ``A unified approach to interpreting model predictions,'' in \textit{Advances in Neural Information Processing Systems (NeurIPS 30)}, 2017, pp. 4765--4774.
+    \item N. V. Chawla, K. W. Bowyer, L. O. Hall, and W. P. Kegelmeyer, ``SMOTE: Synthetic Minority Over-sampling Technique,'' \textit{Journal of Artificial Intelligence Research}, vol. 16, pp. 321--357, 2002.
+    \item T. Chen and C. Guestrin, ``XGBoost: A Scalable Tree Boosting System,'' in \textit{Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining}, 2016, pp. 785--794.
+    \item FastAPI Framework Documentation, Tiangolo, ``FastAPI: Modern, High-Performance Web Framework for Python,'' \url{https://fastapi.tiangolo.com/}, 2026.
+    \item React Documentation, Meta Platforms Inc., ``React: The Library for Web and Native User Interfaces,'' \url{https://react.dev/}, 2026.
+\end{enumerate}
+
+\newpage
+
+% -------------------------------------------------------------
+% CHAPTER 2: OVERALL DESCRIPTION
+% -------------------------------------------------------------
+\chapter{Overall Description}
+
+\section{Product Perspective}
+FraudLens Gateway is a new, self-contained academic project developed in the Department of Computer and Information Systems at NED University of Engineering and Technology. It is not an add-on to an existing commercial product. It is a full-stack reference system built to deal with two problems in fraud triage: extreme class imbalance and unstable explanations.
+
+As Figure \ref{fig:architecture} shows, the system has four loosely coupled layers:
+\begin{enumerate}
+    \item \textbf{Data \& Modeling Layer:} Loads the PaySim benchmark, trains candidate classifiers under several resampling strategies, and precomputes SHAP stability bounds.
+    \item \textbf{Backend API Layer (FastAPI):} Serves predictions, rule checks, and explanation-reliability status through low-latency REST endpoints.
+    \item \textbf{Storage Layer (PostgreSQL):} Stores transactions, engineered feature vectors, SHAP attributions, and the audit log.
+    \item \textbf{Frontend Layer (React + Tailwind CSS):} A responsive web dashboard for compliance analysts and administrators.
+\end{enumerate}
+All components run in Docker containers managed with Docker Compose.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.45\textwidth]{figure_architecture.jpg}
+    \caption{FraudLens Gateway High-Level Architecture Flowchart}
+    \label{fig:architecture}
+\end{figure}
+
+\noindent\textbf{Pipeline overview:}\\
+\textit{PaySim Dataset $\rightarrow$ Feature Engineering $\rightarrow$ Model Training (3 imbalance strategies) $\rightarrow$ SHAP Stability Evaluation $\rightarrow$ FastAPI Scoring Endpoint $\rightarrow$ Three-Way Gateway Decision $\rightarrow$ PostgreSQL Audit Log $\rightarrow$ React Analyst Dashboard.}
+
+\section{Product Functionality \& Level-0 Data Flow Diagram}
+The major functions of FraudLens Gateway are:
+\begin{itemize}
+    \item Train and compare a fraud classifier (XGBoost, with Logistic Regression and Random Forest as baselines) under three class-imbalance handling strategies: no resampling, class weighting, and SMOTE/SMOTE-ENN.
+    \item Evaluate detection performance using Precision, Recall, F1-score, PR-AUC, and Matthews Correlation Coefficient (MCC) on a chronologically held-out PaySim test set.
+    \item Measure and report SHAP explanation stability across repeated training runs for each imbalance strategy using top-$k$ feature overlap and rank correlation.
+    \item Score incoming transactions in real time via a REST API and classify them into a tri-state decision: \textbf{Low Risk}, \textbf{High Risk}, or \textbf{Analyst Review}.
+    \item Apply a hybrid rule-based layer (e.g., zero-balance account drainage, extreme amount anomalies) alongside the ML score as an extra safeguard.
+    \item Automatically re-route any transaction initially scored as High Risk whose SHAP explanation is classified as Unstable to human Analyst Review.
+    \item Log every transaction, risk score, SHAP explanation, stability status, and eventual analyst outcome to an immutable PostgreSQL audit trail.
+    \item Present a web dashboard showing the transaction feed, flagged transactions, model performance metrics, a live test-transaction form, and a downloadable report (PDF/CSV) of flagged transactions.
+    \item Optionally dispatch automated webhook alerts (Slack/email) when a high-risk transaction is flagged.
+\end{itemize}
+
+Figure \ref{fig:dfd0} shows the Level-0 Context Data Flow Diagram (DFD 0.0). It marks the system boundary, the external entities, and the data exchanged with them.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.88\textwidth]{figure_dfd.jpg}
+    \caption{FraudLens Gateway Level-0 Context Data Flow Diagram (DFD 0.0)}
+    \label{fig:dfd0}
+\end{figure}
+
+In the DFD, the central process (\textbf{0.0 FraudLens Gateway}) exchanges data with four external entities:
+\begin{itemize}
+    \item \textbf{Transaction Source (Banking / Payment Core):} Dispatches the \textit{Transaction Payload} (PaySim schema) to the gateway and synchronously receives the \textit{Gateway decision, risk score, top features, explanation status}.
+    \item \textbf{Fraud Analyst (Compliance Officer):} Supplies \textit{Login credentials}, \textit{Review outcome}, \textit{Test transaction}, and \textit{Report request (date range, format)}; in return, receives \textit{Login Validation}, \textit{Flagged transactions, model performance metrics}, \textit{Live score, SHAP explanation, reliability status}, and \textit{Flagged transaction report (PDF/CSV)}.
+    \item \textbf{System Administrator:} Provides \textit{Deployment and configuration settings} and monitors \textit{System status}.
+    \item \textbf{Alert Service (Slack / Email Relay):} Receives a \textit{Fraud alert message}, sent asynchronously, when a critical high-risk transaction occurs.
+\end{itemize}
+
+\section{Users and Characteristics}
+The system has several user groups with different levels of technical expertise:
+\begin{itemize}
+    \item \textbf{Fraud Analyst (Primary User, High Priority):} Reviews flagged transactions, especially those sent to Analyst Review because of unstable explanations. Needs no ML expertise and works only through the dashboard. This is the most important user, since the system's main value is trustworthy, explainable fraud triage.
+    \item \textbf{System Administrator / Developer (Secondary User):} Manages the API, database, environment configuration, and Docker deployment. A technical user with development-level access.
+    \item \textbf{Machine Learning Engineer / Researcher (Supportive Specialist):} Handles PaySim preprocessing, Optuna hyperparameter tuning, model benchmarking, and explanation stability calculations.
+    \item \textbf{Course Evaluator (Dr. Fakhra Aftab):} Reviews the architecture, software engineering methods, research contribution (explanation reliability under imbalance), and the live demo. Treated as an expert evaluator who does not operate the system.
+\end{itemize}
+
+\section{Operating Environment}
+FraudLens Gateway runs in containers managed by Docker Compose:
+\begin{itemize}
+    \item \textbf{Backend:} Python 3.11+, FastAPI, running inside a Docker container (Linux-based image).
+    \item \textbf{Frontend:} React 18 (with Tailwind CSS), served as a static build inside an Nginx Docker container, accessible via any modern web browser (Google Chrome, Mozilla Firefox, Microsoft Edge, Safari).
+    \item \textbf{Database:} PostgreSQL (version 15 or later), running in its own Docker container with named volume persistence.
+    \item \textbf{Orchestration:} Docker Compose runs the three containers on a local workstation or lab server from a single compose file.
+    \item \textbf{Minimum Host Requirements:} A machine capable of running Docker Desktop (or Docker Engine) with at least 8 GB RAM (16 GB recommended for smooth training and container operation), dual-core x86\_64 or ARM64 processor, and 10 GB free disk space.
+\end{itemize}
+
+\section{Design and Implementation Constraints}
+The project is limited by six constraints:
+\begin{enumerate}
+    \item \textbf{Benchmark Dataset Finalization:} The system must use the publicly available PaySim Synthetic Financial Dataset for all training, validation, and scoring demonstrations, as real customer financial data cannot be obtained by the student team due to banking privacy regulations.
+    \item \textbf{Classifier Benchmarking:} The primary model must be XGBoost, evaluated against Logistic Regression and Random Forest baselines; no single model may be presented as the only candidate without empirical comparison.
+    \item \textbf{Bounded Imbalance Handling:} Class-imbalance handling is strictly limited to three strategies: no resampling, class weighting, and SMOTE/SMOTE-ENN, due to the timeline constraints of a single academic semester.
+    \item \textbf{Temporal Split Partitioning:} The train/test split must be chronological (temporal ordering based on PaySim's \textbf{step} attribute), rather than a random shuffle, preventing lookahead data leakage.
+    \item \textbf{Three-Tier Containerization:} The system must be containerized with Docker, using a minimal three-service Compose setup (frontend, backend, database).
+    \item \textbf{Timeline \& Academic Scope:} The project must be completed within the Software Engineering Lab course timeline (approximately 10--12 teaching weeks) by a team of four students with mixed skill levels.
+\end{enumerate}
+
+\section{User Documentation}
+Delivered project documentation will include:
+\begin{itemize}
+    \item \textbf{README.md:} Setup and usage instructions, environment variables, Docker Compose build and start commands, and how to run the tests.
+    \item \textbf{Interactive Swagger / OpenAPI Interface:} Inline API documentation generated automatically by FastAPI at \textbf{/docs} and \textbf{/redoc}.
+    \item \textbf{Analyst User Guide:} A short guide that explains how to read the dashboard's risk levels and SHAP charts, how to interpret the explanation-reliability indicators, and how to record review verdicts.
+\end{itemize}
+
+\section{Assumptions and Dependencies}
+\begin{itemize}
+    \item It is assumed that the PaySim benchmark dataset represents the finalized transaction schema and will not change during development.
+    \item It is assumed that all four team members and evaluation environments have working setups that can run Docker.
+    \item The project depends on established open-source libraries: Scikit-learn, XGBoost, imbalanced-learn, SHAP, Optuna, FastAPI, SQLAlchemy, Pydantic, and React. Version compatibility among these must be maintained.
+    \item It is assumed that the Slack/email alert feature, being optional, does not block core system delivery or scoring execution if third-party webhook access is unavailable in the laboratory environment.
+\end{itemize}
+
+\newpage
+
+% -------------------------------------------------------------
+% CHAPTER 3: SPECIFIC REQUIREMENTS
+% -------------------------------------------------------------
+\chapter{Specific Requirements}
+
+\section{External Interface Requirements}
+
+\subsection{User Interfaces}
+The React dashboard has five main screens:
+\begin{itemize}
+    \item \textbf{Transaction Feed View:} A live/recent table of transactions with columns for Transaction ID, Step, Type, Amount, Origin Account, Destination Account, Risk Score, and a color-coded risk badge (Green = Low Risk, Amber = Analyst Review, Red = High Risk).
+    \item \textbf{Flagged Transactions View:} A filtered queue showing only High Risk and Analyst Review transactions, with each transaction's top contributing features, explanation-reliability status (Stable/Unstable), and action buttons for analyst remediation.
+    \item \textbf{Model Performance Panel:} Charts displaying Precision, Recall, F1, PR-AUC, MCC, and a confusion matrix comparing models across imbalance handling strategies.
+    \item \textbf{Test Transaction Sandbox:} An interactive form where an analyst or evaluator can submit a synthetic PaySim transaction payload and see it scored live, displaying its SHAP waterfall explanation and reliability assessment in under two seconds.
+    \item \textbf{Export Control View:} A filtering and export panel allowing users to download a PDF or CSV compliance report of flagged transactions over a selected time range.
+\end{itemize}
+All views follow the same conventions: a persistent navigation sidebar, clear validation error messages, and consistent placement of submit and cancel buttons.
+
+\subsection{Hardware Interfaces}
+The system has no direct hardware interfaces. It runs entirely as containerized software on standard commodity server or laptop hardware (x86\_64 or ARM64); no specialized sensors, card readers, or proprietary hardware security modules are involved.
+
+\subsection{Software Interfaces}
+\begin{itemize}
+    \item \textbf{Operating System:} Any OS capable of running Docker (Linux, Windows 11 with WSL2, or macOS host); containers run on lightweight Linux base images.
+    \item \textbf{Database Management System:} PostgreSQL (version 15 or later), accessed by the backend via SQLAlchemy 2.0 ORM and \textbf{psycopg2} / \textbf{asyncpg} drivers over TCP port 5432.
+    \item \textbf{Backend Framework:} FastAPI (Python 3.11+), communicating with the frontend over HTTP/JSON via documented REST endpoints.
+    \item \textbf{Frontend Framework:} React 18 (with Tailwind CSS), communicating with the backend via \textbf{fetch} / \textbf{axios} API calls.
+    \item \textbf{Optional Third-Party Interface:} Slack Incoming Webhooks or SMTP mail server for automated high-risk transaction alerts.
+\end{itemize}
+
+\subsection{Communications Interfaces}
+All communication between the frontend, external client payment dispatchers, and the backend occurs over HTTP/1.1 or HTTP/2 using JSON payloads, following REST conventions. In production-style deployments, traffic is encrypted via TLS 1.3 (HTTPS) over TCP port 443. The API is formally documented via OpenAPI 3.0 / Swagger. Authentication is enforced via JSON Web Tokens (JWT) passed within the \textbf{Authorization: Bearer <token>} header.
+
+\section{Functional Requirements}
+
+\subsection{Model Training and Imbalance Evaluation}
+\begin{itemize}
+    \item[\textbf{FR-1}] The system shall train an XGBoost fraud classifier, plus Logistic Regression and Random Forest baseline classifiers, on the finalized PaySim financial transaction dataset.
+    \item[\textbf{FR-2}] The system shall train each classifier under three class-imbalance handling strategies: no resampling, class weighting, and SMOTE/SMOTE-ENN.
+    \item[\textbf{FR-3}] The system shall evaluate each trained model using Precision, Recall, F1-score, PR-AUC, and Matthews Correlation Coefficient (MCC), computed on a chronologically held-out PaySim test set.
+    \item[\textbf{FR-4}] The system shall perform Bayesian hyperparameter tuning (via Optuna) for the primary XGBoost model rather than using default hyperparameters.
+    \item[\textbf{FR-5}] The system shall compute SHAP values for each model's predictions and measure explanation stability across repeated training runs using a top-$k$ feature overlap and Spearman rank-correlation metric.
+\end{itemize}
+
+\subsection{Real-Time Transaction Scoring and Tri-State Decision}
+\begin{itemize}
+    \item[\textbf{FR-6}] The system shall expose a REST endpoint (\textbf{POST /api/v1/score}) that accepts a PaySim transaction payload and returns a fraud risk score, the top contributing features, and an explanation-reliability status.
+    \item[\textbf{FR-7}] The system shall apply a hybrid rule-based layer (e.g., origin balance drainage $\ge 95\%$, transactions exceeding 200,000 currency units) in addition to the ML score when computing the final gateway decision.
+    \item[\textbf{FR-8}] The system shall classify each scored transaction into one of three categories: \textbf{Low Risk}, \textbf{High Risk}, or \textbf{Analyst Review}.
+    \item[\textbf{FR-9}] A transaction classified as High Risk with an unstable explanation shall be automatically re-routed to \textbf{Analyst Review} rather than remaining High Risk.
+\end{itemize}
+
+\subsection{Data Persistence and Immutable Audit Trail}
+\begin{itemize}
+    \item[\textbf{FR-10}] The system shall log every scored transaction, its decision, its SHAP explanation, its reliability status, and (once available) the analyst's final outcome to an immutable PostgreSQL audit table.
+    \item[\textbf{FR-11}] The system shall allow retrieval of historical transactions and their audit records via a REST endpoint with date, account, and risk filtering.
+    \item[\textbf{FR-12}] The system shall capture and store the human fraud analyst's final adjudication verdict (Approved / Confirmed Fraud), timestamp, and commentary.
+\end{itemize}
+
+\subsection{Web Dashboard and Analytical Reporting}
+\begin{itemize}
+    \item[\textbf{FR-13}] The system shall display a live/recent transaction feed in the React dashboard with color-coded risk tier indicators.
+    \item[\textbf{FR-14}] The system shall display a filtered view of flagged (High Risk / Analyst Review) transactions with SHAP detail drawers.
+    \item[\textbf{FR-15}] The system shall display model performance metrics, PR-AUC curves, and a confusion matrix in the dashboard.
+    \item[\textbf{FR-16}] The system shall provide a form for submitting a test transaction and viewing its live score, SHAP explanation, and reliability status.
+    \item[\textbf{FR-17}] The system shall allow the user to export a report (PDF or CSV) of flagged transactions for a selected time range.
+    \item[\textbf{FR-18}] The system may optionally send a Slack or email alert when a High Risk transaction is flagged.
+\end{itemize}
+
+\section{Behaviour Requirements}
+
+\subsection{Use Case View}
+Figure \ref{fig:usecase} shows the use case diagram, which links each actor to what the system does for them.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.88\textwidth]{figure_use_case.jpg}
+    \caption{FraudLens Gateway Comprehensive Use Case Diagram}
+    \label{fig:usecase}
+\end{figure}
+
+The diagram defines five primary actors:
+\begin{itemize}
+    \item \textbf{Fraud Analyst:} Reviews flagged transactions, submits test transactions, inspects SHAP explanations, and exports reports.
+    \item \textbf{Transaction Source:} Automated client payment system dispatching transactions to be scored in real time.
+    \item \textbf{Alert Service:} External messaging platform (Slack/Email) receiving automated alerts for high-risk transactions.
+    \item \textbf{Machine Learning Engineer:} Initiates offline model training, hyperparameter tuning, and explanation stability evaluation.
+    \item \textbf{System Administrator:} Deploys, configures, and monitors the Docker Compose infrastructure.
+\end{itemize}
+
+\noindent\textbf{Core use cases from Figure \ref{fig:usecase}:}
+\begin{itemize}
+    \item \textbf{UC-1: Score Transaction (System-Initiated):} The Transaction Source submits a transaction payload via REST. The system applies feature engineering, evaluates the hybrid rule layer, computes the ML risk score, evaluates SHAP stability, determines the tri-state decision, logs the transaction to the PostgreSQL audit table, and dispatches an alert if High Risk.
+    \item \textbf{UC-2: Review Flagged Transaction:} The Fraud Analyst accesses the Flagged Transactions queue, inspects the transaction's top SHAP contributing features and stability status, and records an adjudication outcome (Approved Legitimate or Confirmed Fraud).
+    \item \textbf{UC-3: Submit Test Transaction:} The Fraud Analyst enters hypothetical transaction parameters in the test form; the system scores it live and renders risk tiers and SHAP waterfall attributions.
+    \item \textbf{UC-4: Export Flagged Report:} The Fraud Analyst filters transactions by date range and downloads an auditable CSV or PDF summary report.
+    \item \textbf{UC-5: Train Classifiers and Benchmark Stability:} The ML Engineer runs training pipelines across all three imbalance regimes, executes Optuna Bayesian tuning, and generates stability benchmarks.
+    \item \textbf{UC-6: Manage System Deployment:} The System Administrator launches and manages the three-container Docker Compose service cluster.
+\end{itemize}
+
+\newpage
+
+% -------------------------------------------------------------
+% CHAPTER 4: OTHER NON-FUNCTIONAL REQUIREMENTS
+% -------------------------------------------------------------
+\chapter{Other Non-Functional Requirements}
+
+\section{Performance Requirements}
+\begin{itemize}
+    \item[\textbf{NFR-1}] The scoring API (\textbf{/api/v1/score}) shall return a risk classification, top SHAP features, and explanation-reliability status for a submitted transaction within \textbf{2 seconds} under normal lab-demo load.
+    \item[\textbf{NFR-2}] The dashboard's transaction feed shall refresh or update within \textbf{3 seconds} of a new transaction being scored.
+    \item[\textbf{NFR-3}] Model training (across all three candidate models and three imbalance strategies on a 100,000-sample PaySim subset) shall complete within \textbf{30 minutes} on typical development hardware.
+    \item[\textbf{NFR-4}] The system shall support at least \textbf{10 concurrent dashboard users} without noticeable performance degradation, satisfying classroom demonstration requirements.
+    \item[\textbf{NFR-5}] Report export (PDF/CSV) for up to 5,000 transactions over a selected date range shall complete within \textbf{5 seconds}.
+\end{itemize}
+
+\section{Safety and Security Requirements}
+\begin{itemize}
+    \item[\textbf{NFR-6}] \textbf{Audit Trail Immutability:} The system shall not permanently delete or overwrite audit log entries; corrections or analyst remediations shall be appended as new records, preserving a tamper-evident audit history.
+    \item[\textbf{NFR-7}] \textbf{Graceful Failure:} If the database becomes unavailable, the API shall return an explicit HTTP 503 error response rather than silently failing or returning unverified approvals.
+    \item[\textbf{NFR-8}] \textbf{Authenticated Access:} Dashboard access and review submission endpoints shall require authentication (username/password or JWT bearer token) with session expiration enforced after 60 minutes of inactivity.
+    \item[\textbf{NFR-9}] \textbf{Privacy \& Synthetic Data Guardrail:} All transaction data used for training, testing, and demonstration shall be sourced exclusively from the synthetic PaySim benchmark; no live cardholder data or real personally identifiable information (PII) shall be ingested or stored.
+\end{itemize}
+
+\newpage
+\section{Software Quality Attributes}
+
+\subsection{Reliability}
+The system shall return a valid tri-state gateway decision (Low Risk, High Risk, or Analyst Review) for 100\% of structurally valid transaction payloads, with no undefined classification outcomes. This is done through Pydantic schema validation at the API boundary, defensive error handling in the ML inference code, and an automated Pytest suite that covers edge cases such as zero-amount transactions, unknown account prefixes, and null balance values.
+
+\subsection{Maintainability \& Design for Change}
+The system is split into separate, containerized modules (Data/ML, FastAPI backend, PostgreSQL store, and React frontend). Following the ``Design for Change'' principle, swapping the main ML algorithm (for example, XGBoost for LightGBM) or adding a new resampling strategy should only need code changes in the modeling module, with no changes to the backend scoring controllers, the database schema, or the frontend.
+
+\subsection{Usability \& Cognitive Clarity}
+The dashboard is designed for compliance analysts who know the domain but have no machine learning background. To keep it clear, complex outputs are turned into simple visuals: SHAP values appear as ranked horizontal bar charts with clear positive and negative cues, risk levels are color-coded, and explanation reliability is shown as a simple ``Stable'' or ``Unstable'' badge.
+
+\subsection{Portability \& Reproducibility}
+The system shall run the same way on Windows 11, macOS, and Linux through multi-container Docker Compose. Consistency comes from pinned dependency files (\textbf{requirements.txt} and \textbf{package.json}) and standard Alpine/Debian base images.
+
+\newpage
+
+% -------------------------------------------------------------
+% CHAPTER 5: OTHER REQUIREMENTS
+% -------------------------------------------------------------
+\chapter{Other Requirements}
+
+\section{PaySim Benchmark Dataset Finalization \& Preprocessing Scope}
+After reviewing the options, the team chose the \textbf{PaySim Synthetic Financial Dataset} as the benchmark for FraudLens Gateway. PaySim simulates mobile money transactions based on real financial logs:
+\begin{itemize}
+    \item \textbf{Transaction Modalities:} Contains five transaction types (\textbf{CASH\_IN}, \textbf{CASH\_OUT}, \textbf{DEBIT}, \textbf{PAYMENT}, \textbf{TRANSFER}). Fraud occurs only in \textbf{TRANSFER} and \textbf{CASH\_OUT}, which reflects account takeover and money laundering behavior.
+    \item \textbf{Severe Class Skew:} Contains over 6.36 million transactions, of which 8,213 are fraudulent ($\approx 0.129\%$), which makes it a realistic benchmark for class-imbalance research.
+    \item \textbf{Balance Trajectories:} Records origin and destination balances before and after each transaction (\textbf{oldbalanceOrg}, \textbf{newbalanceOrig}, \textbf{oldbalanceDest}, \textbf{newbalanceDest}), which allows engineered features such as balance drainage ratios.
+\end{itemize}
+
+\section{Open-Source Component Reuse \& Architecture Integrity}
+Established open-source frameworks (Scikit-learn, XGBoost, imbalanced-learn, SHAP, Optuna, FastAPI, SQLAlchemy, and React) are reused for common tasks. The gateway decision logic, the explanation stability assessment, the REST schemas, and the analyst UI workflows are original work by the student team.
+
+\section{Legal, Regulatory, and Ethical Alignment}
+Because the system uses only synthetic data, formal PCI-DSS and GDPR compliance do not apply. Even so, the design follows good practice for financial AI governance: human oversight of automated triage, an immutable decision audit trail, and routing unstable predictions to human analysts instead of letting the system take unexplained adverse actions.
+
+\newpage
+
+% -------------------------------------------------------------
+% CHAPTER 6: APPENDIX A - DATA DICTIONARY
+% -------------------------------------------------------------
+\chapter{Appendix A - Data Dictionary}
+
+\section{Data Dictionary Overview \& Classification Schema}
+The Data Dictionary is the reference for all data elements, state variables, constants, enumerations, and API schemas used in FraudLens Gateway. Each table gives the identifier, data type, valid range or format, a description, and the related functional requirements (FRs).
+
+\section{PaySim Benchmark Features \& Model Input Attributes}
+Table \ref{tab:paysim} defines the input attributes ingested from the PaySim benchmark dataset and real-time client transaction payloads.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|l|l|l|X|l|}
+\hline
+\rowcolor{tableheadbg}
+\textbf{{Attribute}} & \textbf{{Type}} & \textbf{{Valid Domain}} & \textbf{{Functional Description \& Role}} & \textbf{{FRs}} \\
+\hline
+\textbf{step} & Integer & 1 to 744 & Simulation hour (1 step = 1 hr). Governs chronological train/test split. & FR-1, 3, 6 \\
+\hline
+\textbf{type} & Enum & 5 string types & Modality: CASH\_IN, CASH\_OUT, DEBIT, PAYMENT, TRANSFER. & FR-1, 6, 7 \\
+\hline
+\textbf{amount} & Float & $\ge 0.00$ & Monetary amount transferred. Key feature for amount anomaly rules. & FR-6, 7 \\
+\hline
+\textbf{nameOrig} & String & Alphanumeric & Unique customer identifier initiating the transaction (e.g., C12345). & FR-6, 10 \\
+\hline
+\textbf{oldbalanceOrg} & Float & $\ge 0.00$ & Initial origin account balance immediately prior to execution. & FR-6, 7, 10 \\
+\hline
+\textbf{newbalanceOrig} & Float & $\ge 0.00$ & Resulting origin account balance immediately following execution. & FR-6, 7, 10 \\
+\hline
+\textbf{nameDest} & String & Alphanumeric & Recipient customer or merchant identifier (e.g., M12345 or C98765). & FR-6, 10 \\
+\hline
+\textbf{oldbalanceDest} & Float & $\ge 0.00$ & Initial recipient balance immediately prior to execution. & FR-6, 7, 10 \\
+\hline
+\textbf{newbalanceDest} & Float & $\ge 0.00$ & Resulting recipient balance immediately following execution. & FR-6, 7, 10 \\
+\hline
+\textbf{isFraud} & Binary & 0, 1 & Ground-truth fraud label. Used strictly for offline model training/testing. & FR-1, 2, 3 \\
+\hline
+\textbf{isFlaggedFraud} & Binary & 0, 1 & PaySim legacy benchmark rule flagging single transfers $> 200,000$. & FR-1, 7 \\
+\hline
+\end{tabularx}
+\caption{PaySim Benchmark Features and Model Input Attributes}
+\label{tab:paysim}
+\end{table}
+
+\section{System Constants \& Operational Configuration Parameters}
+Table \ref{tab:constants} documents system constants, decision thresholds, and operational configuration parameters.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|R{4.4cm}|l|l|X|R{2.3cm}|}
+\hline
+\rowcolor{tableheadbg}
+\textbf{{Constant Identifier}} & \textbf{{Type}} & \textbf{{Value}} & \textbf{{Operational Purpose \& Rule Context}} & \textbf{{Traceability}} \\
+\hline
+\textbf{FRAUD\_\allowbreak{}THRESHOLD\_\allowbreak{}HIGH} & Float & 0.75 & Probability cutoff for flagging High Risk (pending stability check). & FR-6, 8, NFR-1 \\
+\hline
+\textbf{FRAUD\_\allowbreak{}THRESHOLD\_\allowbreak{}LOW} & Float & 0.20 & Probability cutoff below which transaction is cleared as Low Risk. & FR-6, 8 \\
+\hline
+\textbf{SHAP\_\allowbreak{}STABILITY\_\allowbreak{}THRESHOLD} & Float & 0.70 & Minimum rank correlation / overlap for a ``Stable'' rating. & FR-5, 9 \\
+\hline
+\textbf{RULE\_\allowbreak{}DRAIN\_\allowbreak{}BALANCE\_\allowbreak{}RATIO} & Float & 0.95 & Flags transfers draining $\ge 95\%$ of origin balance. & FR-7 \\
+\hline
+\textbf{RULE\_\allowbreak{}LARGE\_\allowbreak{}AMOUNT\_\allowbreak{}LIMIT} & Float & 200,000.00 & Flags single transactions exceeding 200,000 currency units. & FR-7 \\
+\hline
+\textbf{JWT\_\allowbreak{}EXPIRATION\_\allowbreak{}MINUTES} & Integer & 60 & Lifetime duration of analyst JWT authentication tokens. & NFR-8 \\
+\hline
+\textbf{TOP\_\allowbreak{}K\_\allowbreak{}EXPLANATION\_\allowbreak{}FEATURES} & Integer & 5 & Number of top SHAP attributions presented in UI and API. & FR-5, 6, 14 \\
+\hline
+\end{tabularx}
+\caption{System Constants and Operational Parameters}
+\label{tab:constants}
+\end{table}
+
+\section{System State Variables \& Tri-State Enums}
+Table \ref{tab:states} specifies the state variables, lifecycle enumerations, and adjudication flags governed by FraudLens Gateway.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|R{3.6cm}|l|R{3.4cm}|X|R{2.0cm}|}
+\hline
+\rowcolor{tableheadbg}
+\textbf{{State Variable}} & \textbf{{Type}} & \textbf{{Permissible Values}} & \textbf{{State Description \& Lifecycle Behavior}} & \textbf{{Traceability}} \\
+\hline
+\textbf{gateway\_\allowbreak{}decision} & Enum & LOW\_\allowbreak{}RISK, HIGH\_\allowbreak{}RISK, ANALYST\_\allowbreak{}REVIEW & Primary tri-state triage classification assigned to every evaluated transaction. & FR-8, 9, 10 \\
+\hline
+\textbf{explanation\_\allowbreak{}status} & Enum & STABLE, UNSTABLE, INSUFFICIENT\_\allowbreak{}DATA & Attribution stability calculated by comparing local SHAP against stability benchmarks. & FR-5, 6, 9 \\
+\hline
+\textbf{analyst\_\allowbreak{}outcome} & Enum & PENDING, APPROVED\_\allowbreak{}LEGITIMATE, CONFIRMED\_\allowbreak{}FRAUD & Remediation lifecycle state reflecting human analyst review status in the queue. & FR-10, 12, 14 \\
+\hline
+\textbf{resampling\_\allowbreak{}regime} & Enum & BASELINE\_\allowbreak{}NONE, CLASS\_\allowbreak{}WEIGHTED, SMOTE\_\allowbreak{}ENN & Active data balancing strategy utilized during offline model training. & FR-2, 3, 5 \\
+\hline
+\textbf{alert\_\allowbreak{}dispatch\_\allowbreak{}status} & Enum & NONE, DISPATCHED, FAILED & Webhook dispatch tracking status for high-risk notifications. & FR-18, NFR-7 \\
+\hline
+\end{tabularx}
+\caption{System State Variables and Lifecycle Enumerations}
+\label{tab:states}
+\end{table}
+
+\section{API Output Schemas \& Traceability Cross-Reference}
+Table \ref{tab:api} documents the outbound response payload attributes returned by the primary real-time scoring endpoint (\textbf{POST /api/v1/score}).
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|R{3.4cm}|R{2.6cm}|X|R{2.2cm}|}
+\hline
+\rowcolor{tableheadbg}
+\textbf{{Output Key}} & \textbf{{Type}} & \textbf{{Attribute Semantic \& Structure Description}} & \textbf{{Related FRs}} \\
+\hline
+\textbf{transaction\_\allowbreak{}id} & String (UUIDv4) & System-assigned unique identifier for audit tracking and lookup. & FR-6, 10 \\
+\hline
+\textbf{fraud\_\allowbreak{}risk\_\allowbreak{}score} & Float & Evaluated fraud probability scalar ($0.0000$ to $1.0000$). & FR-6, 8 \\
+\hline
+\textbf{gateway\_\allowbreak{}decision} & String (Enum) & Gateway classification: \textbf{LOW\_RISK}, \textbf{HIGH\_RISK}, or \textbf{ANALYST\_REVIEW}. & FR-6, 8, 9 \\
+\hline
+\textbf{explanation\_\allowbreak{}status} & String (Enum) & Stability rating: \textbf{STABLE} or \textbf{UNSTABLE}. & FR-5, 6, 9 \\
+\hline
+\textbf{top\_\allowbreak{}features} & List[Object] & Array of top-5 SHAP feature contributions (\textbf{feature\_name}, \textbf{shap\_value}, \textbf{direction}). & FR-5, 6, 14 \\
+\hline
+\textbf{rule\_\allowbreak{}triggers} & List[String] & List of deterministic business rules triggered by the payload. & FR-7, 10 \\
+\hline
+\textbf{scored\_\allowbreak{}at} & String (ISO 8601) & UTC timestamp recording exact scoring execution time. & FR-10, NFR-1 \\
+\hline
+\end{tabularx}
+\caption{API Output Schema for Real-Time Transaction Scoring Endpoint}
+\label{tab:api}
+\end{table}
+
+\end{document}

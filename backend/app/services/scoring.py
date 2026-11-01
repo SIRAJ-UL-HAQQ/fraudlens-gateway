@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 from pathlib import Path
 from typing import Any
 
@@ -357,6 +358,7 @@ class ScoringService:
             raise ModelNotLoadedError(
                 "Model artifact has not been loaded. Service is not ready to score transactions."
             )
+        start_time = time.perf_counter()
         if not transaction_id:
             import uuid
 
@@ -374,6 +376,7 @@ class ScoringService:
             )
 
         decision = self.route_decision(score, rule_flags, explanation_status)
+        latency_ms = round((time.perf_counter() - start_time) * 1000.0, 3)
 
         return PredictionOut(
             transaction_id=transaction_id,
@@ -384,7 +387,7 @@ class ScoringService:
             rule_flags=rule_flags,
             imbalance_strategy=self.imbalance_strategy,
             model_version=self.model_version,
-            latency_ms=0.0,
+            latency_ms=latency_ms,
         )
 
 

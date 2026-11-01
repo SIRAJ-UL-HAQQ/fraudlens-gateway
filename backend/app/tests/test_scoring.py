@@ -356,9 +356,34 @@ def test_startup_self_test():
     X = pd.DataFrame({"f1": [1.0, 0.0], "f2": [2.0, 0.0]})
     y = np.array([1, 0])
     clf = DecisionTreeClassifier().fit(X, y)
+    clf_rep1 = DecisionTreeClassifier().fit(X, y)
+    clf_rep2 = DecisionTreeClassifier().fit(X, y)
 
-    # Valid model succeeds
+    # Valid model succeeds without explainer
     run_startup_self_test(clf, ["f1", "f2"])
+
+    # Valid model succeeds with prebuilt explainer (0 misses)
+    from app.services.explainer import RealExplainer
+
+    explainer = RealExplainer(top_k=2, stability_min_overlap=0.67)
+    explainer.prebuild_explainers(clf, [clf_rep1, clf_rep2])
+    run_startup_self_test(
+        clf,
+        ["f1", "f2"],
+        explainer=explainer,
+        replicates=[clf_rep1, clf_rep2],
+    )
+    assert explainer.cache_misses == 0
+
+    # Un-prebuilt explainer causes a cache miss and fails startup self-test
+    unbuilt_explainer = RealExplainer(top_k=2, stability_min_overlap=0.67)
+    with pytest.raises(RuntimeError, match="expected 0 explainer cache misses"):
+        run_startup_self_test(
+            clf,
+            ["f1", "f2"],
+            explainer=unbuilt_explainer,
+            replicates=[clf_rep1, clf_rep2],
+        )
 
     # Model returning invalid score fails
     class OutOfBoundsModel:

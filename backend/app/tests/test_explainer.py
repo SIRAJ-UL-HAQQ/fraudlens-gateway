@@ -505,3 +505,114 @@ def test_real_explainer_logistic_regression_pipeline():
             ShapDirection.INCREASES_RISK,
             ShapDirection.DECREASES_RISK,
         ]
+
+
+def test_tree_explainer_constructed_once_not_per_call(deterministic_signal_data):
+    """Verify shap.TreeExplainer is pre-constructed at startup and never per explain() call."""
+    from unittest.mock import patch
+
+    import shap
+
+    X_main, _, y = deterministic_signal_data
+    clf_main = DecisionTreeClassifier(random_state=42).fit(X_main, y)
+    clf_rep1 = DecisionTreeClassifier(random_state=43).fit(X_main, y)
+    clf_rep2 = DecisionTreeClassifier(random_state=44).fit(X_main, y)
+
+    explainer = RealExplainer(top_k=2, stability_min_overlap=0.67)
+    explainer.prebuild_explainers(clf_main, [clf_rep1, clf_rep2])
+
+    assert len(explainer._cached_tree_explainers) == 3
+    assert explainer.cache_misses == 0
+
+    query_row = X_main.iloc[[0]]
+
+    # Spy on TreeExplainer constructor during explain calls
+    orig_init = shap.TreeExplainer.__init__
+    init_call_count = 0
+
+    def spy_init(*args, **kwargs):
+        nonlocal init_call_count
+        init_call_count += 1
+        return orig_init(*args, **kwargs)
+
+    with patch.object(shap.TreeExplainer, "__init__", side_effect=spy_init):
+        for _ in range(10):
+            exps, status = explainer.explain(
+                model=clf_main,
+                features_df=query_row,
+                risk_score=0.85,
+                replicates=[clf_rep1, clf_rep2],
+            )
+            assert len(exps) == 2
+            assert status == ExplanationStatus.STABLE
+
+    assert (
+        init_call_count == 0
+    ), f"TreeExplainer.__init__ called {init_call_count} times during explain()"
+    assert explainer.cache_misses == 0
+
+
+def test_multithreaded_explain_parity_with_sequential(deterministic_signal_data):
+    """Verify 8 threads calling explain() concurrently produce bit-for-bit identical results to sequential execution."""
+    import concurrent.futures
+
+    X_main, _, y = deterministic_signal_data
+    clf_main = DecisionTreeClassifier(random_state=42).fit(X_main, y)
+    clf_rep1 = DecisionTreeClassifier(random_state=43).fit(X_main, y)
+    clf_rep2 = DecisionTreeClassifier(random_state=44).fit(X_main, y)
+
+    explainer = RealExplainer(top_k=2, stability_min_overlap=0.67)
+    explainer.prebuild_explainers(clf_main, [clf_rep1, clf_rep2])
+
+    # Build 50 distinct test input rows
+    rng = np.random.RandomState(42)
+    inputs = []
+    for _ in range(50):
+        row = pd.DataFrame(
+            {
+                "f_a": [float(rng.uniform(0.0, 10.0))],
+                "f_b": [float(rng.uniform(0.0, 5.0))],
+                "f_c": [float(rng.uniform(0.0, 10.0))],
+            }
+        )
+        score = float(clf_main.predict_proba(row)[0][1])
+        inputs.append((row, score))
+
+    # Sequential reference run
+    seq_results = []
+    for row, score in inputs:
+        exps, status = explainer.explain(
+            model=clf_main,
+            features_df=row,
+            risk_score=score,
+            replicates=[clf_rep1, clf_rep2],
+        )
+        seq_results.append((exps, status))
+
+    # Concurrent 8 threads execution
+    def worker(thread_idx: int) -> list[tuple[int, list, ExplanationStatus]]:
+        thread_out = []
+        for i, (row, score) in enumerate(inputs):
+            exps, status = explainer.explain(
+                model=clf_main,
+                features_df=row,
+                risk_score=score,
+                replicates=[clf_rep1, clf_rep2],
+            )
+            thread_out.append((i, exps, status))
+        return thread_out
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+        futures = [executor.submit(worker, t) for t in range(8)]
+        for f in concurrent.futures.as_completed(futures):
+            results = f.result()
+            for idx, th_exps, th_status in results:
+                ref_exps, ref_status = seq_results[idx]
+                assert th_status == ref_status
+                assert len(th_exps) == len(ref_exps)
+                for e_th, e_ref in zip(th_exps, ref_exps):
+                    assert e_th.feature == e_ref.feature
+                    assert e_th.shap_value == e_ref.shap_value  # Exact float equality
+                    assert e_th.direction == e_ref.direction
+
+    assert explainer.cache_misses == 0

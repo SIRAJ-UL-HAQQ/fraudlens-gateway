@@ -170,14 +170,16 @@ if [ -z "${METRICS_STATUS}" ]; then
     exit 1
 fi
 
-if [ -n "${EXPECT_MODEL_MODE}" ]; then
-    if [ "${EXPECT_MODEL_MODE}" = "stub" ] && [ "${METRICS_STATUS}" != "unavailable" ]; then
-        echo "ERROR: In stub mode, expected ml_metrics_status 'unavailable', got '${METRICS_STATUS}'"
-        exit 1
-    fi
-    echo "      -> Verified ml_metrics_status '${METRICS_STATUS}' matches expected mode '${EXPECT_MODEL_MODE}'."
+if [ "${EXPECT_MODEL_MODE}" = "stub" ] && [ "${METRICS_STATUS}" != "unavailable" ]; then
+    echo "ERROR: In stub mode, expected ml_metrics_status 'unavailable', got '${METRICS_STATUS}'"
+    exit 1
+fi
+
+if [ "${METRICS_STATUS}" = "unavailable" ]; then
+    METRICS_REASON=$(json_field "${METRICS_RESP}" "ml_metrics_reason")
+    echo "      -> observed ml_metrics_status: ${METRICS_STATUS} (reason: ${METRICS_REASON})"
 else
-    echo "      -> Verified ml_metrics_status: ${METRICS_STATUS}"
+    echo "      -> observed ml_metrics_status: ${METRICS_STATUS}"
 fi
 
 EXPORT_RESP=$(curl -fsS -X GET "${BASE_URL}/api/v1/export?format=csv" -H "${AUTH_HEADER}")

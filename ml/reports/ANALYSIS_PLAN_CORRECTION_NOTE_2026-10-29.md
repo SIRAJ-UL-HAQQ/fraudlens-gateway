@@ -1,7 +1,7 @@
 # Analysis Plan Correction Note: Section 4 Reconciliation
 
 **Date**: 2026-10-29  
-**Author**: Machine Learning Team (Antigravity)  
+**Author**: Siraj Ul Haq  
 **Governing Document**: `docs/analysis-plan.md` (Commit `b947820`)  
 **Target Section**: Section 4 ("Prior Metric Reconciliation", Line 233)  
 
@@ -13,7 +13,7 @@ In commit `b947820` (`docs(ml): amend analysis plan with queue budget, replicate
 
 | Metric / Artifact | Preliminary Stage 2 Training Report | Subsequent Gateway Evaluation Report | Root Cause of Discrepancy | Correct Authoritative Run |
 | :--- | :---: | :---: | :--- | :--- |
-| **Rules-Only Baseline** | Recall: 99.51%, Prec: 4.77% | Recall: 38.31%, Prec: 4.77% | Rule definition: 99.51% used unconstrained union without origin balance requirements; 38.31% used backend `app.services.rules` requiring `new_balance_orig == 0`. | Backend rule function ($38.31\%$) is authoritative. |
+| **Rules-Only Baseline [ORIGINAL TEXT - INCORRECT]** | Recall: 99.51%, Prec: 4.77% | Recall: 38.31%, Prec: 4.77% | Discrepancy origin unestablished (see Section 3; Section 2 demonstrates backend rules reach 99.51% on test split). | Discarded preliminary value (see Section 3). |
 
 Per user instructions, `docs/analysis-plan.md` remains frozen and is **not modified directly**. This dated correction note documents the empirical verification and correction of Section 4.
 

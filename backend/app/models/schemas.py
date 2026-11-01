@@ -131,7 +131,13 @@ class PredictionOut(BaseModel):
     )
     model_version: str = Field(..., description="Model version tag or 'stub'")
     latency_ms: float = Field(
-        ..., ge=0.0, description="Prediction inference latency in milliseconds"
+        ...,
+        ge=0.0,
+        description=(
+            "Scoring pipeline time in milliseconds (rules, feature construction, "
+            "model inference, explanation, routing). Excludes database persistence, "
+            "response serialization and network transit."
+        ),
     )
 
 
@@ -240,10 +246,20 @@ class OperationalMetrics(BaseModel):
         ..., ge=0.0, le=1.0, description="Average risk score across transactions"
     )
     latency_p50_ms: float = Field(
-        ..., ge=0.0, description="Median latency in milliseconds"
+        ...,
+        ge=0.0,
+        description=(
+            "Median scoring pipeline latency in milliseconds computed over all stored rows. "
+            "Rows stored before scoring latency was measured hold 0.0 (no backfill)."
+        ),
     )
     latency_p95_ms: float = Field(
-        ..., ge=0.0, description="95th percentile latency in milliseconds"
+        ...,
+        ge=0.0,
+        description=(
+            "95th percentile scoring pipeline latency in milliseconds computed over all stored rows. "
+            "Rows stored before scoring latency was measured hold 0.0 (no backfill)."
+        ),
     )
 
 
@@ -263,10 +279,20 @@ class MetricsSummary(BaseModel):
         ..., ge=0.0, le=1.0, description="Average risk score across transactions"
     )
     latency_p50_ms: float = Field(
-        ..., ge=0.0, description="Median latency in milliseconds"
+        ...,
+        ge=0.0,
+        description=(
+            "Median scoring pipeline latency in milliseconds computed over all stored rows. "
+            "Rows stored before scoring latency was measured hold 0.0 (no backfill)."
+        ),
     )
     latency_p95_ms: float = Field(
-        ..., ge=0.0, description="95th percentile latency in milliseconds"
+        ...,
+        ge=0.0,
+        description=(
+            "95th percentile scoring pipeline latency in milliseconds computed over all stored rows. "
+            "Rows stored before scoring latency was measured hold 0.0 (no backfill)."
+        ),
     )
     ml_metrics: MLMetrics | None = Field(
         default=None, description="ML benchmark metrics or null when unavailable"

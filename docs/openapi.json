@@ -853,13 +853,13 @@
             "type": "number",
             "minimum": 0.0,
             "title": "Latency P50 Ms",
-            "description": "Median latency in milliseconds"
+            "description": "Median scoring pipeline latency in milliseconds computed over all stored rows. Rows stored before scoring latency was measured hold 0.0 (no backfill)."
           },
           "latency_p95_ms": {
             "type": "number",
             "minimum": 0.0,
             "title": "Latency P95 Ms",
-            "description": "95th percentile latency in milliseconds"
+            "description": "95th percentile scoring pipeline latency in milliseconds computed over all stored rows. Rows stored before scoring latency was measured hold 0.0 (no backfill)."
           },
           "ml_metrics": {
             "anyOf": [
@@ -1028,7 +1028,7 @@
             "type": "number",
             "minimum": 0.0,
             "title": "Latency Ms",
-            "description": "Prediction inference latency in milliseconds"
+            "description": "Scoring pipeline time in milliseconds (rules, feature construction, model inference, explanation, routing). Excludes database persistence, response serialization and network transit."
           }
         },
         "type": "object",

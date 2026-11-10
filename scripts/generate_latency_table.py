@@ -286,7 +286,7 @@ def generate_markdown(
 
     lines.extend([
         "",
-        "Observation: Both CSV and PDF export durations for 5,000 records completed under 5.0 s. Duration through reverse proxy is comparable to direct route with marginal network overhead. PDF output format produces exactly 129 pages (32 records on title page, 39 records across subsequent 128 pages).",
+        "Observation: CSV export duration for 5,000 records averaged ~4.7 s on the direct route and ~6.1 s through the reverse proxy. PDF export duration averaged ~9.1 s on direct and ~9.8 s through the reverse proxy, reflecting ReportLab rendering overhead for 129 formatted pages. Duration through the reverse proxy reflects expected marginal transit overhead. PDF output format produces exactly 129 pages (32 records on the title page, 39 records across each of the subsequent 128 pages).",
         "",
         "---",
         "",

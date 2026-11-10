@@ -779,21 +779,24 @@ def main() -> None:
         )
 
     # 3. Predict Endpoint Benchmark
-    results, total_duration_s = run_benchmark_batch(
-        base_url=base_url,
-        headers=headers,
-        num_requests=args.num_requests,
-        warmup=args.warmup,
-        concurrency=args.clients,
-        tx_type=args.tx_type,
-        seed=args.seed,
-        is_trained=is_trained,
-        assert_latency=not args.no_assert_latency,
-        paced_rps=args.paced_rps,
-        think_time_z=args.think_time_z,
-        lockstep=args.lockstep,
-        duration=args.duration,
-    )
+    results: list[dict[str, Any]] = []
+    total_duration_s = 0.0
+    if args.num_requests > 0 or args.paced_rps or args.duration:
+        results, total_duration_s = run_benchmark_batch(
+            base_url=base_url,
+            headers=headers,
+            num_requests=args.num_requests,
+            warmup=args.warmup,
+            concurrency=args.clients,
+            tx_type=args.tx_type,
+            seed=args.seed,
+            is_trained=is_trained,
+            assert_latency=not args.no_assert_latency,
+            paced_rps=args.paced_rps,
+            think_time_z=args.think_time_z,
+            lockstep=args.lockstep,
+            duration=args.duration,
+        )
 
     # 4. Analyze Results
     successful = [r for r in results if r["success"]]
@@ -889,6 +892,9 @@ def main() -> None:
         "lockstep": args.lockstep,
         "raw_records": results,
     }
+
+    if export_data:
+        raw_payload["export_benchmark"] = export_data
 
     with open(cache_file, "w", encoding="utf-8") as f:
         json.dump(raw_payload, f, indent=2)

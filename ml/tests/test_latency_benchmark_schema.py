@@ -25,7 +25,9 @@ for p in [str(REPO_ROOT), str(SCRIPTS_DIR)]:
         sys.path.insert(0, p)
 
 from benchmark_latency import (
+    collect_provenance,
     compute_percentiles,
+    detect_system_power,
     generate_payload,
     sanitize_metadata,
 )
@@ -259,4 +261,92 @@ def test_provenance_schema():
     assert provenance["docker_ncpu"] >= 1
     assert "AC connected" in provenance["operator_notes"]
     assert "Server model execution time" in provenance["latency_ms_definition"]
+
+
+def test_dynamic_provenance_and_power_detection():
+    """Verify that detect_system_power dynamically constructs notes and provenance collects metadata."""
+    notes = detect_system_power("Test operator note")
+    assert "AC" in notes or "battery" in notes
+    assert "Test operator note" in notes
+
+    prov = collect_provenance("Unit test run")
+    assert "git_commit" in prov
+    assert "backend_image_built_from_commit" in prov
+    assert "operator_notes" in prov
+    assert "Unit test run" in prov["operator_notes"]
+    assert "docker_ncpu" in prov
+
+
+def test_matrix_report_schema():
+    """Verify that the full matrix report schema contains all required orchestration sections."""
+    matrix_report = {
+        "srs_requirements": {
+            "NFR-1": "2 s per scoring request, normal lab-demo load",
+            "NFR-4": ">= 10 concurrent dashboard users",
+            "NFR-5": "export of up to 5,000 transactions within 5 s",
+        },
+        "provenance": {
+            "git_commit": "ae3dae2",
+            "backend_image_built_from_commit": "ae3dae2",
+            "raw_data_sha256": "A" * 64,
+            "resumed": False,
+            "operator_notes": "AC connected (plugged in), Windows Power Scheme: Balanced, Note: matrix run",
+        },
+        "rounds": {
+            "round_1": {
+                "trained_direct": {"p50": 39.4, "rps": 22.5},
+                "trained_proxy": {"p50": 42.1, "rps": 21.8},
+                "stub_direct": {"p50": 2.1, "rps": 120.0},
+                "stub_proxy": {"p50": 4.5, "rps": 110.0},
+            },
+            "round_2": {
+                "trained_direct": {"p50": 39.1, "rps": 22.7},
+                "trained_proxy": {"p50": 41.8, "rps": 22.0},
+                "stub_direct": {"p50": 2.0, "rps": 122.0},
+                "stub_proxy": {"p50": 4.4, "rps": 112.0},
+            },
+            "round_3": {
+                "trained_direct": {"p50": 38.9, "rps": 22.9},
+                "trained_proxy": {"p50": 41.5, "rps": 22.1},
+                "stub_direct": {"p50": 2.1, "rps": 121.0},
+                "stub_proxy": {"p50": 4.3, "rps": 113.0},
+            },
+        },
+        "round_drift": {
+            "client_p50_drift_pct": -1.27,
+            "server_p50_drift_pct": -0.85,
+            "throughput_drift_pct": 1.78,
+        },
+        "think_time_sweep": {
+            "z1_direct": {"p50": 44.5},
+            "z3_direct": {"p50": 45.0},
+            "z5_direct": {"p50": 46.2},
+            "z10_direct": {"p50": 47.1},
+            "z5_proxy": {"p50": 48.9},
+        },
+        "lockstep_profile": {
+            "label": "10 users click at the same instant",
+            "concurrency": 10,
+        },
+        "export_benchmark": {
+            "target_nfr": "NFR-5",
+            "threshold_s": 5.0,
+            "export_scope": "all_matching_rows_not_flagged_only",
+            "csv_runs": [{"line_count": 5001, "row_count": 5000, "duration_s": 0.85}],
+            "pdf_runs": [{"page_count": 129, "duration_s": 2.15}],
+        },
+        "script_arguments": {
+            "orchestrator": "python scripts/run_latency_matrix.py",
+            "commands": ["python scripts/benchmark_latency.py --yes"],
+        },
+    }
+
+    assert "rounds" in matrix_report
+    assert "round_drift" in matrix_report
+    assert len(matrix_report["rounds"]) == 3
+    assert matrix_report["provenance"]["resumed"] is False
+    assert len(matrix_report["provenance"]["raw_data_sha256"]) == 64
+    assert matrix_report["export_benchmark"]["csv_runs"][0]["line_count"] == 5001
+    assert matrix_report["export_benchmark"]["pdf_runs"][0]["page_count"] == 129
+    assert "commands" in matrix_report["script_arguments"]
 

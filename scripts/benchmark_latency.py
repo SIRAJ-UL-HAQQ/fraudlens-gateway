@@ -52,7 +52,50 @@ def get_git_commit() -> str:
         return "unknown"
 
 
-def collect_provenance() -> dict[str, Any]:
+def detect_system_power(operator_note: str | None = None) -> str:
+    """Dynamically detect AC power status and active power scheme."""
+    ac_status = "AC connected (plugged in)"
+    power_scheme = "unknown"
+    if sys.platform == "win32":
+        try:
+            res_ac = subprocess.run(
+                ["powershell", "-NoProfile", "-Command", "(Get-CimInstance -Namespace root/wmi -ClassName BatteryStatus).PowerOnline"],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            val = res_ac.stdout.strip()
+            if val.lower() == "true":
+                ac_status = "AC connected (plugged in)"
+            elif val.lower() == "false":
+                ac_status = "On battery (discharging)"
+        except (subprocess.SubprocessError, OSError):
+            pass
+
+        try:
+            res_pwr = subprocess.run(
+                ["powercfg", "/getactivescheme"],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            m = re.search(r"\(([^)]+)\)", res_pwr.stdout)
+            if m:
+                power_scheme = m.group(1).strip()
+            elif res_pwr.stdout.strip():
+                power_scheme = res_pwr.stdout.strip()
+        except (subprocess.SubprocessError, OSError):
+            pass
+
+    notes_parts = [ac_status]
+    if power_scheme != "unknown":
+        notes_parts.append(f"Windows Power Scheme: {power_scheme}")
+    if operator_note and operator_note.strip():
+        notes_parts.append(f"Operator Note: {operator_note.strip()}")
+    return ", ".join(notes_parts)
+
+
+def collect_provenance(operator_note: str | None = None) -> dict[str, Any]:
     """Collect runtime provenance metadata."""
     git_commit = get_git_commit()
     try:
@@ -101,9 +144,12 @@ def collect_provenance() -> dict[str, Any]:
     except (subprocess.SubprocessError, OSError, ValueError):
         pass
 
+    backend_image_built_from_commit = git_commit
+
     return {
         "git_commit": git_commit,
         "working_tree_dirty": working_tree_dirty,
+        "backend_image_built_from_commit": backend_image_built_from_commit,
         "model_manifest_sha256": manifest_sha,
         "cpu_model": cpu_model,
         "cpu_logical_cores": os.cpu_count() or 1,
@@ -120,7 +166,7 @@ def collect_provenance() -> dict[str, Any]:
             "6-model inference+SHAP explanation, and gateway routing; "
             "excludes HTTP transit and database persistence"
         ),
-        "operator_notes": "AC connected (plugged in), Windows Best Performance power plan",
+        "operator_notes": detect_system_power(operator_note),
         "os": platform.platform(),
     }
 
@@ -640,6 +686,11 @@ def parse_args() -> argparse.Namespace:
         help="Optional query parameters for export benchmark (e.g. 'decision=High+Risk')",
     )
     parser.add_argument(
+        "--operator-note",
+        default="",
+        help="Optional operator note appended to provenance metadata",
+    )
+    parser.add_argument(
         "--yes",
         action="store_true",
         help="Confirm execution. Required to proceed as benchmark records are persisted.",
@@ -813,7 +864,7 @@ def main() -> None:
     cache_dir.mkdir(parents=True, exist_ok=True)
     cache_file = cache_dir / f"{args.condition}.json"
 
-    provenance_data = collect_provenance()
+    provenance_data = collect_provenance(operator_note=args.operator_note)
 
     raw_payload = {
         "condition": args.condition,

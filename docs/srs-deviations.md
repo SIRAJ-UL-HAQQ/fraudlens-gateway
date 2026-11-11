@@ -261,10 +261,14 @@ The table below catalogs requirements, design constraints, and data dictionary s
 - **Implementation**: The repository, Dockerfiles, and virtual environments pin `Python 3.13.5`.
 - **Status / Reason**: Implemented. Pinned version 3.13.5 satisfies the minimum requirement of 3.11+.
 
-### 3.19. Known Limitation: LinearExplainer Background Masking for Linear Models
+### 3.19. Resolved Limitation: LinearExplainer Background Baseline Resolution
 - **Code Reference**: [`backend/app/services/explainer.py::RealExplainer._extract_top_features_from_model`](../backend/app/services/explainer.py).
-- **Limitation**: When explaining a linear model pipeline (`model_type == "linear"`), the explainer instantiates `shap.LinearExplainer(estimator, X_trans)` using the single transformed request row `X_trans` as its background masking data. Evaluating a single row against itself as the background dataset produces zero attribution values ($X - \mu = 0$) across all features:
-  $$(\text{shap\_values} = \mathbf{0})$$
-  Because feature attributions evaluate to identical zeros across all candidate and replicate models, top-$k$ overlap evaluates to 1.0, causing the explanation status to default to `Stable` for linear models.
-- **Impact & Operational Scope**: Linear models (such as the Logistic Regression baseline) are not deployed in the production gateway (`manifest.json` deploys the primary XGBoost tree pipeline, which uses `shap.TreeExplainer`). However, this remains a known technical limitation in `RealExplainer` requiring follow-up before any linear classifier can be served in production.
+- **Previous Limitation**: When explaining a linear model pipeline (`model_type == "linear"`), the explainer previously instantiated `shap.LinearExplainer(estimator, X_trans)` using the single transformed request row `X_trans` as its background masking data. Evaluating a single row against itself produced zero attribution values ($X - \mu = 0$) across all features, artificially triggering the fallback attribution of `0.001` and causing top-$k$ overlap to default trivially to `Stable` across replicates.
+- **Resolution**:
+  - `RealExplainer.__init__` accepts an optional `background_data` parameter (`pd.DataFrame`, `np.ndarray`, or `None`).
+  - When `background_data is None` (default for online inference), a zero reference baseline is constructed (`bg = np.zeros((1, X_trans.shape[1]), dtype=float)`). In standardized feature space (e.g. following `StandardScaler`), $\mu = \mathbf{0}$ corresponds to the training mean, yielding exact linear attributions $\phi_j(x) = \beta_j X_{\text{trans}, j}$.
+  - When `background_data` is provided, if a `preprocessor` step exists in the pipeline, it transforms `background_data` into feature space, producing empirical mean-centered attributions $\phi_j(x) = \beta_j (X_{\text{trans}, j} - \bar{x}_j)$.
+  - Sparse preprocessor outputs (e.g., from `OneHotEncoder`) are handled via `toarray()`.
+  - Replicate stability evaluation evaluates genuine top-$k$ feature overlap across linear models.
+- **Status / Reason**: Resolved. Unit tests in [`backend/app/tests/test_explainer.py`](../backend/app/tests/test_explainer.py) verify exact zero-reference attributions, stability under similar vs divergent linear replicates, and empirical background SHAP values matching analytical expectations to within $10^{-5}$.
 

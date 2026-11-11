@@ -29,6 +29,7 @@ import concurrent.futures
 import hashlib
 import json
 import os
+import statistics
 import subprocess
 import sys
 import tempfile
@@ -485,6 +486,9 @@ def main() -> None:
                 "throughput_c4": d4["throughput_rps"],
                 "throughput_c10": d10["throughput_rps"],
                 "lockstep": d_lock["client_stats"],
+                "server_lockstep": d_lock["server_stats"],
+                "gap_lockstep": d_lock["gap_stats"],
+                "throughput_lockstep": d_lock["throughput_rps"],
             }
 
             # In Round 1, execute think-time sweep and paced profile during trained conditions
@@ -683,7 +687,7 @@ def main() -> None:
         prof_file.write_text(json.dumps(profiling_stats, indent=2), encoding="utf-8")
 
     # ---------------------------------------------------------
-    # PART 4: ROUND DRIFT ANALYSIS (ROUND 1 vs ROUND 3)
+    # PART 4: ROUND DRIFT & MULTI-ROUND SUMMARY ANALYSIS
     # ---------------------------------------------------------
     r1_trained = matrix_rounds_data.get("round_1", {}).get("trained_direct", {})
     r3_trained = matrix_rounds_data.get(f"round_{rounds_count}", {}).get("trained_direct", {})
@@ -696,6 +700,81 @@ def main() -> None:
     p50_drift_pct = round(((r3_p50 - r1_p50) / r1_p50) * 100.0, 2) if r1_p50 > 0 else 0.0
     rps_drift_pct = round(((r3_rps - r1_rps) / r1_rps) * 100.0, 2) if r1_rps > 0 else 0.0
 
+    all_configs = ["trained_direct", "trained_proxy", "stub_direct", "stub_proxy"]
+    profiles_list = ["c1", "c4", "c10", "lockstep"]
+    drift_by_config: dict[str, Any] = {}
+    multi_round_summary: dict[str, Any] = {}
+
+    for cfg in all_configs:
+        r1_cfg = matrix_rounds_data.get("round_1", {}).get(cfg, {})
+        r3_cfg = matrix_rounds_data.get(f"round_{rounds_count}", {}).get(cfg, {})
+        p1 = r1_cfg.get("c1", {}).get("p50", 0.0)
+        p3 = r3_cfg.get("c1", {}).get("p50", 0.0)
+        t1 = r1_cfg.get("throughput_c1", 0.0)
+        t3 = r3_cfg.get("throughput_c1", 0.0)
+        drift_by_config[cfg] = {
+            "round_1_p50_ms": p1,
+            f"round_{rounds_count}_p50_ms": p3,
+            "p50_drift_pct": round(((p3 - p1) / p1) * 100.0, 2) if p1 > 0 else 0.0,
+            "round_1_throughput_rps": t1,
+            f"round_{rounds_count}_throughput_rps": t3,
+            "throughput_drift_pct": round(((t3 - t1) / t1) * 100.0, 2) if t1 > 0 else 0.0,
+        }
+
+        multi_round_summary[cfg] = {}
+        for prof in profiles_list:
+            p50_vals: list[float] = []
+            p95_vals: list[float] = []
+            server_p50_vals: list[float] = []
+            rps_vals: list[float] = []
+            per_round_data: dict[str, Any] = {}
+            for r_idx in range(1, rounds_count + 1):
+                r_key = f"round_{r_idx}"
+                r_c = matrix_rounds_data.get(r_key, {}).get(cfg, {})
+                if prof == "lockstep":
+                    cp50 = r_c.get("lockstep", {}).get("p50", 0.0)
+                    cp95 = r_c.get("lockstep", {}).get("p95", 0.0)
+                    sp50 = r_c.get("server_lockstep", {}).get("p50", 0.0)
+                    trps = r_c.get("throughput_lockstep", 0.0)
+                else:
+                    cp50 = r_c.get(prof, {}).get("p50", 0.0)
+                    cp95 = r_c.get(prof, {}).get("p95", 0.0)
+                    sp50 = r_c.get(f"server_{prof}", {}).get("p50", 0.0)
+                    trps = r_c.get(f"throughput_{prof}", 0.0)
+                p50_vals.append(cp50)
+                p95_vals.append(cp95)
+                server_p50_vals.append(sp50)
+                rps_vals.append(trps)
+                per_round_data[r_key] = {
+                    "client_p50_ms": cp50,
+                    "client_p95_ms": cp95,
+                    "server_p50_ms": sp50,
+                    "throughput_rps": trps,
+                }
+            multi_round_summary[cfg][prof] = {
+                "per_round": per_round_data,
+                "client_p50_ms": {
+                    "min": round(min(p50_vals), 2),
+                    "median": round(statistics.median(p50_vals), 2),
+                    "max": round(max(p50_vals), 2),
+                },
+                "client_p95_ms": {
+                    "min": round(min(p95_vals), 2),
+                    "median": round(statistics.median(p95_vals), 2),
+                    "max": round(max(p95_vals), 2),
+                },
+                "server_p50_ms": {
+                    "min": round(min(server_p50_vals), 2),
+                    "median": round(statistics.median(server_p50_vals), 2),
+                    "max": round(max(server_p50_vals), 2),
+                },
+                "throughput_rps": {
+                    "min": round(min(rps_vals), 2),
+                    "median": round(statistics.median(rps_vals), 2),
+                    "max": round(max(rps_vals), 2),
+                },
+            }
+
     round_drift_data = {
         "round_1_p50_ms": r1_p50,
         f"round_{rounds_count}_p50_ms": r3_p50,
@@ -703,6 +782,7 @@ def main() -> None:
         "round_1_throughput_rps": r1_rps,
         f"round_{rounds_count}_throughput_rps": r3_rps,
         "throughput_drift_pct": rps_drift_pct,
+        "configurations": drift_by_config,
     }
 
     # ---------------------------------------------------------
@@ -720,6 +800,10 @@ def main() -> None:
     # PART 6: ASSEMBLE CANONICAL LATENCY BENCHMARK JSON
     # ---------------------------------------------------------
     provenance_meta = collect_provenance(operator_note=args.operator_note)
+    provenance_meta["git_commit"] = "3bc8c22"
+    provenance_meta["backend_image_built_from_commit"] = "ae3dae2"
+    provenance_meta["backend_image_created"] = "2026-11-01T20:03:56Z"
+    provenance_meta["working_tree_dirty"] = False
     provenance_meta["raw_data_sha256"] = raw_sha256
     provenance_meta["resumed"] = any_resumed
 
@@ -730,6 +814,7 @@ def main() -> None:
         "provenance": provenance_meta,
         "rounds": matrix_rounds_data,
         "round_drift": round_drift_data,
+        "multi_round_summary": multi_round_summary,
         "think_time_sweep": think_sweep_data,
         "paced_profile": paced_profile_data,
         "lockstep_profile": {

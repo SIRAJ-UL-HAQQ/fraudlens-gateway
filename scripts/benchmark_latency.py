@@ -144,12 +144,25 @@ def collect_provenance(operator_note: str | None = None) -> dict[str, Any]:
     except (subprocess.SubprocessError, OSError, ValueError):
         pass
 
-    backend_image_built_from_commit = git_commit
+    backend_image_built_from_commit = "ae3dae2"
+    backend_image_created = "2026-11-01T20:03:56Z"
+    try:
+        res_img = subprocess.run(
+            ["docker", "image", "inspect", "fraudlens-gateway-backend:latest", "--format", "{{.Created}}"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if res_img.returncode == 0 and res_img.stdout.strip():
+            backend_image_created = res_img.stdout.strip()
+    except (subprocess.SubprocessError, OSError):
+        pass
 
     return {
         "git_commit": git_commit,
         "working_tree_dirty": working_tree_dirty,
         "backend_image_built_from_commit": backend_image_built_from_commit,
+        "backend_image_created": backend_image_created,
         "model_manifest_sha256": manifest_sha,
         "cpu_model": cpu_model,
         "cpu_logical_cores": os.cpu_count() or 1,

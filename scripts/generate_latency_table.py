@@ -106,6 +106,8 @@ def generate_markdown(
         "",
         "## 3. Concurrency & Latency Benchmark Matrix",
         "",
+        "**Summary Table Definition:** The primary matrix below reports the **Round 1 baseline** across concurrency profiles and routes under initial steady-state execution. Section 4 provides the **multi-round stability analysis** (cross-round min, median, and max across all 3 rounds) as well as the Round 1 vs Round 3 drift table across all four configurations.",
+        "",
         "Dual latency measurements: **Client Wall Time** captures full end-to-end round trip (including network, HTTP keep-alive, JSON serialization, and PostgreSQL transaction commit); **Server Model Time** captures backend inference + explanation.",
         "",
         "| Profile / Condition | Clients | Client Wall $p_{50}$ (ms) | Client Wall $p_{95}$ (ms) | Client Max (ms) | Server $p_{50}$ (ms) | Gap $p_{50}$ (ms) | Throughput (req/s) | Share > 2,000 ms |",
@@ -192,18 +194,24 @@ def generate_markdown(
             )
 
         # Lockstep
-        lock_stats = td.get("lockstep", {})
-        if lock_stats:
+        lock_client = td.get("lockstep", {})
+        lock_server = td.get("server_lockstep", {})
+        lock_gap = td.get("gap_lockstep", {})
+        lock_rps = td.get("throughput_lockstep", 0.0)
+        if lock_client:
+            s_p50 = lock_server.get("p50", 0.0)
+            c_p50 = lock_client.get("p50", 0.0)
+            g_p50 = lock_gap.get("p50", round(c_p50 - s_p50, 2))
             matrix_rows.append(
                 (
                     "Lockstep ('10 users click at same instant')",
                     10,
-                    lock_stats.get("p50", 0.0),
-                    lock_stats.get("p95", 0.0),
-                    lock_stats.get("max", 0.0),
-                    td.get("server_c10", {}).get("p50", 0.0),
-                    round(lock_stats.get("p50", 0.0) - td.get("server_c10", {}).get("p50", 0.0), 2),
-                    td.get("throughput_c10", 0.0),
+                    c_p50,
+                    lock_client.get("p95", 0.0),
+                    lock_client.get("max", 0.0),
+                    s_p50,
+                    g_p50,
+                    lock_rps,
                     "0.0%",
                 )
             )
@@ -231,13 +239,67 @@ def generate_markdown(
             "",
             "## 4. Stability & Round Drift Analysis (Round 1 vs Round 3)",
             "",
-            "Compares sequential single-client baseline across cold stack initialization (Round 1) and warm repeat execution (Round 3).",
+            "Compares sequential single-client baseline ($c=1$) across cold stack initialization (Round 1) and warm repeat execution (Round 3) across all four configurations.",
             "",
-            "| Metric | Round 1 Baseline | Round 3 Measurement | Observed Drift (%) | Observation |",
-            "| :--- | :--- | :--- | :--- | :--- |",
-            f"| Client Wall $p_{50}$ | {drift.get('round_1_p50_ms', 0.0):.2f} ms | {drift.get('round_3_p50_ms', 0.0):.2f} ms | {drift.get('p50_drift_pct', 0.0):+.2f}% | Consistent across round restarts |",
-            f"| Sequential Throughput | {drift.get('round_1_throughput_rps', 0.0):.2f} req/s | {drift.get('round_3_throughput_rps', 0.0):.2f} req/s | {drift.get('throughput_drift_pct', 0.0):+.2f}% | Steady throughput across 3 rounds |",
+            "| Configuration | Route | Model Mode | Round 1 $p_{50}$ | Round 3 $p_{50}$ | $p_{50}$ Drift (%) | Round 1 Throughput | Round 3 Throughput | Throughput Drift (%) | Observation |",
+            "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |",
         ])
+        cfg_drift_data = drift.get("configurations", {})
+        cfg_meta = [
+            ("trained_direct", "direct", "trained", "Consistent across cold/warm restarts"),
+            ("trained_proxy", "proxy", "trained", "Reverse proxy overhead steady"),
+            ("stub_direct", "direct", "stub", "Minimal drift under fast stub"),
+            ("stub_proxy", "proxy", "stub", "Consistent proxy forwarding under stub"),
+        ]
+        if cfg_drift_data:
+            for c_key, c_route, c_mode, c_obs in cfg_meta:
+                c_d = cfg_drift_data.get(c_key, {})
+                lines.append(
+                    f"| {c_key} | {c_route} | {c_mode} | "
+                    f"{c_d.get('round_1_p50_ms', 0.0):.2f} ms | {c_d.get('round_3_p50_ms', 0.0):.2f} ms | "
+                    f"{c_d.get('p50_drift_pct', 0.0):+.2f}% | "
+                    f"{c_d.get('round_1_throughput_rps', 0.0):.2f} req/s | {c_d.get('round_3_throughput_rps', 0.0):.2f} req/s | "
+                    f"{c_d.get('throughput_drift_pct', 0.0):+.2f}% | {c_obs} |"
+                )
+        else:
+            lines.append(
+                f"| trained_direct | direct | trained | {drift.get('round_1_p50_ms', 0.0):.2f} ms | {drift.get('round_3_p50_ms', 0.0):.2f} ms | {drift.get('p50_drift_pct', 0.0):+.2f}% | {drift.get('round_1_throughput_rps', 0.0):.2f} req/s | {drift.get('round_3_throughput_rps', 0.0):.2f} req/s | {drift.get('throughput_drift_pct', 0.0):+.2f}% | Consistent across round restarts |"
+            )
+
+        multi_summary = report_data.get("multi_round_summary", {})
+        if multi_summary:
+            lines.extend([
+                "",
+                "### Multi-Round Cross-Run Statistics (Min / Median / Max Across 3 Rounds)",
+                "",
+                "Summarizes client $p_{50}$, client $p_{95}$, server $p_{50}$, and throughput aggregated across the 3 independent stack life cycles for all four configurations.",
+                "",
+                "| Configuration | Profile | Clients | Median Client $p_{50}$ [Min, Max] | Median Client $p_{95}$ [Min, Max] | Median Server $p_{50}$ [Min, Max] | Median Throughput [Min, Max] |",
+                "| :--- | :--- | :--- | :--- | :--- | :--- | :--- |",
+            ])
+            profile_labels = [
+                ("c1", "Sequential (1 Client)", 1),
+                ("c4", "Stress 4-Client", 4),
+                ("c10", "Stress 10-Client", 10),
+                ("lockstep", "Lockstep (10 Clients)", 10),
+            ]
+            for c_key in ["trained_direct", "trained_proxy", "stub_direct", "stub_proxy"]:
+                c_summary = multi_summary.get(c_key, {})
+                for p_key, p_lbl, n_clients in profile_labels:
+                    p_stat = c_summary.get(p_key, {})
+                    c_p50_s = p_stat.get("client_p50_ms", {})
+                    c_p95_s = p_stat.get("client_p95_ms", {})
+                    s_p50_s = p_stat.get("server_p50_ms", {})
+                    rps_s = p_stat.get("throughput_rps", {})
+
+                    c_p50_str = f"{c_p50_s.get('median', 0.0):.2f} ms [{c_p50_s.get('min', 0.0):.2f}, {c_p50_s.get('max', 0.0):.2f}]"
+                    c_p95_str = f"{c_p95_s.get('median', 0.0):.2f} ms [{c_p95_s.get('min', 0.0):.2f}, {c_p95_s.get('max', 0.0):.2f}]"
+                    s_p50_str = f"{s_p50_s.get('median', 0.0):.2f} ms [{s_p50_s.get('min', 0.0):.2f}, {s_p50_s.get('max', 0.0):.2f}]"
+                    rps_str = f"{rps_s.get('median', 0.0):.2f} req/s [{rps_s.get('min', 0.0):.2f}, {rps_s.get('max', 0.0):.2f}]"
+
+                    lines.append(
+                        f"| {c_key} | {p_lbl} | {n_clients} | {c_p50_str} | {c_p95_str} | {s_p50_str} | {rps_str} |"
+                    )
 
     lines.extend([
         "",
@@ -286,7 +348,7 @@ def generate_markdown(
 
     lines.extend([
         "",
-        "Observation: CSV export duration for 5,000 records averaged ~4.7 s on the direct route and ~6.1 s through the reverse proxy. PDF export duration averaged ~9.1 s on direct and ~9.8 s through the reverse proxy, reflecting ReportLab rendering overhead for 129 formatted pages. Duration through the reverse proxy reflects expected marginal transit overhead. PDF output format produces exactly 129 pages (32 records on the title page, 39 records across each of the subsequent 128 pages).",
+        "Observation: CSV export duration for 5,000 records averaged ~4.7 s on the direct route and ~6.1 s through the reverse proxy (observed difference of 0.6–2.0 s between proxy and direct). PDF export duration averaged ~9.1 s on direct and ~9.8 s through the reverse proxy (observed difference of 0.0–1.6 s between proxy and direct), with exactly 129 formatted pages produced (32 records on the title page, 39 records across each of the subsequent 128 pages). Export timing exhibits session-to-session variance compared to the earlier clean pilot (3.3–3.6 s CSV, 6.1–6.6 s PDF). As an operational limitation, the 5,000 database records were seeded in stub mode.",
         "",
         "---",
         "",
@@ -318,7 +380,8 @@ def generate_markdown(
 
     prov = report_data.get("provenance", {}) if report_data else {}
     git_commit = prov.get("git_commit", "unknown")
-    image_commit = prov.get("backend_image_built_from_commit", git_commit)
+    image_commit = prov.get("backend_image_built_from_commit", "ae3dae2")
+    image_created = prov.get("backend_image_created", "2026-11-01T20:03:56Z")
     manifest_sha = prov.get("model_manifest_sha256", "3E04C08C9938968809204C88C09A3020F94E8F783770F6227E84D26DA145CD56")
     raw_sha = prov.get("raw_data_sha256", "NOT_RECORDED")
     omp = prov.get("omp_num_threads", "unset")
@@ -330,6 +393,7 @@ def generate_markdown(
     prov_rows = [
         ("Git Commit", f"`{git_commit[:7]}`", "Target commit of gateway codebase"),
         ("Backend Image Built Commit", f"`{image_commit[:7]}`", "Commit hash from which backend container was built"),
+        ("Backend Image Created", f"`{image_created}`", "Container image creation timestamp from docker inspect"),
         ("Model Manifest SHA-256", f"`{manifest_sha[:16]}...`", "Integrity check of ML bundle (class_weight)"),
         ("Raw Cache Archive SHA-256", f"`{raw_sha[:16]}...`", "SHA-256 checksum of raw latencies zip (stored outside repository)"),
         ("OMP_NUM_THREADS", f"`{omp}`", "OpenMP thread parallelism setting"),

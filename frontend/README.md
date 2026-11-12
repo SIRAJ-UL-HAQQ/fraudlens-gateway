@@ -22,13 +22,14 @@ The frontend provides an accessible, dark-themed operational dashboard for fraud
 ## Technology Stack & Architecture Decisions
 
 - **Framework**: React 18.3.1 + React DOM 18.3.1
-- **Bundler & Dev Server**: Vite 5.4.14
-- **Routing**: React Router 6.28.2
+- **Bundler & Dev Server**: Vite 5.4.21
+- **Routing**: React Router 6.30.6
 - **Data Fetching & Cache**: TanStack Query (React Query) 5.62.8
-- **Styling**: Tailwind CSS 3.4.17 + PostCSS + Autoprefixer
+- **Styling**: Tailwind CSS 3.4.17 + PostCSS 8.5.32 + Autoprefixer 10.4.20
 - **Icons**: Lucide React 0.468.0
-- **Testing**: Vitest 2.1.8 + React Testing Library 16.1.0 + JSDOM 25.0.1
-- **Linting**: ESLint 9.17.0 (Flat Config) + `eslint-plugin-react` (`react/no-danger: "error"`)
+- **Testing**: Vitest 2.1.9 + React Testing Library 16.1.0 + JSDOM 25.0.1
+- **Linting & A11y**: ESLint 9.39.5 (Flat Config) + `eslint-plugin-react` (`react/no-danger: "error"`) + `eslint-plugin-jsx-a11y` 6.10.2 (WCAG AA)
+- **Resilience**: Dual-level `ErrorBoundary` with "Reload View" recovery and fault resilience suite
 
 ### Pure Accessible SVG Charting (Zero 3rd-Party Dependencies)
 To maintain zero runtime vulnerabilities, prevent bundle bloat, and guarantee complete accessibility:

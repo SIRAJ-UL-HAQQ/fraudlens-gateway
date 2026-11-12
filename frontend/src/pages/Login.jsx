@@ -78,7 +78,7 @@ export function Login() {
               <div>
                 <p className="font-medium">Session Expired</p>
                 <p className="text-xs text-amber-300/80 mt-0.5">
-                  Your session has ended. Please log in again to continue.
+                  Session expired. Please log in again.
                 </p>
               </div>
             </div>

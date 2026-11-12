@@ -46,11 +46,7 @@ export function normalizeError(status, errorBody) {
     message = 'Internal gateway error. Please try again later.';
   } else if (status === 503) {
     retryable = true;
-    if (typeof detail === 'string') {
-      message = detail;
-    } else {
-      message = 'Service temporarily unavailable. Please retry.';
-    }
+    message = 'Service temporarily unavailable. Please retry.';
   } else if (status === 0) {
     retryable = true;
     message = 'Network error. Gateway is unreachable.';

@@ -67,7 +67,14 @@ describe('API Client normalizeError', () => {
     const err = normalizeError(503, healthPayload);
     expect(err.status).toBe(503);
     expect(err.retryable).toBe(true);
+    expect(err.message).toBe('Service temporarily unavailable. Please retry.');
     expect(err.data).toEqual(healthPayload);
+
+    // Verify string detail does not override fixed copy
+    const errWithDetail = normalizeError(503, { detail: 'Custom server detail' });
+    expect(errWithDetail.status).toBe(503);
+    expect(errWithDetail.message).toBe('Service temporarily unavailable. Please retry.');
+    expect(errWithDetail.data).toEqual({ detail: 'Custom server detail' });
   });
 
   it('normalizes network error (status 0) as retryable', () => {

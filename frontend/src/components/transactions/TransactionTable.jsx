@@ -48,9 +48,9 @@ export function TransactionTable({
             <th scope="col" className="py-2.5 px-2">Step & Ingested</th>
             <th scope="col" className="py-2.5 px-2">Type & Amount</th>
             <th scope="col" className="py-2.5 px-2">Decision</th>
-            <th scope="col" className="py-2.5 px-2 min-w-[110px]">Risk Score</th>
+            <th scope="col" className="py-2.5 px-2 min-w-[85px]">Risk Score</th>
             <th scope="col" className="py-2.5 px-2">Reliability</th>
-            <th scope="col" className="py-2.5 px-2 max-w-[150px]">Rule Flags</th>
+            <th scope="col" className="py-2.5 px-2 max-w-[120px]">Rule Flags</th>
             <th scope="col" className="py-2.5 px-2">Audit Status</th>
           </tr>
         </thead>
@@ -115,10 +115,10 @@ export function TransactionTable({
                     >
                       {displayTxId}
                     </div>
-                    <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-mono mt-0.5">
-                      <span>{tx.name_orig || '—'}</span>
+                    <div className="flex items-center gap-1 text-[11px] text-slate-400 font-mono mt-0.5">
+                      <span className="truncate max-w-[70px]" title={tx.name_orig}>{tx.name_orig || '—'}</span>
                       <ArrowRight className="w-3 h-3 text-slate-500 shrink-0" aria-hidden="true" />
-                      <span>{tx.name_dest || '—'}</span>
+                      <span className="truncate max-w-[70px]" title={tx.name_dest}>{tx.name_dest || '—'}</span>
                     </div>
                   </td>
 
@@ -168,7 +168,7 @@ export function TransactionTable({
                     {ruleFlags.length === 0 ? (
                       <span className="text-[11px] text-slate-500 font-mono italic">None</span>
                     ) : (
-                      <div className="flex flex-wrap gap-1 max-w-[140px]">
+                      <div className="flex flex-wrap gap-1 max-w-[115px]">
                         {ruleFlags.map((flag) => (
                           <span
                             key={flag}

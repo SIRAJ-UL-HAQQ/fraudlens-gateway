@@ -139,4 +139,22 @@ describe('DashboardFeed page (Condition 2 & Condition 4)', () => {
       expect(screen.getByTestId('transaction-detail-drawer')).toBeInTheDocument();
     });
   });
+
+  it('opens TransactionDetailDrawer when a transaction row is focused and Enter or Space is pressed (keyboard accessibility)', async () => {
+    renderFeed();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('transaction-row-tx-001')).toBeInTheDocument();
+    });
+
+    const row = screen.getByTestId('transaction-row-tx-001');
+    expect(row).toHaveAttribute('tabIndex', '0');
+
+    // Press Enter to open
+    fireEvent.keyDown(row, { key: 'Enter', code: 'Enter' });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('transaction-detail-drawer')).toBeInTheDocument();
+    });
+  });
 });

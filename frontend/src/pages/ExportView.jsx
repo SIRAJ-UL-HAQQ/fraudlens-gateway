@@ -151,9 +151,9 @@ export function ExportView() {
         <form onSubmit={handleExport} className="space-y-6" noValidate>
           {/* Format Selector */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">
+            <span className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">
               Export File Format
-            </label>
+            </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <label
                 data-testid="format-option-csv"

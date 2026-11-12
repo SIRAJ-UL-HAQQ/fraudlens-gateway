@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import * as client from '../api/client';
 import OperationalMetricsCard from '../components/metrics/OperationalMetricsCard';
 import DecisionDistributionChart from '../components/metrics/DecisionDistributionChart';
@@ -186,5 +186,152 @@ describe('MetricsView Integration', () => {
     await waitFor(() => {
       expect(screen.getByText('Network error loading metrics')).toBeInTheDocument();
     });
+  });
+
+  it('handles nested shap_stability objects and filters metadata keys without rendering NaN% or non-strategy rows', async () => {
+    const liveLikeResponse = {
+      total_transactions: 5007,
+      decision_distribution: { 'Low Risk': 3973, 'High Risk': 0, 'Analyst Review': 1034 },
+      explanation_stability_ratio: 0.836,
+      average_risk_score: 0.18,
+      latency_p50_ms: 12.5,
+      latency_p95_ms: 22.1,
+      ml_metrics_status: 'available',
+      ml_metrics_reason: null,
+      ml_metrics: {
+        strategy_comparison: {
+          class_weight: {
+            label: 'class_weight (deployed)',
+            metrics_at_high: {
+              precision: 0.9429,
+              recall: 0.9446,
+              f1: 0.9437,
+              pr_auc: 0.9907,
+              confusion_matrix: {
+                true_negatives: 116410,
+                false_positives: 94,
+                false_negatives: 91,
+                true_positives: 1551,
+              },
+            },
+            shap_stability: {
+              fraud_cohort: {
+                primary_k5: {
+                  stability_rate: 0.8276,
+                },
+              },
+              across_10_sets: {
+                fraud_cohort_stability: {
+                  mean: 0.8359,
+                },
+              },
+            },
+          },
+          none: {
+            label: 'none (10:1 undersampled baseline)',
+            metrics_at_high: {
+              precision: 0.95,
+              recall: 0.9367,
+              f1: 0.9433,
+              pr_auc: 0.99,
+            },
+            shap_stability: {
+              across_10_sets: {
+                fraud_cohort_stability: {
+                  mean: 0.8149,
+                },
+              },
+            },
+          },
+          smote_enn: {
+            label: 'smote_enn',
+            metrics_at_high: {
+              precision: 0.9538,
+              recall: 0.905,
+              f1: 0.9287,
+              pr_auc: 0.9853,
+            },
+            shap_stability: {
+              across_10_sets: {
+                fraud_cohort_stability: {
+                  mean: 0.8623,
+                },
+              },
+            },
+          },
+          rules_baseline: {
+            label: 'Rules baseline (backend rule function)',
+            union_all_rules: {
+              precision: 0.0445,
+              recall: 0.9951,
+              f1: 0.0851,
+              pr_auc: 0.0443,
+            },
+          },
+          variant_A_reference: {
+            label: 'Variant A reference (15 features with balance errors/deltas)',
+            precision: 0.9832,
+            recall: 0.9994,
+            f1: 0.9912,
+            pr_auc: 0.9999,
+            shap_stability: {
+              primary_k5: {
+                stability_rate: 0.8307,
+              },
+            },
+          },
+          cross_strategy_shap_agreement: {
+            n_samples: 1699,
+            k: 5,
+            chance_baseline: 0.4545,
+            pairwise_comparisons: {
+              class_weight_vs_none: { mean_top_k_overlap: 0.8281 },
+            },
+          },
+          informative_nature_of_unstable: {
+            chi2_contingency: { p_value: 0.001 },
+          },
+        },
+      },
+    };
+
+    vi.spyOn(client, 'getMetrics').mockResolvedValue(liveLikeResponse);
+
+    render(<MetricsView />);
+    await waitFor(() => {
+      expect(screen.getByTestId('strategy-comparison-table')).toBeInTheDocument();
+    });
+
+    // Verify valid strategies render correctly
+    expect(screen.getByTestId('strategy-row-class_weight')).toBeInTheDocument();
+    expect(screen.getByTestId('strategy-row-none')).toBeInTheDocument();
+    expect(screen.getByTestId('strategy-row-smote_enn')).toBeInTheDocument();
+    expect(screen.getByTestId('strategy-row-rules_baseline')).toBeInTheDocument();
+    expect(screen.getByTestId('strategy-row-variant_A_reference')).toBeInTheDocument();
+
+    // Verify non-strategy metadata keys are completely filtered out
+    expect(screen.queryByTestId('strategy-row-cross_strategy_shap_agreement')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('strategy-row-informative_nature_of_unstable')).not.toBeInTheDocument();
+
+    // Check specific rendered stability percentages inside their strategy rows
+    const classWeightRow = screen.getByTestId('strategy-row-class_weight');
+    expect(within(classWeightRow).getByText('83.6%')).toBeInTheDocument();
+
+    const noneRow = screen.getByTestId('strategy-row-none');
+    expect(within(noneRow).getByText('81.5%')).toBeInTheDocument();
+
+    const smoteRow = screen.getByTestId('strategy-row-smote_enn');
+    expect(within(smoteRow).getByText('86.2%')).toBeInTheDocument();
+
+    const variantARow = screen.getByTestId('strategy-row-variant_A_reference');
+    expect(within(variantARow).getByText('83.1%')).toBeInTheDocument();
+
+    const rulesRow = screen.getByTestId('strategy-row-rules_baseline');
+    expect(within(rulesRow).getByText('4.5%')).toBeInTheDocument(); // Precision
+    expect(within(rulesRow).getByText('99.5%')).toBeInTheDocument(); // Recall
+
+    // Assert that zero NaN% strings appear anywhere in the document body
+    expect(document.body.textContent).not.toContain('NaN%');
+    expect(document.body.textContent).not.toContain('NaN');
   });
 });

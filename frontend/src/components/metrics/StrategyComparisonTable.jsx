@@ -17,7 +17,8 @@ export function StrategyComparisonTable({ strategyComparison }) {
     .map((k) => parseStrategyData(k, strategyComparison[k]))
     .filter(Boolean);
 
-  const formatScore = (val) => (typeof val === 'number' ? (val * 100).toFixed(1) + '%' : '—');
+  const formatScore = (val) =>
+    typeof val === 'number' && !Number.isNaN(val) ? (val * 100).toFixed(1) + '%' : '—';
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm" data-testid="strategy-comparison-table">
@@ -62,7 +63,7 @@ export function StrategyComparisonTable({ strategyComparison }) {
                 <td className="py-3 px-3 text-right font-mono text-slate-200">{formatScore(row.f1)}</td>
                 <td className="py-3 px-3 text-right font-mono text-slate-200">{formatScore(row.prAuc)}</td>
                 <td className="py-3 px-3 text-right font-mono">
-                  {typeof row.stability === 'number' ? (
+                  {typeof row.stability === 'number' && !Number.isNaN(row.stability) ? (
                     <span className={row.stability >= 0.85 ? 'text-emerald-400' : 'text-amber-400'}>
                       {formatScore(row.stability)}
                     </span>

@@ -31,6 +31,25 @@ export function StrategyComparisonChart({ strategyComparison }) {
     none: '#64748b', // Slate 500
     class_weight: '#6366f1', // Indigo 500
     smote_enn: '#06b6d4', // Cyan 500
+    logistic_regression: '#f59e0b', // Amber 500
+    random_forest: '#10b981', // Emerald 500
+    rules_baseline: '#f43f5e', // Rose 500
+    full_train_none: '#8b5cf6', // Violet 500
+    full_train_class_weight: '#ec4899', // Pink 500
+    variant_A_reference: '#14b8a6', // Teal 500
+  };
+
+  const getLegendLabel = (strat) => {
+    if (strat.key === 'class_weight') return 'Class Weight (Deployed)';
+    if (strat.key === 'none') return 'None (Baseline)';
+    if (strat.key === 'smote_enn') return 'SMOTE-ENN';
+    if (strat.key === 'rules_baseline') return 'Rules Baseline';
+    if (strat.key === 'logistic_regression') return 'Logistic Regression';
+    if (strat.key === 'random_forest') return 'Random Forest';
+    if (strat.key === 'variant_A_reference') return 'Variant A Ref';
+    if (strat.key === 'full_train_none') return 'Full-Train None';
+    if (strat.key === 'full_train_class_weight') return 'Full-Train Class Weight';
+    return strat.label.split(' ')[0];
   };
 
   // Dimensions for SVG
@@ -54,7 +73,7 @@ export function StrategyComparisonChart({ strategyComparison }) {
           <h2 className="text-sm font-semibold text-white">Strategy Metric Comparison</h2>
         </div>
         {/* Legend */}
-        <div className="flex items-center gap-4 text-xs">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
           {parsedStrategies.map((strat) => (
             <div key={strat.key} className="flex items-center gap-1.5">
               <span
@@ -62,7 +81,7 @@ export function StrategyComparisonChart({ strategyComparison }) {
                 style={{ backgroundColor: strategyColors[strat.key] || '#94a3b8' }}
               />
               <span className="text-slate-300 font-medium">
-                {strat.key === 'class_weight' ? 'Class Weight (Deployed)' : strat.label.split(' ')[0]}
+                {getLegendLabel(strat)}
               </span>
             </div>
           ))}
@@ -133,7 +152,10 @@ export function StrategyComparisonChart({ strategyComparison }) {
 
                 {/* Bars for each strategy */}
                 {parsedStrategies.map((strat, stratIdx) => {
-                  const val = strat[metric.key] ?? 0;
+                  const val =
+                    typeof strat[metric.key] === 'number' && !Number.isNaN(strat[metric.key])
+                      ? strat[metric.key]
+                      : 0;
                   const barH = Math.max(2, val * chartHeight);
                   const barX = startX + stratIdx * barWidth;
                   const barY = paddingTop + chartHeight - barH;

@@ -39,9 +39,6 @@ export function FlaggedQueue() {
     queryFn: () => getTransactions({ decision: 'High Risk', page_size: 1 }),
   });
 
-  const countAnalystReview = analystReviewCountData?.total;
-  const countHighRisk = highRiskCountData?.total;
-
   // Query for current tab's transactions
   const queryParams = {
     page,
@@ -64,6 +61,20 @@ export function FlaggedQueue() {
     queryKey: ['transactions', queryParams],
     queryFn: () => getTransactions(queryParams),
   });
+
+  const countAnalystReview =
+    analystReviewCountData?.total !== undefined
+      ? analystReviewCountData.total
+      : activeTab === 'Analyst Review' && data?.total !== undefined
+        ? data.total
+        : undefined;
+
+  const countHighRisk =
+    highRiskCountData?.total !== undefined
+      ? highRiskCountData.total
+      : activeTab === 'High Risk' && data?.total !== undefined
+        ? data.total
+        : undefined;
 
   const transactions = data?.items || [];
   const total = data?.total || 0;

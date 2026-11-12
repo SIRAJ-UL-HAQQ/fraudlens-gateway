@@ -75,18 +75,18 @@ export function ShapFeatureBars({ features = [], className = '' }) {
                 </div>
               </div>
 
-              {/* Bar visualization */}
-              <div className="h-2 w-full bg-slate-950 rounded-full overflow-hidden flex">
+              {/* Bar visualization (decorative, aria-hidden; text labels above are accessible) */}
+              <div
+                className="h-2 w-full bg-slate-950 rounded-full overflow-hidden flex"
+                aria-hidden="true"
+                data-testid="shap-bar-track"
+              >
                 <div
                   className={`h-full rounded-full transition-all duration-300 ${
                     isIncrease ? 'bg-rose-500' : 'bg-emerald-500'
                   }`}
                   style={{ width: `${widthPct}%` }}
-                  role="progressbar"
-                  aria-valuenow={val}
-                  aria-valuetext={`${f.feature}: ${signedValue} (${
-                    isIncrease ? 'Pushes toward Fraud' : 'Pushes toward Legitimate'
-                  })`}
+                  data-testid="shap-bar-fill"
                 />
               </div>
             </div>

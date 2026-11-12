@@ -177,6 +177,9 @@ export async function handleMockRequest(url, options = {}) {
       filtered = filtered.filter((tx) => new Date(tx.created_at) <= new Date(createdTo));
     }
 
+    // Server-enforced audit order: created_at desc
+    filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
     const total = filtered.length;
     const totalPages = Math.max(1, Math.ceil(total / pageSize));
     const startIdx = (page - 1) * pageSize;

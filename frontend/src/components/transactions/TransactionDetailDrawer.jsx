@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { X, AlertTriangle, Clock, Loader2 } from 'lucide-react';
+import { X, AlertTriangle, Clock, Loader2, Cpu, GitBranch } from 'lucide-react';
 import { getTransaction } from '../../api/client';
 import DecisionBadge from '../shared/DecisionBadge';
 import ReliabilityBadge from '../shared/ReliabilityBadge';
@@ -61,12 +61,13 @@ export function TransactionDetailDrawer({
   const type = txData.type ?? transaction?.type;
   const amount = txData.amount ?? transaction?.amount;
   const nameOrig = txData.name_orig ?? transaction?.name_orig;
-  const oldbalanceOrg = txData.oldbalance_org ?? transaction?.oldbalance_org;
-  const newbalanceOrig = txData.newbalance_orig ?? transaction?.newbalance_orig;
+
+  // Contract snake_case balance field support with fallback to legacy PaySim CSV names (Bug 2 Fix)
+  const oldbalanceOrg = txData.old_balance_orig ?? txData.oldbalance_org ?? transaction?.old_balance_orig ?? transaction?.oldbalance_org;
+  const newbalanceOrig = txData.new_balance_orig ?? txData.newbalance_orig ?? transaction?.new_balance_orig ?? transaction?.newbalance_orig;
   const nameDest = txData.name_dest ?? transaction?.name_dest;
-  const oldbalanceDest = txData.oldbalance_dest ?? transaction?.oldbalance_dest;
-  const newbalanceDest = txData.newbalance_dest ?? transaction?.newbalance_dest;
-  const isFlaggedFraud = txData.is_flagged_fraud ?? transaction?.is_flagged_fraud;
+  const oldbalanceDest = txData.old_balance_dest ?? txData.oldbalance_dest ?? transaction?.old_balance_dest ?? transaction?.oldbalance_dest;
+  const newbalanceDest = txData.new_balance_dest ?? txData.newbalance_dest ?? transaction?.new_balance_dest ?? transaction?.newbalance_dest;
 
   const riskScore = predData.risk_score ?? transaction?.risk_score;
   const gatewayDecision = predData.gateway_decision ?? transaction?.gateway_decision;
@@ -74,6 +75,8 @@ export function TransactionDetailDrawer({
   const ruleFlags = predData.rule_flags ?? transaction?.rule_flags ?? [];
   const shapFeatures = predData.top_features ?? transaction?.shap_features ?? [];
   const latencyMs = predData.latency_ms ?? transaction?.latency_ms;
+  const modelVersion = predData.model_version ?? transaction?.model_version;
+  const imbalanceStrategy = predData.imbalance_strategy ?? transaction?.imbalance_strategy;
   const reviews = transaction?.reviews ?? [];
   const createdAt = transaction?.created_at;
 
@@ -83,7 +86,7 @@ export function TransactionDetailDrawer({
       style: 'currency',
       currency: 'USD',
       maximumFractionDigits: 2,
-    }).format(val);
+    }).format(Number(val));
   };
 
   return (
@@ -150,25 +153,42 @@ export function TransactionDetailDrawer({
 
             {/* Model Prediction & Gateway Routing Banner */}
             <div className="space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-lg bg-slate-900/50 border border-slate-800">
-                <div className="space-y-1">
-                  <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider block">
-                    Gateway Routing Decision
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <DecisionBadge decision={gatewayDecision} />
-                    <ReliabilityBadge status={explanationStatus} />
+              <div className="p-4 rounded-lg bg-slate-900/50 border border-slate-800 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider block">
+                      Gateway Routing Decision
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <DecisionBadge decision={gatewayDecision} />
+                      <ReliabilityBadge status={explanationStatus} />
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider block">
+                      Server-side scoring + explanation latency
+                    </span>
+                    <span className="text-xs font-mono text-slate-300 flex items-center justify-end gap-1">
+                      <Clock className="w-3 h-3 text-slate-500" aria-hidden="true" />
+                      {latencyMs != null ? `${Number(latencyMs).toFixed(1)} ms` : 'N/A'}
+                    </span>
                   </div>
                 </div>
 
-                <div className="text-right">
-                  <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider block">
-                    Inference Latency
-                  </span>
-                  <span className="text-xs font-mono text-slate-300 flex items-center justify-end gap-1">
-                    <Clock className="w-3 h-3 text-slate-500" aria-hidden="true" />
-                    {latencyMs != null ? `${Number(latencyMs).toFixed(1)} ms` : 'N/A'}
-                  </span>
+                {/* Model Version and Imbalance Strategy Badges (Bug 4 Fix) */}
+                <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-800/80 text-[11px] font-mono text-slate-400">
+                  <div className="flex items-center gap-1.5">
+                    <Cpu className="w-3.5 h-3.5 text-slate-500 shrink-0" aria-hidden="true" />
+                    <span>Model:</span>
+                    <span className="text-slate-200 font-semibold">{modelVersion || 'N/A'}</span>
+                  </div>
+                  <span className="text-slate-700">•</span>
+                  <div className="flex items-center gap-1.5">
+                    <GitBranch className="w-3.5 h-3.5 text-slate-500 shrink-0" aria-hidden="true" />
+                    <span>Strategy:</span>
+                    <span className="text-slate-200 font-semibold">{imbalanceStrategy || 'N/A'}</span>
+                  </div>
                 </div>
               </div>
 
@@ -209,7 +229,7 @@ export function TransactionDetailDrawer({
               </div>
             </div>
 
-            {/* PaySim Raw Transaction Parameters */}
+            {/* PaySim Raw Transaction Parameters (Bug 2 & 3 Fix) */}
             <div className="space-y-3">
               <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
                 PaySim Financial Parameters
@@ -260,13 +280,7 @@ export function TransactionDetailDrawer({
 
                 <div className="sm:col-span-3 border-t border-slate-800/80 my-1" />
 
-                <div>
-                  <span className="text-slate-500 text-[11px] block">Heuristic Flagged</span>
-                  <span className="font-mono text-slate-300">
-                    {isFlaggedFraud === 1 ? 'Yes (Flagged)' : 'No (0)'}
-                  </span>
-                </div>
-                <div>
+                <div className="sm:col-span-3">
                   <span className="text-slate-500 text-[11px] block">Logged At</span>
                   <span className="font-mono text-slate-400 text-[11px]">
                     {createdAt ? new Date(createdAt).toLocaleString() : '—'}

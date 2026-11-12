@@ -75,6 +75,9 @@ describe('DashboardFeed page (Condition 2 & Condition 4)', () => {
     expect(banner).toBeInTheDocument();
     expect(banner).toHaveTextContent(/Ordered by created_at descending \(server-enforced audit order\)/i);
 
+    // Bug 7 Fix: Last updated indicator
+    expect(screen.getByTestId('last-updated-indicator')).toHaveTextContent(/Last updated:/i);
+
     // Wait for table to populate
     await waitFor(() => {
       expect(screen.getByText('tx-001')).toBeInTheDocument();

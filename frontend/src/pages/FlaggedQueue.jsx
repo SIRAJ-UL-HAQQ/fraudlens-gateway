@@ -12,6 +12,7 @@ export function FlaggedQueue() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedTransactionId, setSelectedTransactionId] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
 
   // Active tab synchronized with URL search params (default: 'Analyst Review')
   const currentDecisionParam = searchParams.get('decision');
@@ -68,6 +69,12 @@ export function FlaggedQueue() {
   const total = data?.total || 0;
   const totalPages = data?.total_pages || 1;
 
+  React.useEffect(() => {
+    if (data) {
+      setLastUpdated(new Date());
+    }
+  }, [data]);
+
   const handleTabChange = (decision) => {
     const updated = new URLSearchParams(searchParams);
     updated.set('decision', decision);
@@ -111,20 +118,25 @@ export function FlaggedQueue() {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => refetch()}
-          disabled={isFetching}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs font-medium transition-colors disabled:opacity-50 cursor-pointer self-start sm:self-auto"
-          aria-label="Refresh flagged queue"
-          data-testid="refresh-flagged-btn"
-        >
-          <RefreshCw
-            className={`w-3.5 h-3.5 ${isFetching ? 'animate-spin text-amber-400' : ''}`}
-            aria-hidden="true"
-          />
-          <span>Refresh Queue</span>
-        </button>
+        <div className="flex items-center gap-3 self-start sm:self-auto">
+          <span className="text-[11px] text-slate-400 font-mono" data-testid="last-updated-indicator">
+            Last updated: {lastUpdated.toLocaleTimeString()}
+          </span>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            disabled={isFetching}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs font-medium transition-colors disabled:opacity-50 cursor-pointer"
+            aria-label="Refresh flagged queue"
+            data-testid="refresh-flagged-btn"
+          >
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${isFetching ? 'animate-spin text-amber-400' : ''}`}
+              aria-hidden="true"
+            />
+            <span>Refresh Queue</span>
+          </button>
+        </div>
       </div>
 
       {/* Variant B Routing Educational Banner (Condition 2) */}

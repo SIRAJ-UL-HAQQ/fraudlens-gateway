@@ -19,9 +19,9 @@ describe('ShapFeatureBars component (Condition 3)', () => {
     ];
     render(<ShapFeatureBars features={zeroFeatures} />);
 
-    const progressbars = screen.getAllByRole('progressbar');
-    expect(progressbars.length).toBe(2);
-    progressbars.forEach((bar) => {
+    const bars = screen.getAllByTestId('shap-bar-fill');
+    expect(bars.length).toBe(2);
+    bars.forEach((bar) => {
       expect(bar.style.width).toBe('0%');
       expect(bar.style.width).not.toContain('NaN');
     });
@@ -57,8 +57,8 @@ describe('ShapFeatureBars component (Condition 3)', () => {
 
     render(<ShapFeatureBars features={features} />);
 
-    const progressbars = screen.getAllByRole('progressbar');
-    expect(progressbars[0].style.width).toBe('50%');
-    expect(progressbars[1].style.width).toBe('100%');
+    const bars = screen.getAllByTestId('shap-bar-fill');
+    expect(bars[0].style.width).toBe('50%');
+    expect(bars[1].style.width).toBe('100%');
   });
 });

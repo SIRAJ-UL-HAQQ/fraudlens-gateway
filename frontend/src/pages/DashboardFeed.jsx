@@ -13,6 +13,7 @@ export function DashboardFeed() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedTransactionId, setSelectedTransactionId] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
 
   // Parse search params for API query
   const page = parseInt(searchParams.get('page') || '1', 10) || 1;
@@ -60,6 +61,12 @@ export function DashboardFeed() {
   const total = data?.total || 0;
   const totalPages = data?.total_pages || 1;
 
+  React.useEffect(() => {
+    if (data) {
+      setLastUpdated(new Date());
+    }
+  }, [data]);
+
   const handleRowClick = (txId) => {
     setSelectedTransactionId(txId);
     setIsDrawerOpen(true);
@@ -97,7 +104,10 @@ export function DashboardFeed() {
         </div>
 
         {/* Polling & Refresh Controls */}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-[11px] text-slate-400 font-mono" data-testid="last-updated-indicator">
+            Last updated: {lastUpdated.toLocaleTimeString()}
+          </span>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-slate-300">
             <span
               className={`w-2 h-2 rounded-full ${

@@ -22,7 +22,7 @@ function DevMockPanelInner() {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 text-xs font-mono">
+    <div className="fixed bottom-4 left-4 z-50 text-xs font-mono">
       {!isOpen ? (
         <button
           type="button"

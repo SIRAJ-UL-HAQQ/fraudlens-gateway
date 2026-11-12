@@ -20,16 +20,17 @@ describe('TransactionDetailDrawer component', () => {
     type: 'TRANSFER',
     amount: 150000.5,
     name_orig: 'C10000001',
-    oldbalance_org: 150000.5,
-    newbalance_orig: 0.0,
+    old_balance_orig: 150000.5,
+    new_balance_orig: 0.0,
     name_dest: 'M20000002',
-    oldbalance_dest: 0.0,
-    newbalance_dest: 150000.5,
-    is_flagged_fraud: 1,
+    old_balance_dest: 0.0,
+    new_balance_dest: 150000.5,
     risk_score: 0.9542,
     gateway_decision: 'High Risk',
     explanation_status: 'Stable',
     rule_flags: ['ORIGIN_ACCOUNT_DRAINED'],
+    model_version: 'v1.0.0-xgb',
+    imbalance_strategy: 'smote_enn',
     latency_ms: 14.8,
     shap_features: [
       { feature: 'amount', shap_value: 0.25, direction: 'increases_risk' },
@@ -69,7 +70,17 @@ describe('TransactionDetailDrawer component', () => {
     expect(screen.getByText('TRANSFER')).toBeInTheDocument();
     expect(screen.getByText('C10000001')).toBeInTheDocument();
     expect(screen.getByText('M20000002')).toBeInTheDocument();
-    expect(screen.getByText('Yes (Flagged)')).toBeInTheDocument();
+
+    // Balances render accurately including $0.00 (Bug 2 Fix)
+    const positiveAmounts = screen.getAllByText('$150,000.50');
+    expect(positiveAmounts.length).toBe(3);
+    const zeroBalances = screen.getAllByText('$0.00');
+    expect(zeroBalances.length).toBe(2);
+
+    // Model version and strategy badges render (Bug 4 Fix)
+    expect(screen.getByText('v1.0.0-xgb')).toBeInTheDocument();
+    expect(screen.getByText('smote_enn')).toBeInTheDocument();
+    expect(screen.getByText(/Server-side scoring \+ explanation latency/i)).toBeInTheDocument();
 
     // Rule flags rendered unconditionally
     expect(screen.getByText('ORIGIN_ACCOUNT_DRAINED')).toBeInTheDocument();

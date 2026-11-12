@@ -111,7 +111,9 @@ describe('Login Page workflow', () => {
       </AuthProvider>
     );
 
-    expect(screen.getByText(/Session Expired/i)).toBeInTheDocument();
+    expect(
+      screen.getByText('Session expired. Please log in again.')
+    ).toBeInTheDocument();
   });
 
   it('submits credentials and handles login error', async () => {

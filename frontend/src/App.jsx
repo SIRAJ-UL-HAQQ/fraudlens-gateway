@@ -1,6 +1,10 @@
 import React from 'react';
-import Dashboard from './pages/Dashboard';
 
 export default function App() {
-  return <Dashboard />;
+  return (
+    <div data-testid="app-root">
+      <h1>FraudLens Gateway</h1>
+      <p>Real-Time Fraud Detection Gateway with Explainable AI (SHAP)</p>
+    </div>
+  );
 }

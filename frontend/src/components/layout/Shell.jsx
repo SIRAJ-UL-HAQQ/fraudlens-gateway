@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import StatusBanner from './StatusBanner';
 import Sidebar from './Sidebar';
-import DevMockPanel from '../../mocks/DevMockPanel';
+
+const DevMockPanel = import.meta.env.DEV
+  ? lazy(() => import('../../mocks/DevMockPanel'))
+  : null;
 
 export function Shell({ children }) {
   return (
@@ -18,7 +21,11 @@ export function Shell({ children }) {
           </div>
         </main>
       </div>
-      <DevMockPanel />
+      {import.meta.env.DEV && DevMockPanel && (
+        <Suspense fallback={null}>
+          <DevMockPanel />
+        </Suspense>
+      )}
     </div>
   );
 }

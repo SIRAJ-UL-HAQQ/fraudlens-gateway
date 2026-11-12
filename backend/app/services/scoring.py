@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 from pathlib import Path
 from typing import Any
 
@@ -61,8 +62,17 @@ def make_sample_row_from_features(feature_names: list[str]) -> pd.DataFrame:
     return pd.DataFrame(data)
 
 
-def run_startup_self_test(model: Any, feature_names: list[str]) -> None:
-    """Score a single sample row built from the manifest and check probability is in [0, 1]."""
+def run_startup_self_test(
+    model: Any,
+    feature_names: list[str],
+    explainer: ExplainerService | None = None,
+    replicates: list[Any] | None = None,
+) -> None:
+    """Score a single sample row built from the manifest and check probability is in [0, 1].
+
+    If an explainer is provided, verifies that explanation succeeds and asserts
+    zero explainer cache misses.
+    """
     sample_df = make_sample_row_from_features(feature_names)
     try:
         if hasattr(model, "predict_proba"):
@@ -85,6 +95,14 @@ def run_startup_self_test(model: Any, feature_names: list[str]) -> None:
             raise RuntimeError(
                 f"Startup self-test produced score {score} outside [0.0, 1.0]."
             )
+
+        if explainer is not None:
+            explainer.explain(model, sample_df, score, replicates)
+            misses = getattr(explainer, "cache_misses", 0)
+            if misses != 0:
+                raise RuntimeError(
+                    f"Startup self-test failed: expected 0 explainer cache misses, found {misses}."
+                )
     except Exception as e:
         raise RuntimeError(
             f"Startup self-test failed: pipeline inference error: {e}"
@@ -206,9 +224,6 @@ class ScoringService:
                 self.manifest, self.model, replicate_files
             )
 
-            # Startup self-test
-            run_startup_self_test(self.model, parsed_manifest.feature_names)
-
             self.model_version = parsed_manifest.model_version
             self.imbalance_strategy = parsed_manifest.imbalance_strategy.value
 
@@ -237,7 +252,16 @@ class ScoringService:
                 top_k=parsed_manifest.shap_top_k,
                 stability_min_overlap=parsed_manifest.stability_min_overlap,
             )
+            self.explainer.prebuild_explainers(self.model, self.replicates)
             self.mode = "trained"
+
+            # Startup self-test (validates scoring + explainer zero-miss assertion)
+            run_startup_self_test(
+                self.model,
+                parsed_manifest.feature_names,
+                explainer=self.explainer,
+                replicates=self.replicates,
+            )
             logger.info(
                 "Successfully loaded trained model '%s' from %s",
                 self.model_version,
@@ -357,6 +381,7 @@ class ScoringService:
             raise ModelNotLoadedError(
                 "Model artifact has not been loaded. Service is not ready to score transactions."
             )
+        start_time = time.perf_counter()
         if not transaction_id:
             import uuid
 
@@ -374,6 +399,7 @@ class ScoringService:
             )
 
         decision = self.route_decision(score, rule_flags, explanation_status)
+        latency_ms = round((time.perf_counter() - start_time) * 1000.0, 3)
 
         return PredictionOut(
             transaction_id=transaction_id,
@@ -384,7 +410,7 @@ class ScoringService:
             rule_flags=rule_flags,
             imbalance_strategy=self.imbalance_strategy,
             model_version=self.model_version,
-            latency_ms=0.0,
+            latency_ms=latency_ms,
         )
 
 

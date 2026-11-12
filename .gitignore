@@ -71,3 +71,9 @@ ml/reports/.training_progress.json
 Thumbs.db
 .vscode/
 .idea/
+
+# Benchmark local caches and raw latency dumps
+.benchmark_cache/
+/reports/benchmarks/
+ml/reports/.raw_latencies*
+

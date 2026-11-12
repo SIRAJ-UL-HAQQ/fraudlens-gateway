@@ -451,3 +451,6 @@ Evaluated strictly on **TRAIN** (steps 1..520) and **VALIDATION** (steps 521..59
 5. **Deployment Dependency**: The backend runtime container requires `ml/__init__.py` and `ml/src/features.py` with `PYTHONPATH` set so `PaySimFeaturePreprocessor` can be unpickled cleanly by `joblib.load()`.
 6. **Strategy Comparison Schema Note**: For documentation and reporting, additional strategy comparisons (such as Logistic Regression and Random Forest baselines, confusion matrices, and PR curves) are structured inside `strategy_comparison`. Proposed schema documentation addition for `docs/ml-artifact-contract.md`:
    - `strategy_comparison`: Dictionary mapping strategy names (`none`, `class_weight`, `smote_enn`, `logistic_regression`, `random_forest`, `rules_baseline`) to their validation and test evaluation metrics, confusion matrices, and precision-recall curves.
+
+## Errata & Reconciliation
+- **Analysis Plan Correction (2026-10-29)**: See [ANALYSIS_PLAN_CORRECTION_NOTE_2026-10-29.md](ANALYSIS_PLAN_CORRECTION_NOTE_2026-10-29.md) for empirical verification and reconciliation of exploratory Section 4 metrics and heuristic baseline figures.

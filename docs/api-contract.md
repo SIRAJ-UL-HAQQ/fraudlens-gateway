@@ -177,6 +177,8 @@ Returned when the database connection is down or the ML model service has not be
 }
 ```
 
+> **Telemetry**: `latency_ms` measures scoring pipeline time in milliseconds (rules, feature construction, model inference, explanation, routing). Excludes database persistence, response serialization and network transit.
+
 #### Errors
 - `401 Unauthorized`: Missing or invalid Bearer token.
 - `422 Unprocessable Entity`: Validation failure (e.g. `step < 1`, `amount < 0`, negative balances).
@@ -296,6 +298,8 @@ Returned when the database connection is down or the ML model service has not be
 }
 ```
 
+> **Telemetry**: `prediction.latency_ms` measures scoring pipeline time in milliseconds (rules, feature construction, model inference, explanation, routing). Excludes database persistence, response serialization and network transit. Rows stored before scoring latency was measured hold 0.0 (no backfill).
+
 #### Errors
 - `404 Not Found`: Transaction does not exist.
 
@@ -336,6 +340,8 @@ Returned when the database connection is down or the ML model service has not be
 - **Endpoint**: `GET /api/v1/metrics`
 - **Access**: Protected (Bearer token required)
 - **Description**: Returns live system telemetry (decision breakdown, p50/p95 latency) alongside ML research benchmark metrics comparing imbalance strategies. When benchmark reports (`ml/reports/metrics.json`) are missing or malformed, `ml_metrics` returns `null`, `ml_metrics_status` is `"unavailable"`, and `ml_metrics_reason` provides diagnostic information so the frontend dashboard displays an appropriate unavailable notice rather than invented values.
+  - `latency_p50_ms`: Median scoring pipeline latency in milliseconds computed over all stored rows. Rows stored before scoring latency was measured hold 0.0 (no backfill).
+  - `latency_p95_ms`: 95th percentile scoring pipeline latency in milliseconds computed over all stored rows. Rows stored before scoring latency was measured hold 0.0 (no backfill).
 
 #### Response: Available ML Metrics (`200 OK` - `MetricsSummary`)
 ```json

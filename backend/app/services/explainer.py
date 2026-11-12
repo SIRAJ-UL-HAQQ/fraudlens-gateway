@@ -3,6 +3,7 @@ import math
 from abc import ABC, abstractmethod
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 from app.models.schemas import ExplanationStatus, FeatureExplanation, ShapDirection
@@ -73,6 +74,11 @@ class ExplainerService(ABC):
     ) -> tuple[list[FeatureExplanation], ExplanationStatus]:
         """Compute top-k SHAP explanations and determine explanation stability."""
 
+    def prebuild_explainers(
+        self, model: Any, replicates: list[Any] | None = None
+    ) -> None:
+        """Pre-construct model explainers at startup. Defaults to no-op."""
+
 
 class StubExplainer(ExplainerService):
     """Deterministic explainer for development, contract tests, and CI."""
@@ -141,9 +147,43 @@ class RealExplainer(ExplainerService):
         self,
         top_k: int = 3,
         stability_min_overlap: float = 0.67,
+        background_data: Any | None = None,
     ):
         self.top_k = max(1, top_k)
         self.stability_min_overlap = stability_min_overlap
+        self.background_data = background_data
+        self._cached_tree_explainers: list[tuple[Any, Any]] = []
+        self.cache_misses: int = 0
+
+    def prebuild_explainers(
+        self, model: Any, replicates: list[Any] | None = None
+    ) -> None:
+        """Pre-construct SHAP TreeExplainer objects for tree models at artifact load time."""
+        self._cached_tree_explainers = []
+        self.cache_misses = 0
+        try:
+            all_pipelines = [model] + (replicates or [])
+            for pipe in all_pipelines:
+                if pipe is not None and validate_model_supported(pipe) == "tree":
+                    estimator = (
+                        pipe[-1] if hasattr(pipe, "named_steps") else pipe
+                    )
+                    import shap
+
+                    explainer = shap.TreeExplainer(estimator)
+                    self._cached_tree_explainers.append((pipe, explainer))
+        except Exception as e:
+            logger.error("Failed to prebuild TreeExplainer at load time: %s", e)
+            raise RuntimeError(
+                f"Failed to prebuild TreeExplainer at load time: {e}"
+            ) from e
+
+    def _get_tree_explainer(self, pipeline: Any) -> Any | None:
+        """Find pre-built TreeExplainer using object identity check ('is')."""
+        for p, explainer in self._cached_tree_explainers:
+            if p is pipeline:
+                return explainer
+        return None
 
     def _extract_top_features_from_model(
         self,
@@ -175,13 +215,26 @@ class RealExplainer(ExplainerService):
                 X_trans = features_df
                 feature_names = list(features_df.columns)
         else:
+            preprocessor = None
             estimator = pipeline
             X_trans = features_df
             feature_names = list(features_df.columns)
 
+        if hasattr(X_trans, "toarray"):
+            X_trans = X_trans.toarray()
+
         # Compute SHAP values via TreeExplainer or LinearExplainer
         if model_type == "tree":
-            tree_exp = shap.TreeExplainer(estimator)
+            tree_exp = self._get_tree_explainer(pipeline)
+            if tree_exp is None:
+                self.cache_misses += 1
+                logger.warning(
+                    "TreeExplainer cache miss in trained mode for %s; "
+                    "constructing on the fly (total cache misses: %d)",
+                    getattr(estimator, "__class__", type(estimator)).__name__,
+                    self.cache_misses,
+                )
+                tree_exp = shap.TreeExplainer(estimator)
             sv = tree_exp.shap_values(X_trans)
             if isinstance(sv, list):
                 vals = sv[1][0] if len(sv) >= 2 else sv[0]
@@ -190,10 +243,61 @@ class RealExplainer(ExplainerService):
             else:
                 vals = sv[0]
         else:  # linear
-            lin_exp = shap.LinearExplainer(estimator, X_trans)
+            if self.background_data is not None:
+                bg = self.background_data
+                if preprocessor is not None:
+                    raw_cols = (
+                        features_df.shape[1]
+                        if hasattr(features_df, "shape")
+                        else len(features_df.columns)
+                    )
+                    trans_cols = (
+                        X_trans.shape[1]
+                        if hasattr(X_trans, "shape")
+                        else len(feature_names)
+                    )
+                    bg_cols = (
+                        bg.shape[1]
+                        if hasattr(bg, "shape")
+                        else (len(bg.columns) if hasattr(bg, "columns") else None)
+                    )
+                    # If DataFrame or raw column count matches features_df rather than X_trans, transform
+                    if isinstance(bg, pd.DataFrame) or (
+                        bg_cols is not None
+                        and bg_cols == raw_cols
+                        and bg_cols != trans_cols
+                    ):
+                        bg = preprocessor.transform(bg)
+                    elif bg_cols is not None and bg_cols == trans_cols:
+                        pass
+                    elif isinstance(bg, (pd.DataFrame, np.ndarray)):
+                        bg = preprocessor.transform(bg)
+                if hasattr(bg, "toarray"):
+                    bg = bg.toarray()
+            else:
+                ncols = (
+                    X_trans.shape[1]
+                    if hasattr(X_trans, "shape")
+                    else len(feature_names)
+                )
+                bg = np.zeros((1, ncols), dtype=float)
+
+            lin_exp = shap.LinearExplainer(estimator, bg)
             sv = lin_exp.shap_values(X_trans)
             if isinstance(sv, list):
-                vals = sv[1][0] if len(sv) >= 2 else sv[0]
+                vals = (
+                    sv[1][0]
+                    if len(sv) >= 2
+                    else (
+                        sv[0][0]
+                        if hasattr(sv[0], "shape") and len(sv[0].shape) == 2
+                        else sv[0]
+                    )
+                )
+            elif hasattr(sv, "shape") and len(sv.shape) == 3:
+                vals = sv[0, :, 1] if sv.shape[2] >= 2 else sv[0, :, 0]
+            elif hasattr(sv, "shape") and len(sv.shape) == 2:
+                vals = sv[0]
             else:
                 vals = sv[0]
 

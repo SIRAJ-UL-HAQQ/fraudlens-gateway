@@ -133,7 +133,7 @@ def test_real_explainer_pipeline_with_preprocessor(deterministic_signal_data):
 
 
 def test_real_explainer_linear_model(deterministic_signal_data):
-    """RealExplainer supports linear models explicitly."""
+    """RealExplainer supports linear models with non-zero zero-reference baseline."""
     X_main, _, y = deterministic_signal_data
     lr_main = LogisticRegression(random_state=42).fit(X_main, y)
     lr_rep1 = LogisticRegression(random_state=43).fit(X_main, y)
@@ -150,6 +150,210 @@ def test_real_explainer_linear_model(deterministic_signal_data):
 
     assert status == ExplanationStatus.STABLE
     assert len(explanations) == 2
+    assert all(e.shap_value != 0.001 for e in explanations)
+    assert any(e.shap_value != 0.0 for e in explanations)
+
+    # Verify correct direction signs matching model coefficients and feature values
+    coef_map = dict(zip(X_main.columns, lr_main.coef_[0]))
+    row_vals = single_row.iloc[0].to_dict()
+    for e in explanations:
+        expected_sign = coef_map[e.feature] * row_vals[e.feature]
+        if expected_sign >= 0:
+            assert e.direction == ShapDirection.INCREASES_RISK
+        else:
+            assert e.direction == ShapDirection.DECREASES_RISK
+
+
+def test_real_explainer_linear_zero_reference_baseline():
+    """Verify zero reference baseline yields exact phi_j = beta_j * x_j and evaluates stability."""
+    # 1. Standalone LogisticRegression
+    X_train = pd.DataFrame(
+        {
+            "f1": [10.0, 0.0, 10.0, 0.0],
+            "f2": [2.0, 1.0, 3.0, 0.0],
+            "f3": [0.0, 0.0, 0.0, 0.0],
+        }
+    )
+    y_train = np.array([1, 0, 1, 0])
+
+    clf_main = LogisticRegression(random_state=42).fit(X_train, y_train)
+    clf_rep1 = LogisticRegression(random_state=43).fit(X_train, y_train)
+    clf_rep2 = LogisticRegression(random_state=44).fit(X_train, y_train)
+
+    # Divergent signal on f3 for replicates
+    X_div = pd.DataFrame(
+        {
+            "f1": [0.0, 0.0, 0.0, 0.0],
+            "f2": [2.0, 1.0, 3.0, 0.0],
+            "f3": [10.0, 0.0, 10.0, 0.0],
+        }
+    )
+    clf_div1 = LogisticRegression(random_state=45).fit(X_div, y_train)
+    clf_div2 = LogisticRegression(random_state=46).fit(X_div, y_train)
+
+    query_row = pd.DataFrame({"f1": [10.0], "f2": [2.5], "f3": [10.0]})
+
+    explainer = RealExplainer(top_k=2, stability_min_overlap=0.67)
+    explanations, status = explainer.explain(
+        model=clf_main,
+        features_df=query_row,
+        risk_score=0.85,
+        replicates=[clf_rep1, clf_rep2],
+    )
+
+    assert status == ExplanationStatus.STABLE
+    assert len(explanations) == 2
+    assert all(e.shap_value != 0.001 for e in explanations)
+
+    # Confirm exact linear formula phi_j = beta_j * x_j under zero reference baseline
+    coefs = clf_main.coef_[0]
+    expected_phi = {
+        col: coefs[i] * float(query_row[col].iloc[0])
+        for i, col in enumerate(query_row.columns)
+    }
+    for e in explanations:
+        exp_val = expected_phi[e.feature]
+        assert abs(e.shap_value - round(exp_val, 4)) <= 1e-4
+
+    # Divergent replicates evaluate to UNSTABLE
+    _, status_div = explainer.explain(
+        model=clf_main,
+        features_df=query_row,
+        risk_score=0.85,
+        replicates=[clf_div1, clf_div2],
+    )
+    assert status_div == ExplanationStatus.UNSTABLE
+
+    # 2. Pipeline with StandardScaler and LogisticRegression
+    pipe_main = Pipeline(
+        [("scaler", StandardScaler()), ("clf", LogisticRegression(random_state=42))]
+    ).fit(X_train, y_train)
+    pipe_rep1 = Pipeline(
+        [("scaler", StandardScaler()), ("clf", LogisticRegression(random_state=43))]
+    ).fit(X_train, y_train)
+    pipe_rep2 = Pipeline(
+        [("scaler", StandardScaler()), ("clf", LogisticRegression(random_state=44))]
+    ).fit(X_train, y_train)
+
+    pipe_explanations, pipe_status = explainer.explain(
+        model=pipe_main,
+        features_df=query_row,
+        risk_score=0.85,
+        replicates=[pipe_rep1, pipe_rep2],
+    )
+    assert pipe_status == ExplanationStatus.STABLE
+    assert len(pipe_explanations) == 2
+    assert all(e.shap_value != 0.001 for e in pipe_explanations)
+
+    # In standardized space, origin bg=0 corresponds to the empirical mean.
+    # Attributions on transformed input must match beta_j * X_trans_j
+    scaler = pipe_main.named_steps["scaler"]
+    estimator = pipe_main.named_steps["clf"]
+    x_trans = scaler.transform(query_row)[0]
+    pipe_coefs = estimator.coef_[0]
+    expected_pipe_phi = {
+        col: pipe_coefs[i] * float(x_trans[i])
+        for i, col in enumerate(query_row.columns)
+    }
+    for e in pipe_explanations:
+        exp_val = expected_pipe_phi[e.feature]
+        assert abs(e.shap_value - round(exp_val, 4)) <= 1e-4
+
+
+def test_real_explainer_linear_empirical_background():
+    """Verify explicit empirical background_data produces phi_j = beta_j * (x_j - mu_j)."""
+    X_train = pd.DataFrame(
+        {
+            "feat_a": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+            "feat_b": [10.0, 20.0, 15.0, 25.0, 30.0, 35.0],
+        }
+    )
+    y_train = np.array([0, 0, 0, 1, 1, 1])
+    clf = LogisticRegression(random_state=42).fit(X_train, y_train)
+
+    bg_df = pd.DataFrame(
+        {
+            "feat_a": [1.0, 3.0, 5.0],
+            "feat_b": [10.0, 20.0, 30.0],
+        }
+    )
+    query_row = pd.DataFrame({"feat_a": [6.0], "feat_b": [15.0]})
+
+    explainer = RealExplainer(top_k=2, background_data=bg_df)
+    rep1 = LogisticRegression(random_state=43).fit(X_train, y_train)
+    rep2 = LogisticRegression(random_state=44).fit(X_train, y_train)
+
+    explanations, _ = explainer.explain(
+        model=clf,
+        features_df=query_row,
+        risk_score=0.80,
+        replicates=[rep1, rep2],
+    )
+
+    mu = bg_df.mean().values
+    x_val = query_row.values[0]
+    expected_phi = clf.coef_[0] * (x_val - mu)
+
+    # Check match within 1e-4 on rounded explanations
+    exp_dict = {e.feature: e.shap_value for e in explanations}
+    assert abs(exp_dict["feat_a"] - round(expected_phi[0], 4)) <= 1e-4
+    assert abs(exp_dict["feat_b"] - round(expected_phi[1], 4)) <= 1e-4
+
+    # Assert raw SHAP attributions match phi_j = beta_j * (x_j - mu_j) to within 1e-5
+    raw_top = explainer._extract_top_features_from_model(clf, query_row)
+    raw_dict = dict(raw_top)
+    assert abs(raw_dict["feat_a"] - expected_phi[0]) < 1e-5
+    assert abs(raw_dict["feat_b"] - expected_phi[1]) < 1e-5
+
+    # Check with numpy array background_data
+    explainer_arr = RealExplainer(top_k=2, background_data=bg_df.values)
+    raw_top_arr = explainer_arr._extract_top_features_from_model(clf, query_row)
+    raw_dict_arr = dict(raw_top_arr)
+    assert abs(raw_dict_arr["feat_a"] - expected_phi[0]) < 1e-5
+    assert abs(raw_dict_arr["feat_b"] - expected_phi[1]) < 1e-5
+
+    # Check through Pipeline with preprocessor
+    pipe = Pipeline(
+        [("scaler", StandardScaler()), ("clf", LogisticRegression(random_state=42))]
+    ).fit(X_train, y_train)
+    explainer_pipe = RealExplainer(top_k=2, background_data=bg_df)
+    raw_top_pipe = explainer_pipe._extract_top_features_from_model(pipe, query_row)
+    raw_dict_pipe = dict(raw_top_pipe)
+
+    scaler = pipe.named_steps["scaler"]
+    estimator = pipe.named_steps["clf"]
+    bg_trans = scaler.transform(bg_df)
+    x_trans = scaler.transform(query_row)
+    mu_trans = np.mean(bg_trans, axis=0)
+    expected_pipe_phi = estimator.coef_[0] * (x_trans[0] - mu_trans)
+    assert abs(raw_dict_pipe["feat_a"] - expected_pipe_phi[0]) < 1e-5
+    assert abs(raw_dict_pipe["feat_b"] - expected_pipe_phi[1]) < 1e-5
+
+    # Check passing background_data already in transformed space (ndarray) to Pipeline
+    explainer_pretrans = RealExplainer(top_k=2, background_data=bg_trans)
+    raw_top_pretrans = explainer_pretrans._extract_top_features_from_model(
+        pipe, query_row
+    )
+    raw_dict_pretrans = dict(raw_top_pretrans)
+    assert abs(raw_dict_pretrans["feat_a"] - expected_pipe_phi[0]) < 1e-5
+    assert abs(raw_dict_pretrans["feat_b"] - expected_pipe_phi[1]) < 1e-5
+
+    # Verify pre-transformed background with dimension-changing preprocessor (OneHotEncoder)
+    from sklearn.preprocessing import OneHotEncoder
+
+    cat_df = pd.DataFrame({"cat": ["A", "B", "A", "B"]})
+    cat_pipe = Pipeline(
+        [
+            ("ohe", OneHotEncoder(sparse_output=False)),
+            ("clf", LogisticRegression(random_state=42)),
+        ]
+    ).fit(cat_df, y_train[:4])
+    cat_query = pd.DataFrame({"cat": ["A"]})
+    cat_bg_trans = cat_pipe.named_steps["ohe"].transform(cat_df)  # shape (4, 2) vs raw (4, 1)
+    explainer_cat = RealExplainer(top_k=2, background_data=cat_bg_trans)
+    # Must succeed cleanly without re-transforming already transformed array
+    raw_top_cat = explainer_cat._extract_top_features_from_model(cat_pipe, cat_query)
+    assert len(raw_top_cat) == 2
 
 
 def test_stability_boundary_conditions():
@@ -505,3 +709,114 @@ def test_real_explainer_logistic_regression_pipeline():
             ShapDirection.INCREASES_RISK,
             ShapDirection.DECREASES_RISK,
         ]
+
+
+def test_tree_explainer_constructed_once_not_per_call(deterministic_signal_data):
+    """Verify shap.TreeExplainer is pre-constructed at startup and never per explain() call."""
+    from unittest.mock import patch
+
+    import shap
+
+    X_main, _, y = deterministic_signal_data
+    clf_main = DecisionTreeClassifier(random_state=42).fit(X_main, y)
+    clf_rep1 = DecisionTreeClassifier(random_state=43).fit(X_main, y)
+    clf_rep2 = DecisionTreeClassifier(random_state=44).fit(X_main, y)
+
+    explainer = RealExplainer(top_k=2, stability_min_overlap=0.67)
+    explainer.prebuild_explainers(clf_main, [clf_rep1, clf_rep2])
+
+    assert len(explainer._cached_tree_explainers) == 3
+    assert explainer.cache_misses == 0
+
+    query_row = X_main.iloc[[0]]
+
+    # Spy on TreeExplainer constructor during explain calls
+    orig_init = shap.TreeExplainer.__init__
+    init_call_count = 0
+
+    def spy_init(*args, **kwargs):
+        nonlocal init_call_count
+        init_call_count += 1
+        return orig_init(*args, **kwargs)
+
+    with patch.object(shap.TreeExplainer, "__init__", side_effect=spy_init):
+        for _ in range(10):
+            exps, status = explainer.explain(
+                model=clf_main,
+                features_df=query_row,
+                risk_score=0.85,
+                replicates=[clf_rep1, clf_rep2],
+            )
+            assert len(exps) == 2
+            assert status == ExplanationStatus.STABLE
+
+    assert (
+        init_call_count == 0
+    ), f"TreeExplainer.__init__ called {init_call_count} times during explain()"
+    assert explainer.cache_misses == 0
+
+
+def test_multithreaded_explain_parity_with_sequential(deterministic_signal_data):
+    """Verify 8 threads calling explain() concurrently produce bit-for-bit identical results to sequential execution."""
+    import concurrent.futures
+
+    X_main, _, y = deterministic_signal_data
+    clf_main = DecisionTreeClassifier(random_state=42).fit(X_main, y)
+    clf_rep1 = DecisionTreeClassifier(random_state=43).fit(X_main, y)
+    clf_rep2 = DecisionTreeClassifier(random_state=44).fit(X_main, y)
+
+    explainer = RealExplainer(top_k=2, stability_min_overlap=0.67)
+    explainer.prebuild_explainers(clf_main, [clf_rep1, clf_rep2])
+
+    # Build 50 distinct test input rows
+    rng = np.random.RandomState(42)
+    inputs = []
+    for _ in range(50):
+        row = pd.DataFrame(
+            {
+                "f_a": [float(rng.uniform(0.0, 10.0))],
+                "f_b": [float(rng.uniform(0.0, 5.0))],
+                "f_c": [float(rng.uniform(0.0, 10.0))],
+            }
+        )
+        score = float(clf_main.predict_proba(row)[0][1])
+        inputs.append((row, score))
+
+    # Sequential reference run
+    seq_results = []
+    for row, score in inputs:
+        exps, status = explainer.explain(
+            model=clf_main,
+            features_df=row,
+            risk_score=score,
+            replicates=[clf_rep1, clf_rep2],
+        )
+        seq_results.append((exps, status))
+
+    # Concurrent 8 threads execution
+    def worker(thread_idx: int) -> list[tuple[int, list, ExplanationStatus]]:
+        thread_out = []
+        for i, (row, score) in enumerate(inputs):
+            exps, status = explainer.explain(
+                model=clf_main,
+                features_df=row,
+                risk_score=score,
+                replicates=[clf_rep1, clf_rep2],
+            )
+            thread_out.append((i, exps, status))
+        return thread_out
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+        futures = [executor.submit(worker, t) for t in range(8)]
+        for f in concurrent.futures.as_completed(futures):
+            results = f.result()
+            for idx, th_exps, th_status in results:
+                ref_exps, ref_status = seq_results[idx]
+                assert th_status == ref_status
+                assert len(th_exps) == len(ref_exps)
+                for e_th, e_ref in zip(th_exps, ref_exps):
+                    assert e_th.feature == e_ref.feature
+                    assert e_th.shap_value == e_ref.shap_value  # Exact float equality
+                    assert e_th.direction == e_ref.direction
+
+    assert explainer.cache_misses == 0

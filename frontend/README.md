@@ -14,9 +14,12 @@ The frontend provides an accessible, dark-themed operational dashboard for fraud
 - **Accessible Transaction Detail Drawer**: Slide-out dialog (`role="dialog"`, `aria-modal="true"`, focus trap, Escape key close) with PaySim raw financial parameters, latency indicators, and prominent unstable warnings.
 - **SHAP Feature Attribution Bars**: Scaled horizontal bars relative to `max(|shap_value|)`, division-by-zero guards, signed formatting, explicit direction badges, and causality disclaimers.
 - **Append-Only Review Workflow**: Immutable review audit trail and verdict submission form with zero optimistic updates and input preservation on 503/network failures.
+- **Pipeline Metrics & Research Benchmark (`MetricsView`)**: Operational telemetry (total scored, explanation stability ratio, mean risk score, p50/p95 latency) paired with conditional offline ML benchmark evaluation (strategy comparison table, SVG charts, 2x2 confusion matrix grid).
+- **Test Transaction Sandbox (`TestTransactionView`)**: Interactive single-transaction simulation with 4 contract-valid presets (Obvious Fraud, Obvious Legitimate, Borderline/Ambiguous, Zero Amount), boundary validation, and real-time inference result cards.
+- **Audit Log Export (`ExportView`)**: Authenticated CSV/PDF export with parameter filtering, client-side step range validation, dynamic server safety cap handling, and browser blob download triggering.
 - **Zero-Production Mock System**: Development-only mock interception panel driven by `fixtures.json` and configurable overrides (`stub`, `unloaded`, `disconnected`, `network_error`), completely tree-shaken from production builds.
 
-## Technology Stack
+## Technology Stack & Architecture Decisions
 
 - **Framework**: React 18.3.1 + React DOM 18.3.1
 - **Bundler & Dev Server**: Vite 5.4.14
@@ -26,6 +29,11 @@ The frontend provides an accessible, dark-themed operational dashboard for fraud
 - **Icons**: Lucide React 0.468.0
 - **Testing**: Vitest 2.1.8 + React Testing Library 16.1.0 + JSDOM 25.0.1
 - **Linting**: ESLint 9.17.0 (Flat Config) + `eslint-plugin-react` (`react/no-danger: "error"`)
+
+### Pure Accessible SVG Charting (Zero 3rd-Party Dependencies)
+To maintain zero runtime vulnerabilities, prevent bundle bloat, and guarantee complete accessibility:
+- **Decision Distribution & Strategy Comparison**: Rendered using pure SVG elements (`<svg role="img" aria-label="...">`, `<title>`, `<desc>`).
+- **Full Theme & High-DPI Support**: Vector-sharp on all screen resolutions, dark-mode matched, and zero external graphing runtime overhead.
 
 ## Getting Started
 
@@ -59,8 +67,8 @@ npm run preview
 
 ## Mock Mode & Development Workflow
 
-In development (`npm run dev`), a floating **Mock Mode Controls** panel is rendered at the bottom-right of the screen.
-- **Toggle Mock Mode**: Intercepts `/api/v1/*` and `/health` requests using `fixtures.json`.
+In development (`npm run dev`), a floating **Mock Mode Controls** panel is rendered at the bottom-left of the screen.
+- **Toggle Mock Mode**: Intercepts `/api/v1/*` and `/health` requests using `fixtures.json` and `overrides.js`.
 - **Simulate States**:
   - `Normal (Fixtures)`: Simulates healthy backend and standard PaySim transaction fixtures.
   - `Stub Heuristic Mode`: Simulates gateway running with heuristic stubs (renders amber `role="status"` banner).
@@ -68,7 +76,7 @@ In development (`npm run dev`), a floating **Mock Mode Controls** panel is rende
   - `Database Disconnected (503)`: Simulates database failure (renders rose `role="alert"` banner).
   - `Network Offline (0)`: Simulates network disconnect / offline gateway.
 - **Dev Credentials**: `analyst_1` / `password123` (supports 1-click auto-fill on `/login`).
-- **Production Safety**: All mock logic is guarded with `import.meta.env.DEV` and tree-shaken during `npm run build`. No mock tokens or fixture IDs exist in `dist/`.
+- **Production Safety**: All mock logic is guarded with `import.meta.env.DEV` and lazy-loaded / tree-shaken during `npm run build`. No mock tokens, credentials, or fixture IDs exist in `dist/`.
 
 ## Component Guidelines
 
@@ -83,6 +91,13 @@ In development (`npm run dev`), a floating **Mock Mode Controls** panel is rende
 | `TransactionDetailDrawer` | Accessible Dialog | `role="dialog"`, `aria-modal="true"`, focus trap, Escape key close. Displays PaySim parameters, prominent unstable banner, and audit timeline. |
 | `ReviewHistoryTimeline` | Append-Only Audit Log | Newest-first chronological timeline with reviewer attribution, timestamps, outcome badges, and investigation notes. |
 | `AnalystReviewForm` | Verdict Submission | `outcome` selection, advisory character counter, zero optimistic updates, input preservation on error. |
+| `OperationalMetricsCard` | Accessible Telemetry Grid | Total scored, explanation stability ratio, mean risk score, p50/p95 latency with tooltip *"Server-side scoring + explanation time"*. |
+| `DecisionDistributionChart`| `role="img"` SVG | Stacked proportional bar showing Low Risk, Analyst Review, High Risk counts and shares. |
+| `StrategyComparisonTable` | Semantic Benchmark Table | Class imbalance benchmark across None, Class Weight (Deployed), and SMOTE-ENN for Precision, Recall, F1, PR-AUC, and Stability. |
+| `StrategyComparisonChart` | `role="img"` Grouped SVG Bar | Visual performance comparison across imbalance strategies. |
+| `ConfusionMatrixGrid` | 2x2 Evaluation Grid | Accessible 2x2 grid for TP, FP, TN, FN at high-risk threshold with automated fallback when absent. |
+| `TestTransactionView` | Interactive Simulation | 9 PaySim fields, client validation, 4 presets, real-time result card with latency tooltip and stub/unstable warning banners. |
+| `ExportView` | Blob Downloader & Filter | CSV and PDF export with step/date filters, dynamic server safety cap error handling, and browser download triggering. |
 
 ## Contract & API Truth
 

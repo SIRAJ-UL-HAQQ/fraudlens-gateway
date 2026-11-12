@@ -117,6 +117,10 @@ jobs:
         working-directory: frontend
         run: npm run lint
 
+      - name: Run frontend unit tests
+        working-directory: frontend
+        run: npm test
+
       - name: Build frontend bundle
         working-directory: frontend
         run: npm run build

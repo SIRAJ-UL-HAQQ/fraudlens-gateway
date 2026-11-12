@@ -1,10 +1,52 @@
 import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider } from './auth/AuthContext';
+import { ProtectedRoute } from './auth/ProtectedRoute';
+import { Shell } from './components/layout/Shell';
+import { Login } from './pages/Login';
+import { DashboardFeed } from './pages/DashboardFeed';
+import { FlaggedQueue } from './pages/FlaggedQueue';
+import { MetricsView } from './pages/MetricsView';
+import { TestTransactionView } from './pages/TestTransactionView';
+import { ExportView } from './pages/ExportView';
 
-export default function App() {
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+export function App() {
   return (
-    <div data-testid="app-root">
-      <h1>FraudLens Gateway</h1>
-      <p>Real-Time Fraud Detection Gateway with Explainable AI (SHAP)</p>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Shell />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<DashboardFeed />} />
+              <Route path="flagged" element={<FlaggedQueue />} />
+              <Route path="metrics" element={<MetricsView />} />
+              <Route path="test" element={<TestTransactionView />} />
+              <Route path="export" element={<ExportView />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
+
+export default App;

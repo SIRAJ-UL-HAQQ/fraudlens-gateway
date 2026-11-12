@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { AuthContext } from './authContext';
+import { AuthContext } from './context';
 import { tokenStore } from './tokenStore';
 import { login as apiLogin } from '../api/client';
 

@@ -105,7 +105,7 @@ export function OperationalMetricsCard({ metrics }) {
           <div className="text-2xl font-bold text-white tracking-tight">
             {p50} <span className="text-sm font-normal text-slate-400">/</span> <span className="text-lg font-semibold text-slate-300">{p95}</span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">End-to-end inference latency</p>
+          <p className="text-xs text-slate-400 mt-1">Server-side scoring + explanation time</p>
         </div>
       </div>
     </div>

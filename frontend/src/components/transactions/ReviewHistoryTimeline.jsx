@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserCheck, AlertOctagon, CheckCircle2 } from 'lucide-react';
+import { UserCheck, AlertOctagon, Shield } from 'lucide-react';
 
 export function ReviewHistoryTimeline({ reviews = [], className = '' }) {
   const reviewList = Array.isArray(reviews) ? reviews : [];
@@ -38,7 +38,7 @@ export function ReviewHistoryTimeline({ reviews = [], className = '' }) {
           const badgeStyle = isFraud
             ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
             : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
-          const Icon = isFraud ? AlertOctagon : CheckCircle2;
+          const Icon = isFraud ? AlertOctagon : Shield;
 
           const rawDate = rev.reviewed_at || rev.created_at;
           let formattedDate = rawDate;

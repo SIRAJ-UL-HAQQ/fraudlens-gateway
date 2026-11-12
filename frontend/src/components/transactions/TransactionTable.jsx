@@ -44,35 +44,35 @@ export function TransactionTable({
       <table className="w-full text-left text-xs border-collapse">
         <thead className="bg-slate-950/80 border-b border-slate-800 text-slate-400 uppercase tracking-wider font-semibold text-[10px]">
           <tr>
-            <th scope="col" className="py-2.5 px-3">Transaction / Route</th>
-            <th scope="col" className="py-2.5 px-3">Step & Ingested</th>
-            <th scope="col" className="py-2.5 px-3">Type & Amount</th>
-            <th scope="col" className="py-2.5 px-3">Decision</th>
-            <th scope="col" className="py-2.5 px-3 min-w-[120px]">Risk Score</th>
-            <th scope="col" className="py-2.5 px-3">Reliability</th>
-            <th scope="col" className="py-2.5 px-3 max-w-[160px]">Rule Flags</th>
-            <th scope="col" className="py-2.5 px-3">Audit Status</th>
+            <th scope="col" className="py-2.5 px-2">Transaction / Route</th>
+            <th scope="col" className="py-2.5 px-2">Step & Ingested</th>
+            <th scope="col" className="py-2.5 px-2">Type & Amount</th>
+            <th scope="col" className="py-2.5 px-2">Decision</th>
+            <th scope="col" className="py-2.5 px-2 min-w-[110px]">Risk Score</th>
+            <th scope="col" className="py-2.5 px-2">Reliability</th>
+            <th scope="col" className="py-2.5 px-2 max-w-[150px]">Rule Flags</th>
+            <th scope="col" className="py-2.5 px-2">Audit Status</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-800/60 text-slate-200">
           {isLoading && transactions.length === 0 ? (
             Array.from({ length: 5 }).map((_, rIdx) => (
               <tr key={`loading-row-${rIdx}`} data-testid="table-loading-row">
-                <td className="py-3 px-3"><Skeleton className="h-4 w-28" /></td>
-                <td className="py-3 px-3"><Skeleton className="h-4 w-20" /></td>
-                <td className="py-3 px-3"><Skeleton className="h-4 w-24" /></td>
-                <td className="py-3 px-3"><Skeleton className="h-4 w-20" /></td>
-                <td className="py-3 px-3"><Skeleton className="h-4 w-28" /></td>
-                <td className="py-3 px-3"><Skeleton className="h-4 w-20" /></td>
-                <td className="py-3 px-3"><Skeleton className="h-4 w-24" /></td>
-                <td className="py-3 px-3"><Skeleton className="h-4 w-16" /></td>
+                <td className="py-3 px-2"><Skeleton className="h-4 w-28" /></td>
+                <td className="py-3 px-2"><Skeleton className="h-4 w-20" /></td>
+                <td className="py-3 px-2"><Skeleton className="h-4 w-24" /></td>
+                <td className="py-3 px-2"><Skeleton className="h-4 w-20" /></td>
+                <td className="py-3 px-2"><Skeleton className="h-4 w-28" /></td>
+                <td className="py-3 px-2"><Skeleton className="h-4 w-20" /></td>
+                <td className="py-3 px-2"><Skeleton className="h-4 w-24" /></td>
+                <td className="py-3 px-2"><Skeleton className="h-4 w-16" /></td>
               </tr>
             ))
           ) : transactions.length === 0 ? (
             <tr>
               <td
                 colSpan={8}
-                className="py-12 px-3 text-center text-slate-500 italic"
+                className="py-12 px-2 text-center text-slate-500 italic"
                 data-testid="table-empty-message"
               >
                 No transactions found matching the filter criteria.
@@ -84,6 +84,9 @@ export function TransactionTable({
               const isReviewed = Boolean(
                 tx.reviewed || (Array.isArray(tx.reviews) && tx.reviews.length > 0)
               );
+              const displayTxId = tx.transaction_id && tx.transaction_id.length > 12
+                ? `${tx.transaction_id.slice(0, 8)}...`
+                : tx.transaction_id;
 
               return (
                 <tr
@@ -103,10 +106,14 @@ export function TransactionTable({
                     }
                   }}
                 >
-                  {/* Transaction ID & Accounts */}
-                  <td className="py-2.5 px-3">
-                    <div className="font-mono font-medium text-slate-200 text-xs">
-                      {tx.transaction_id}
+                  {/* Transaction ID & Accounts (UUID truncated to 8 chars with full ID in title for 1280px clean fit) */}
+                  <td className="py-2.5 px-2">
+                    <div
+                      className="font-mono font-medium text-slate-200 text-xs"
+                      title={tx.transaction_id}
+                      aria-label={tx.transaction_id}
+                    >
+                      {displayTxId}
                     </div>
                     <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-mono mt-0.5">
                       <span>{tx.name_orig || '—'}</span>
@@ -115,8 +122,8 @@ export function TransactionTable({
                     </div>
                   </td>
 
-                  {/* Step & Ingested Timestamp (Combined - Bug 5 Fix) */}
-                  <td className="py-2.5 px-3">
+                  {/* Step & Ingested Timestamp */}
+                  <td className="py-2.5 px-2">
                     <div className="font-mono text-slate-200 text-xs font-semibold">
                       Step {tx.step ?? '—'}
                     </div>
@@ -126,7 +133,7 @@ export function TransactionTable({
                   </td>
 
                   {/* Type & Amount */}
-                  <td className="py-2.5 px-3">
+                  <td className="py-2.5 px-2">
                     <span className="font-mono text-[11px] font-semibold text-emerald-400 block">
                       {tx.type || '—'}
                     </span>
@@ -136,12 +143,12 @@ export function TransactionTable({
                   </td>
 
                   {/* Decision */}
-                  <td className="py-2.5 px-3">
+                  <td className="py-2.5 px-2">
                     <DecisionBadge decision={tx.gateway_decision} />
                   </td>
 
                   {/* Risk Score */}
-                  <td className="py-2.5 px-3">
+                  <td className="py-2.5 px-2">
                     <div className="space-y-1">
                       <div className="flex justify-between text-[11px] font-mono text-slate-400">
                         <span>Score:</span>
@@ -152,16 +159,16 @@ export function TransactionTable({
                   </td>
 
                   {/* Reliability */}
-                  <td className="py-2.5 px-3">
+                  <td className="py-2.5 px-2">
                     <ReliabilityBadge status={tx.explanation_status} />
                   </td>
 
-                  {/* Rule Flags (Unconditionally rendered on all transactions - Variant B requirement) */}
-                  <td className="py-2.5 px-3">
+                  {/* Rule Flags */}
+                  <td className="py-2.5 px-2">
                     {ruleFlags.length === 0 ? (
                       <span className="text-[11px] text-slate-500 font-mono italic">None</span>
                     ) : (
-                      <div className="flex flex-wrap gap-1 max-w-[150px]">
+                      <div className="flex flex-wrap gap-1 max-w-[140px]">
                         {ruleFlags.map((flag) => (
                           <span
                             key={flag}
@@ -174,8 +181,8 @@ export function TransactionTable({
                     )}
                   </td>
 
-                  {/* Audit Status (Neutral FileText icon - Bug 8 Fix, no check marks) */}
-                  <td className="py-2.5 px-3">
+                  {/* Audit Status */}
+                  <td className="py-2.5 px-2">
                     {isReviewed ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                         <FileText className="w-3 h-3 shrink-0 text-emerald-400" aria-hidden="true" />

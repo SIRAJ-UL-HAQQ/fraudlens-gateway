@@ -34,7 +34,7 @@ describe('OperationalMetricsCard', () => {
 
     fireEvent.mouseEnter(trigger);
     expect(screen.getByRole('tooltip')).toBeInTheDocument();
-    expect(screen.getByText('Server-side scoring + explanation time')).toBeInTheDocument();
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Server-side scoring + explanation time');
 
     fireEvent.mouseLeave(trigger);
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();

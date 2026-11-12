@@ -552,50 +552,8 @@ export function TestTransactionView() {
                 </div>
               </div>
 
-              {/* Stub mode banner */}
-              {isStubMode && (
-                <div
-                  className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs flex items-start gap-2"
-                  data-testid="stub-mode-banner"
-                >
-                  <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400 mt-0.5" />
-                  <div>
-                    <span className="font-semibold text-amber-300">Stub Mode Active:</span> Model weights are not loaded. Scoring returned fallback heuristic outputs.
-                  </div>
-                </div>
-              )}
-
-              {/* Unstable explanation banner */}
-              {isUnstable && (
-                <div
-                  className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs flex items-start gap-2"
-                  data-testid="unstable-explanation-banner"
-                >
-                  <AlertOctagon className="w-4 h-4 shrink-0 text-amber-400 mt-0.5" />
-                  <div>
-                    <span className="font-semibold text-amber-300">Unstable Explanation:</span> SHAP feature attributions shift across imbalance resampling strategies. Routed to Analyst Review.
-                  </div>
-                </div>
-              )}
-
-              {/* Risk Score */}
-              <div className="space-y-1.5">
-                <span className="text-xs font-semibold text-slate-300">Calibrated Risk Score</span>
-                <RiskScoreBar score={result.risk_score} />
-              </div>
-
-              {/* SHAP Feature Waterfall / Bars */}
-              <div className="pt-2 border-t border-slate-800/80">
-                <ShapFeatureBars features={result.top_features} />
-              </div>
-
-              {/* Rule Flags */}
-              <div className="pt-2 border-t border-slate-800/80">
-                <RuleFlagList flags={result.rule_flags} />
-              </div>
-
-              {/* Pipeline Telemetry Metadata */}
-              <div className="pt-3 border-t border-slate-800/80 grid grid-cols-3 gap-2 text-center text-xs">
+              {/* Pipeline Telemetry Metadata (Top Section) */}
+              <div className="grid grid-cols-3 gap-2 text-center text-xs">
                 <div className="p-2 rounded bg-slate-800/40 border border-slate-800">
                   <div className="text-[10px] text-slate-400 font-medium uppercase tracking-wider flex items-center justify-center gap-1">
                     <Cpu className="w-3 h-3 text-slate-400" />
@@ -644,6 +602,48 @@ export function TestTransactionView() {
                     {typeof result.latency_ms === 'number' ? `${result.latency_ms.toFixed(1)} ms` : '—'}
                   </div>
                 </div>
+              </div>
+
+              {/* Stub mode banner */}
+              {isStubMode && (
+                <div
+                  className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs flex items-start gap-2"
+                  data-testid="stub-mode-banner"
+                >
+                  <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400 mt-0.5" />
+                  <div>
+                    <span className="font-semibold text-amber-300">Stub Mode Active:</span> Model weights are not loaded. Scoring returned fallback heuristic outputs.
+                  </div>
+                </div>
+              )}
+
+              {/* Unstable explanation banner */}
+              {isUnstable && (
+                <div
+                  className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs flex items-start gap-2"
+                  data-testid="unstable-explanation-banner"
+                >
+                  <AlertOctagon className="w-4 h-4 shrink-0 text-amber-400 mt-0.5" />
+                  <div>
+                    <span className="font-semibold text-amber-300">Unstable Explanation:</span> SHAP feature attributions shift across imbalance resampling strategies. Routed to Analyst Review.
+                  </div>
+                </div>
+              )}
+
+              {/* Risk Score */}
+              <div className="space-y-1.5">
+                <span className="text-xs font-semibold text-slate-300">Calibrated Risk Score</span>
+                <RiskScoreBar score={result.risk_score} />
+              </div>
+
+              {/* SHAP Feature Waterfall / Bars */}
+              <div className="pt-2 border-t border-slate-800/80">
+                <ShapFeatureBars features={result.top_features} />
+              </div>
+
+              {/* Rule Flags */}
+              <div className="pt-2 border-t border-slate-800/80">
+                <RuleFlagList flags={result.rule_flags} />
               </div>
             </div>
           ) : (

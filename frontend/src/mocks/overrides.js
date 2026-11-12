@@ -84,4 +84,13 @@ export const mockOverrides = {
     reviews: [],
     latest_review: null,
   },
+
+  mockConfusionMatrix: {
+    true_positives: 1551,
+    false_positives: 94,
+    true_negatives: 116410,
+    false_negatives: 91,
+  },
+
+  exportError: false,
 };

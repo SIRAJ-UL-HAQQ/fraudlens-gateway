@@ -192,7 +192,12 @@ export async function exportTransactions(params = {}) {
       const cfg = raw ? JSON.parse(raw) : null;
       if (cfg && cfg.enabled) {
         const { handleMockRequest } = await import('../mocks/mockService.js');
-        return await handleMockRequest(url);
+        const mockRes = await handleMockRequest(url);
+        if (mockRes && mockRes.blob) {
+          return mockRes;
+        }
+        const format = params.format || 'csv';
+        return { blob: mockRes, filename: `transactions_export.${format}` };
       }
     } catch (mockErr) {
       if (mockErr.status) {
@@ -224,5 +229,17 @@ export async function exportTransactions(params = {}) {
     throw normalizeError(response.status, errorData);
   }
 
-  return await response.blob();
+  const contentDisposition = response.headers.get('content-disposition') || '';
+  let filename = '';
+  const match = contentDisposition.match(/filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?/i);
+  if (match && match[1]) {
+    filename = decodeURIComponent(match[1].trim());
+  }
+  if (!filename) {
+    const format = params.format || 'csv';
+    filename = `transactions_export.${format}`;
+  }
+
+  const blob = await response.blob();
+  return { blob, filename };
 }

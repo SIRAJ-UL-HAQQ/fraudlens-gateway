@@ -160,15 +160,31 @@ describe('API Client Network Calls & 401 Interception', () => {
     unsub();
   });
 
-  it('exportTransactions returns blob on success and normalizes error on failure', async () => {
+  it('exportTransactions returns blob and filename on success and normalizes error on failure', async () => {
     const mockBlob = new Blob(['csv,data\n1,2'], { type: 'text/csv' });
     global.fetch = vi.fn().mockResolvedValueOnce({
       ok: true,
+      headers: {
+        get: (header) => (header.toLowerCase() === 'content-disposition' ? 'attachment; filename="custom_export.csv"' : null),
+      },
       blob: async () => mockBlob,
     });
 
-    const blobResult = await exportTransactions({ format: 'csv' });
-    expect(blobResult).toBeInstanceOf(Blob);
+    const result = await exportTransactions({ format: 'csv' });
+    expect(result.blob).toBeInstanceOf(Blob);
+    expect(result.filename).toBe('custom_export.csv');
+
+    // Test fallback filename when header absent
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      headers: {
+        get: () => null,
+      },
+      blob: async () => mockBlob,
+    });
+    const fallbackResult = await exportTransactions({ format: 'pdf' });
+    expect(fallbackResult.blob).toBeInstanceOf(Blob);
+    expect(fallbackResult.filename).toBe('transactions_export.pdf');
 
     // Test failure path
     global.fetch = vi.fn().mockResolvedValueOnce({

@@ -85,6 +85,87 @@ export async function handleMockRequest(url, options = {}) {
   }
 
   if (url.startsWith('/api/v1/predict')) {
+    const body = options.body ? (typeof options.body === 'string' ? JSON.parse(options.body) : options.body) : {};
+    const amount = Number(body.amount || 0);
+    const oldBal = Number(body.old_balance_orig ?? body.oldbalance_org ?? 0);
+    const newBal = Number(body.new_balance_orig ?? body.newbalance_orig ?? 0);
+    const txType = body.type || 'TRANSFER';
+
+    // Preset 1: Obvious Fraud (Draining origin balance >= 90% or large transfer >= 100k)
+    if ((oldBal > 0 && newBal === 0 && amount >= 50000) || (amount >= 150000 && (txType === 'TRANSFER' || txType === 'CASH_OUT'))) {
+      return {
+        transaction_id: `pred-fraud-${Date.now()}`,
+        risk_score: 0.945,
+        top_features: [
+          { feature: 'amount', shap_value: 0.4821, direction: 'increases_risk' },
+          { feature: `type_${txType}`, shap_value: 0.3512, direction: 'increases_risk' },
+          { feature: 'balance_delta_orig', shap_value: -0.1205, direction: 'decreases_risk' },
+        ],
+        explanation_status: 'Stable',
+        gateway_decision: 'High Risk',
+        rule_flags: ['ORIGIN_ACCOUNT_DRAINED', 'LARGE_TRANSFER_AMOUNT'],
+        imbalance_strategy: 'class_weight',
+        model_version: 'v1.0.0-xgb',
+        latency_ms: 14.2,
+      };
+    }
+
+    // Preset 4: Zero Amount edge case
+    if (amount === 0) {
+      return {
+        transaction_id: `pred-zero-${Date.now()}`,
+        risk_score: 0.012,
+        top_features: [
+          { feature: 'amount', shap_value: -0.4512, direction: 'decreases_risk' },
+          { feature: `type_${txType}`, shap_value: -0.1834, direction: 'decreases_risk' },
+        ],
+        explanation_status: 'Stable',
+        gateway_decision: 'Low Risk',
+        rule_flags: [],
+        imbalance_strategy: 'class_weight',
+        model_version: 'v1.0.0-xgb',
+        latency_ms: 11.5,
+      };
+    }
+
+    // Preset 3: Borderline / Ambiguous (Moderate TRANSFER, triggers Analyst Review & Unstable SHAP)
+    if (amount >= 40000 && amount <= 90000 && txType === 'TRANSFER') {
+      return {
+        transaction_id: `pred-ambig-${Date.now()}`,
+        risk_score: 0.725,
+        top_features: [
+          { feature: 'amount', shap_value: 0.2215, direction: 'increases_risk' },
+          { feature: 'old_balance_orig', shap_value: 0.1842, direction: 'increases_risk' },
+          { feature: 'new_balance_orig', shap_value: -0.0912, direction: 'decreases_risk' },
+        ],
+        explanation_status: 'Unstable',
+        gateway_decision: 'Analyst Review',
+        rule_flags: [],
+        imbalance_strategy: 'smote_enn',
+        model_version: 'v1.0.0-xgb',
+        latency_ms: 18.7,
+      };
+    }
+
+    // Preset 2: Obvious Legitimate (small payment, consistent balances)
+    if (amount < 1000 || txType === 'PAYMENT') {
+      return {
+        transaction_id: `pred-legit-${Date.now()}`,
+        risk_score: 0.024,
+        top_features: [
+          { feature: 'amount', shap_value: -0.3214, direction: 'decreases_risk' },
+          { feature: `type_${txType}`, shap_value: -0.2518, direction: 'decreases_risk' },
+          { feature: 'old_balance_orig', shap_value: -0.1412, direction: 'decreases_risk' },
+        ],
+        explanation_status: 'Stable',
+        gateway_decision: 'Low Risk',
+        rule_flags: [],
+        imbalance_strategy: 'class_weight',
+        model_version: 'v1.0.0-xgb',
+        latency_ms: 10.8,
+      };
+    }
+
     return fixtures.single_prediction;
   }
 
@@ -210,14 +291,49 @@ export async function handleMockRequest(url, options = {}) {
   }
 
   if (url.startsWith('/api/v1/metrics')) {
-    return fixtures.metrics;
+    if (config.state === 'metrics_unavailable' || config.metricsUnavailable) {
+      return fixtures.metrics_unavailable;
+    }
+    const metricsCopy = JSON.parse(JSON.stringify(fixtures.metrics));
+    if (metricsCopy.ml_metrics && mockOverrides.mockConfusionMatrix) {
+      metricsCopy.ml_metrics.confusion_matrix = { ...mockOverrides.mockConfusionMatrix };
+      if (metricsCopy.ml_metrics.strategy_comparison?.class_weight) {
+        metricsCopy.ml_metrics.strategy_comparison.class_weight.metrics_at_high = {
+          confusion_matrix: { ...mockOverrides.mockConfusionMatrix },
+        };
+      }
+    }
+    return metricsCopy;
   }
 
   if (url.startsWith('/api/v1/export')) {
+    const parsedUrl = new URL(url, 'http://localhost');
+    const format = parsedUrl.searchParams.get('format') || 'csv';
+
+    if (config.exportError || mockOverrides.exportError) {
+      const err = new Error('Bad Request');
+      err.status = 400;
+      err.data = {
+        detail: 'Export matching 5200 records exceeds safety cap of 5000 rows. Please narrow your query filters.',
+      };
+      throw err;
+    }
+
+    if (format === 'pdf') {
+      const pdfBytes = new Uint8Array([0x25, 0x50, 0x44, 0x46]); // %PDF
+      return {
+        blob: new Blob([pdfBytes], { type: 'application/pdf' }),
+        filename: 'transactions_export.pdf',
+      };
+    }
+
     const csvContent =
       'Transaction ID,Step,Type,Amount,Origin,Destination,Risk Score,Gateway Decision,Explanation Status,Rule Flags,Created At\n' +
       '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d,1,TRANSFER,181000.0,C1231006815,C553264065,0.94,High Risk,Stable,ORIGIN_ACCOUNT_DRAINED;LARGE_TRANSFER_AMOUNT,2026-10-24T09:00:00Z\n';
-    return new Blob([csvContent], { type: 'text/csv; charset=utf-8' });
+    return {
+      blob: new Blob([csvContent], { type: 'text/csv; charset=utf-8' }),
+      filename: 'transactions_export.csv',
+    };
   }
 
   return {};

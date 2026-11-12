@@ -3,6 +3,21 @@ import { mockOverrides } from './overrides';
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Deep clone fixtures + Variant B sample for in-memory mutable mock store
+let mockTransactionsStore = initMockTransactions();
+
+function initMockTransactions() {
+  const base = JSON.parse(JSON.stringify(fixtures.transactions));
+  if (mockOverrides.variantBLowRiskTransaction) {
+    base.push(JSON.parse(JSON.stringify(mockOverrides.variantBLowRiskTransaction)));
+  }
+  return base;
+}
+
+export function resetMockTransactions() {
+  mockTransactionsStore = initMockTransactions();
+}
+
 export function getMockConfig() {
   try {
     const raw = localStorage.getItem('fraudlens_mock_mode');
@@ -73,12 +88,101 @@ export async function handleMockRequest(url, options = {}) {
     return fixtures.single_prediction;
   }
 
-  if (url.startsWith('/api/v1/transactions/')) {
-    return fixtures.transactions[0];
+  // POST /api/v1/transactions/{transaction_id}/review
+  if (url.match(/\/api\/v1\/transactions\/([^/?#]+)\/review/)) {
+    const match = url.match(/\/api\/v1\/transactions\/([^/?#]+)\/review/);
+    const txId = decodeURIComponent(match[1]);
+    const body = options.body ? JSON.parse(options.body) : {};
+
+    if (!body.outcome || !['Confirmed Fraud', 'False Positive'].includes(body.outcome)) {
+      const err = new Error('Validation Error');
+      err.status = 422;
+      err.data = {
+        detail: [
+          {
+            loc: ['body', 'outcome'],
+            msg: "Input should be 'Confirmed Fraud' or 'False Positive'",
+          },
+        ],
+      };
+      throw err;
+    }
+
+    const tx = mockTransactionsStore.find((t) => t.transaction_id === txId);
+    if (!tx) {
+      const err = new Error('Not Found');
+      err.status = 404;
+      err.data = { detail: `Transaction '${txId}' not found` };
+      throw err;
+    }
+
+    const reviewRecord = {
+      review_id: `rev-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+      transaction_id: txId,
+      outcome: body.outcome,
+      note: body.note ? String(body.note).trim() : null,
+      reviewed_by: 'analyst_1',
+      reviewed_at: new Date().toISOString(),
+    };
+
+    tx.reviews = [reviewRecord, ...(tx.reviews || [])];
+    tx.latest_review = reviewRecord;
+    return reviewRecord;
   }
 
+  // GET /api/v1/transactions/{transaction_id}
+  if (url.match(/\/api\/v1\/transactions\/([^/?#]+)$/)) {
+    const match = url.match(/\/api\/v1\/transactions\/([^/?#]+)$/);
+    const txId = decodeURIComponent(match[1]);
+    const tx = mockTransactionsStore.find((t) => t.transaction_id === txId);
+    if (!tx) {
+      const err = new Error('Not Found');
+      err.status = 404;
+      err.data = { detail: `Transaction '${txId}' not found` };
+      throw err;
+    }
+    return JSON.parse(JSON.stringify(tx));
+  }
+
+  // GET /api/v1/transactions
   if (url.startsWith('/api/v1/transactions')) {
-    const items = fixtures.transactions.map((tx) => ({
+    const parsedUrl = new URL(url, 'http://localhost');
+    const decision = parsedUrl.searchParams.get('decision');
+    const explanationStatus = parsedUrl.searchParams.get('explanation_status');
+    const stepMin = parsedUrl.searchParams.get('step_min');
+    const stepMax = parsedUrl.searchParams.get('step_max');
+    const createdFrom = parsedUrl.searchParams.get('created_from');
+    const createdTo = parsedUrl.searchParams.get('created_to');
+    const page = parseInt(parsedUrl.searchParams.get('page') || '1', 10) || 1;
+    const pageSize = Math.min(200, parseInt(parsedUrl.searchParams.get('page_size') || '50', 10) || 50);
+
+    let filtered = [...mockTransactionsStore];
+
+    if (decision) {
+      filtered = filtered.filter((tx) => tx.prediction.gateway_decision === decision);
+    }
+    if (explanationStatus) {
+      filtered = filtered.filter((tx) => tx.prediction.explanation_status === explanationStatus);
+    }
+    if (stepMin !== null && stepMin !== '') {
+      filtered = filtered.filter((tx) => tx.transaction_data.step >= Number(stepMin));
+    }
+    if (stepMax !== null && stepMax !== '') {
+      filtered = filtered.filter((tx) => tx.transaction_data.step <= Number(stepMax));
+    }
+    if (createdFrom) {
+      filtered = filtered.filter((tx) => new Date(tx.created_at) >= new Date(createdFrom));
+    }
+    if (createdTo) {
+      filtered = filtered.filter((tx) => new Date(tx.created_at) <= new Date(createdTo));
+    }
+
+    const total = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const startIdx = (page - 1) * pageSize;
+    const pageItems = filtered.slice(startIdx, startIdx + pageSize);
+
+    const items = pageItems.map((tx) => ({
       transaction_id: tx.transaction_id,
       step: tx.transaction_data.step,
       type: tx.transaction_data.type,
@@ -88,16 +192,17 @@ export async function handleMockRequest(url, options = {}) {
       risk_score: tx.prediction.risk_score,
       gateway_decision: tx.prediction.gateway_decision,
       explanation_status: tx.prediction.explanation_status,
-      rule_flags: tx.prediction.rule_flags,
+      rule_flags: tx.prediction.rule_flags || [],
       created_at: tx.created_at,
-      reviewed: tx.reviews && tx.reviews.length > 0,
+      reviewed: Boolean(tx.reviews && tx.reviews.length > 0),
     }));
+
     return {
       items,
-      total: items.length,
-      page: 1,
-      page_size: 50,
-      total_pages: 1,
+      total,
+      page,
+      page_size: pageSize,
+      total_pages: totalPages,
     };
   }
 

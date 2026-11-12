@@ -10,6 +10,7 @@ import { FlaggedQueue } from './pages/FlaggedQueue';
 import { MetricsView } from './pages/MetricsView';
 import { TestTransactionView } from './pages/TestTransactionView';
 import { ExportView } from './pages/ExportView';
+import { ErrorBoundary } from './components/shared/ErrorBoundary';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,26 +25,28 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Shell />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<DashboardFeed />} />
-              <Route path="flagged" element={<FlaggedQueue />} />
-              <Route path="metrics" element={<MetricsView />} />
-              <Route path="test" element={<TestTransactionView />} />
-              <Route path="export" element={<ExportView />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
+        <ErrorBoundary>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Shell />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<DashboardFeed />} />
+                <Route path="flagged" element={<FlaggedQueue />} />
+                <Route path="metrics" element={<MetricsView />} />
+                <Route path="test" element={<TestTransactionView />} />
+                <Route path="export" element={<ExportView />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </ErrorBoundary>
       </AuthProvider>
     </QueryClientProvider>
   );

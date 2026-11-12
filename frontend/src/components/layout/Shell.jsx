@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import StatusBanner from './StatusBanner';
 import Sidebar from './Sidebar';
+import ErrorBoundary from '../shared/ErrorBoundary';
 
 const DevMockPanel = import.meta.env.DEV
   ? lazy(() => import('../../mocks/DevMockPanel'))
@@ -17,7 +18,9 @@ export function Shell({ children }) {
         <Sidebar />
         <main className="flex-1 overflow-y-auto p-8 bg-slate-950">
           <div className="max-w-7xl mx-auto w-full">
-            {children || <Outlet />}
+            <ErrorBoundary>
+              {children || <Outlet />}
+            </ErrorBoundary>
           </div>
         </main>
       </div>

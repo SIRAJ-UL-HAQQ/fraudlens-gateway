@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { X, AlertTriangle, Clock, Loader2, Cpu, GitBranch } from 'lucide-react';
+import { X, AlertTriangle, Clock, Loader2, Cpu, GitBranch, CheckCircle2 } from 'lucide-react';
 import { getTransaction } from '../../api/client';
 import DecisionBadge from '../shared/DecisionBadge';
 import ReliabilityBadge from '../shared/ReliabilityBadge';
@@ -300,7 +300,19 @@ export function TransactionDetailDrawer({
             {/* Analyst Review & Audit History Section */}
             <div className="space-y-4">
               <ReviewHistoryTimeline reviews={reviews} />
-              <AnalystReviewForm transactionId={txId} onSuccess={() => refetch()} />
+              {gatewayDecision === 'Low Risk' ? (
+                <div
+                  className="p-4 rounded-xl bg-slate-900/40 border border-slate-800 text-slate-400 text-xs flex items-center gap-3"
+                  data-testid="low-risk-no-review-notice"
+                >
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" aria-hidden="true" />
+                  <span>
+                    This transaction was evaluated as <strong className="text-slate-300">Low Risk</strong> and auto-cleared by the gateway. Human review is not required.
+                  </span>
+                </div>
+              ) : (
+                <AnalystReviewForm transactionId={txId} onSuccess={() => refetch()} />
+              )}
             </div>
           </div>
         </div>

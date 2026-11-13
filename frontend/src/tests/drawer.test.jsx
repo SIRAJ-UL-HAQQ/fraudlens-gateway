@@ -137,4 +137,31 @@ describe('TransactionDetailDrawer component', () => {
     fireEvent.keyDown(window, { key: 'Escape' });
     expect(onClose).toHaveBeenCalledTimes(3);
   });
+
+  it('renders auto-cleared notice and hides AnalystReviewForm when decision is Low Risk', () => {
+    const lowRiskTx = {
+      ...baseTx,
+      gateway_decision: 'Low Risk',
+      risk_score: 0.02,
+    };
+
+    renderWithClient(
+      <TransactionDetailDrawer
+        transactionId="tx-1234-abcd"
+        isOpen={true}
+        onClose={vi.fn()}
+        initialData={lowRiskTx}
+      />
+    );
+
+    // Auto-cleared notice should be present
+    const notice = screen.getByTestId('low-risk-no-review-notice');
+    expect(notice).toBeInTheDocument();
+    expect(notice).toHaveTextContent(/This transaction was evaluated as Low Risk and auto-cleared by the gateway/i);
+    expect(notice).toHaveTextContent(/Human review is not required/i);
+
+    // Analyst review submission form should NOT be present
+    expect(screen.queryByTestId('analyst-review-form')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Submit Analyst Review/i)).not.toBeInTheDocument();
+  });
 });

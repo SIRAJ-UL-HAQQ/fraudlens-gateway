@@ -1,0 +1,36 @@
+import React, { Suspense, lazy } from 'react';
+import { Outlet } from 'react-router-dom';
+import Header from './Header';
+import StatusBanner from './StatusBanner';
+import Sidebar from './Sidebar';
+import ErrorBoundary from '../shared/ErrorBoundary';
+
+const DevMockPanel = import.meta.env.DEV
+  ? lazy(() => import('../../mocks/DevMockPanel'))
+  : null;
+
+export function Shell({ children }) {
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+      <StatusBanner />
+      <Header />
+      <div className="flex-1 flex overflow-hidden">
+        <Sidebar />
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-950">
+          <div className="max-w-7xl mx-auto w-full">
+            <ErrorBoundary>
+              {children || <Outlet />}
+            </ErrorBoundary>
+          </div>
+        </main>
+      </div>
+      {import.meta.env.DEV && DevMockPanel && (
+        <Suspense fallback={null}>
+          <DevMockPanel />
+        </Suspense>
+      )}
+    </div>
+  );
+}
+
+export default Shell;

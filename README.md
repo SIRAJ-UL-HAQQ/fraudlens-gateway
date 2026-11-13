@@ -56,20 +56,21 @@ fraudlens-gateway/
 │   └── requirements.txt
 ├── frontend/
 │   ├── src/
-│   │   ├── components/
-│   │   │   ├── TransactionFeed.jsx
-│   │   │   ├── FlaggedView.jsx
-│   │   │   ├── MetricsPanel.jsx
-│   │   │   └── TestTransactionForm.jsx
-│   │   ├── pages/
-│   │   │   └── Dashboard.jsx
-│   │   ├── api/
-│   │   │   └── client.js           # fetch/axios wrapper calling backend
-│   │   └── App.jsx
+│   │   ├── main.jsx                # createRoot mount to #root with error guards
+│   │   ├── App.jsx                 # Top-level query & auth providers, ErrorBoundary
+│   │   ├── auth/                   # Session auth, route protection, token storage
+│   │   ├── components/             # Layout (Shell, Header, Sidebar) & triage components
+│   │   ├── pages/                  # DashboardFeed, FlaggedQueue, Metrics, Sandbox, Export
+│   │   ├── api/                    # Relative client, normalizer, health polling
+│   │   └── mocks/                  # Zero-production mock service and fixtures
 │   ├── package.json
+│   ├── eslint.config.js            # ESLint 9 + eslint-plugin-jsx-a11y flat config
 │   └── Dockerfile
 ├── docs/
 │   ├── FraudLens_Gateway_SRS.tex
+│   ├── FRONTEND.md                 # Frontend architecture and operations guide
+│   ├── api-contract.md
+│   ├── srs-deviations.md
 │   ├── proposal.docx
 │   └── architecture-diagram.png
 ├── docker-compose.yml

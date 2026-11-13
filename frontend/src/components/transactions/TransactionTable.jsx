@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, FileText, Clock } from 'lucide-react';
+import { ArrowRight, FileText, Clock, ShieldAlert } from 'lucide-react';
 import DecisionBadge from '../shared/DecisionBadge';
 import ReliabilityBadge from '../shared/ReliabilityBadge';
 import RiskScoreBar from '../shared/RiskScoreBar';
@@ -81,6 +81,7 @@ export function TransactionTable({
           ) : (
             transactions.map((tx) => {
               const ruleFlags = Array.isArray(tx.rule_flags) ? tx.rule_flags : [];
+              const decision = tx.gateway_decision || tx.decision;
               const isReviewed = Boolean(
                 tx.reviewed || (Array.isArray(tx.reviews) && tx.reviews.length > 0)
               );
@@ -188,10 +189,19 @@ export function TransactionTable({
                         <FileText className="w-3 h-3 shrink-0 text-emerald-400" aria-hidden="true" />
                         <span>Reviewed</span>
                       </span>
-                    ) : (
+                    ) : decision === 'Analyst Review' ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/30">
                         <Clock className="w-3 h-3 shrink-0 text-amber-400" aria-hidden="true" />
                         <span>Pending</span>
+                      </span>
+                    ) : decision === 'High Risk' ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-rose-500/10 text-rose-400 border border-rose-500/30">
+                        <ShieldAlert className="w-3 h-3 shrink-0 text-rose-400" aria-hidden="true" />
+                        <span>Blocked</span>
+                      </span>
+                    ) : (
+                      <span className="text-slate-500 font-mono text-xs pl-2.5" title="Auto-cleared (Review not required)">
+                        —
                       </span>
                     )}
                   </td>

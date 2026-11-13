@@ -5,6 +5,7 @@ import RiskScoreBar from '../components/shared/RiskScoreBar';
 import RuleFlagList from '../components/shared/RuleFlagList';
 import DataTable from '../components/shared/DataTable';
 import Pagination from '../components/shared/Pagination';
+import TransactionTable from '../components/transactions/TransactionTable';
 
 describe('RiskScoreBar', () => {
   it('renders role="meter" with exact aria-valuetext and no threshold marks', () => {
@@ -103,5 +104,79 @@ describe('Pagination', () => {
 
     fireEvent.click(nextBtn);
     expect(handlePageChange).toHaveBeenCalledWith(2);
+  });
+});
+
+describe('TransactionTable - Decision-Aware Audit Status', () => {
+  const sampleTransactions = [
+    {
+      transaction_id: 'tx-low-unreviewed',
+      step: 1,
+      type: 'PAYMENT',
+      amount: 45.0,
+      name_orig: 'C1000',
+      name_dest: 'M2000',
+      risk_score: 0.05,
+      gateway_decision: 'Low Risk',
+      explanation_status: 'Stable',
+      reviewed: false,
+    },
+    {
+      transaction_id: 'tx-review-unreviewed',
+      step: 1,
+      type: 'TRANSFER',
+      amount: 150000.0,
+      name_orig: 'C1001',
+      name_dest: 'C2001',
+      risk_score: 0.72,
+      gateway_decision: 'Analyst Review',
+      explanation_status: 'Unstable',
+      reviewed: false,
+    },
+    {
+      transaction_id: 'tx-high-unreviewed',
+      step: 1,
+      type: 'CASH_OUT',
+      amount: 250000.0,
+      name_orig: 'C1002',
+      name_dest: 'C2002',
+      risk_score: 0.95,
+      gateway_decision: 'High Risk',
+      explanation_status: 'Stable',
+      reviewed: false,
+    },
+    {
+      transaction_id: 'tx-reviewed',
+      step: 1,
+      type: 'TRANSFER',
+      amount: 80000.0,
+      name_orig: 'C1003',
+      name_dest: 'C2003',
+      risk_score: 0.85,
+      gateway_decision: 'Analyst Review',
+      explanation_status: 'Stable',
+      reviewed: true,
+    },
+  ];
+
+  it('renders decision-aware audit statuses accurately', () => {
+    render(<TransactionTable transactions={sampleTransactions} />);
+
+    // Row 1: Low Risk unreviewed should NOT show Pending, should show dash
+    const rowLow = screen.getByTestId('transaction-row-tx-low-unreviewed');
+    expect(rowLow).not.toHaveTextContent('Pending');
+    expect(rowLow).toHaveTextContent('—');
+
+    // Row 2: Analyst Review unreviewed should show Pending
+    const rowReview = screen.getByTestId('transaction-row-tx-review-unreviewed');
+    expect(rowReview).toHaveTextContent('Pending');
+
+    // Row 3: High Risk unreviewed should show Blocked
+    const rowHigh = screen.getByTestId('transaction-row-tx-high-unreviewed');
+    expect(rowHigh).toHaveTextContent('Blocked');
+
+    // Row 4: Reviewed transaction should show Reviewed
+    const rowReviewed = screen.getByTestId('transaction-row-tx-reviewed');
+    expect(rowReviewed).toHaveTextContent('Reviewed');
   });
 });
